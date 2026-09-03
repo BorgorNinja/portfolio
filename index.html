@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Rochelle De Santos — Software Engineer & Systems Architect</title>
+  <meta name="description" content="Portfolio of Rochelle De Santos (borgorninja). Software engineer specializing in Python asyncio, backend systems, and event-driven automation.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0b10;
+      --bg-surface: #12141f;
+      --bg-card: #161926;
+      --bg-card-hover: #1c2030;
+      --text: #f4f5fa;
+      --text-muted: #9aa0b8;
+      --text-dim: #636882;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-glow: #be95ff;
+      
+      --aurora-pink: #ff70a6;
+      --aurora-purple: #be95ff;
+      --aurora-blue: #70d6ff;
+      --aurora-yellow: #ffd670;
+      --aurora-green: #38ef7d;
+
+      --font-display: 'Outfit', sans-serif;
+      --font-main: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(190, 149, 255, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(255, 112, 166, 0.10) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(112, 214, 255, 0.06) 0px, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    /* Header Nav */
+    header {
+      max-width: 960px;
+      margin: 14px auto 0;
+      padding: 0 16px;
+      width: 100%;
+      position: sticky;
+      top: 12px;
+      z-index: 100;
+    }
+
+    .nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 18px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      transform: translateZ(0);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--text);
+      text-decoration: none;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .logo-gem {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, var(--aurora-pink), var(--aurora-purple));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+    }
+
+    /* Desktop Navigation Tabs */
+    .nav-tabs {
+      display: flex;
+      gap: 6px;
+      list-style: none;
+    }
+
+    .nav-tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-main);
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 7px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.15s ease, background-color 0.15s ease;
+      will-change: color, background-color;
+    }
+
+    .nav-tab-btn:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-tab-btn.active {
+      color: var(--text);
+      background: rgba(190, 149, 255, 0.16);
+      border: 1px solid rgba(190, 149, 255, 0.3);
+      font-weight: 700;
+    }
+
+    /* Mobile Hamburger Button */
+    .burger-btn {
+      display: none;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 6px 12px;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 1.15rem;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+
+    /* Mobile Retractable Drawer */
+    .mobile-drawer {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      background: #141624;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7);
+      flex-direction: column;
+      gap: 6px;
+      opacity: 0;
+      transform: translate3d(0, -8px, 0);
+      pointer-events: none;
+      transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform;
+      z-index: 101;
+    }
+
+    .mobile-drawer.open {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+      pointer-events: auto;
+    }
+
+    .mobile-tab-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      font-family: var(--font-main);
+      font-size: 0.92rem;
+      font-weight: 700;
+      padding: 11px 16px;
+      border-radius: 12px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      transition: background-color 0.12s ease, color 0.12s ease;
+    }
+
+    .mobile-tab-btn:active, .mobile-tab-btn.active {
+      background: rgba(190, 149, 255, 0.2);
+      border-color: rgba(190, 149, 255, 0.4);
+      color: var(--aurora-pink);
+    }
+
+    /* Main Container */
+    main {
+      max-width: 960px;
+      margin: 24px auto 60px;
+      padding: 0 16px;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* High-Performance Page Transitions */
+    .page-view {
+      display: none;
+      opacity: 0;
+      transform: translate3d(0, 8px, 0);
+      will-change: opacity, transform;
+    }
+
+    .page-view.active {
+      display: block;
+      animation: smoothFade 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes smoothFade {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, 8px, 0);
+      }
+      100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+      }
+    }
+
+    /* --- PAGE 1: INTRO / HOME --- */
+    .intro-grid {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .intro-hero-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 38px 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transform: translateZ(0);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(56, 239, 125, 0.1);
+      border: 1px solid rgba(56, 239, 125, 0.25);
+      color: var(--aurora-green);
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      width: fit-content;
+      margin-bottom: 18px;
+      font-family: var(--font-mono);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--aurora-green);
+      border-radius: 50%;
+    }
+
+    .hero-name {
+      font-family: var(--font-display);
+      font-size: clamp(2.3rem, 5vw, 3.4rem);
+      font-weight: 900;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, var(--aurora-pink), var(--aurora-purple), var(--aurora-blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subhead {
+      font-size: 1.02rem;
+      color: var(--text-muted);
+      margin-bottom: 26px;
+      line-height: 1.6;
+    }
+
+    .nav-shortcuts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn-glow {
+      background: linear-gradient(135deg, var(--aurora-purple), var(--aurora-pink));
+      color: #090a0f;
+      font-weight: 800;
+      font-size: 0.9rem;
+      padding: 11px 20px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+      will-change: transform;
+    }
+
+    .btn-glow:hover {
+      transform: translate3d(0, -2px, 0);
+      opacity: 0.95;
+    }
+
+    .btn-glow:active {
+      transform: translate3d(0, 1px, 0);
+    }
+
+    .btn-glass {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 11px 18px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: background-color 0.15s ease, transform 0.15s ease;
+      will-change: transform;
+    }
+
+    .btn-glass:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translate3d(0, -2px, 0);
+    }
+
+    .btn-glass:active {
+      transform: translate3d(0, 1px, 0);
+    }
+
+    /* Intro Side Panel */
+    .intro-side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .intro-meta-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transform: translateZ(0);
+    }
+
+    .meta-head {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .meta-val {
+      font-size: 1.08rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .meta-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .m-chip {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+    }
+
+    /* Section Page Layouts */
+    .page-head {
+      margin-bottom: 22px;
+    }
+
+    .page-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.9rem, 4vw, 2.5rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .page-subhead {
+      color: var(--text-muted);
+      font-size: 0.98rem;
+    }
+
+    /* --- PAGE 2: PROJECTS --- */
+    .projects-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .proj-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 26px;
+      transform: translateZ(0);
+      transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+      will-change: transform;
+    }
+
+    .proj-card:hover {
+      border-color: var(--border-glow);
+      background: var(--bg-card-hover);
+      transform: translate3d(0, -2px, 0);
+    }
+
+    .proj-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .proj-badge {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-shelby { background: rgba(190, 149, 255, 0.12); color: var(--aurora-purple); border: 1px solid rgba(190, 149, 255, 0.25); }
+    .badge-brosie { background: rgba(255, 112, 166, 0.12); color: var(--aurora-pink); border: 1px solid rgba(255, 112, 166, 0.25); }
+    .badge-stream { background: rgba(112, 214, 255, 0.12); color: var(--aurora-blue); border: 1px solid rgba(112, 214, 255, 0.25); }
+
+    .proj-title {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .proj-desc {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .proj-highlights {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+      font-size: 0.88rem;
+      color: var(--text);
+    }
+
+    .proj-highlights li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .proj-highlights li::before {
+      content: "▹";
+      color: var(--aurora-purple);
+      font-weight: bold;
+    }
+
+    .proj-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 16px;
+    }
+
+    .proj-tag {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-dim);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .proj-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-btn {
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 7px 14px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: background-color 0.15s ease, color 0.15s ease;
+      cursor: pointer;
+    }
+
+    .action-btn:hover {
+      background: var(--aurora-purple);
+      color: #090a0f;
+      border-color: var(--aurora-purple);
+    }
+
+    /* --- PAGE 3: TECH STACK --- */
+    .stack-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .stack-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+      transform: translateZ(0);
+    }
+
+    .stack-card-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 800;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stack-items {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .stack-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .stack-lvl {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(190, 149, 255, 0.1);
+      color: var(--aurora-purple);
+    }
+
+    /* --- PAGE 4: AUDIO SYNTH --- */
+    .synth-wrapper {
+      background: var(--bg-card);
+      border: 1px solid rgba(190, 149, 255, 0.2);
+      border-radius: 24px;
+      padding: 36px 24px;
+      text-align: center;
+      transform: translateZ(0);
+    }
+
+    .synth-pad-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin: 22px auto 0;
+      max-width: 560px;
+    }
+
+    .synth-pad {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 16px 12px;
+      cursor: pointer;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.12s ease, transform 0.12s ease;
+      will-change: transform;
+      user-select: none;
+    }
+
+    .synth-pad:hover {
+      transform: translate3d(0, -2px, 0);
+      background: rgba(190, 149, 255, 0.16);
+      border-color: var(--aurora-purple);
+    }
+
+    .synth-pad:active {
+      transform: translate3d(0, 1px, 0);
+    }
+
+    .pad-note {
+      font-family: var(--font-mono);
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .pad-solfege {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    /* --- PAGE 5: CONTACT --- */
+    .contact-view-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 112, 166, 0.25);
+      border-radius: 24px;
+      padding: 40px 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform: translateZ(0);
+    }
+
+    .contact-grid-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      width: 100%;
+      max-width: 600px;
+      margin-top: 20px;
+    }
+
+    .c-link-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 18px;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+      will-change: transform;
+    }
+
+    .c-link-box:hover {
+      background: var(--aurora-pink);
+      color: #090a0f;
+      border-color: var(--aurora-pink);
+      transform: translate3d(0, -2px, 0);
+    }
+
+    .c-link-box:active {
+      transform: translate3d(0, 1px, 0);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      padding: 18px 0;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--aurora-purple);
+      color: #090a0f;
+      padding: 9px 16px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      transform: translate3d(0, 80px, 0);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+      will-change: transform, opacity;
+      z-index: 9999;
+    }
+
+    .toast.show {
+      transform: translate3d(0, 0, 0);
+      opacity: 1;
+    }
+
+    /* Mobile Responsive Rules */
+    @media (max-width: 768px) {
+      .nav-tabs {
+        display: none;
+      }
+      .burger-btn {
+        display: flex;
+      }
+      .mobile-drawer {
+        display: flex;
+      }
+      .intro-grid {
+        grid-template-columns: 1fr;
+      }
+      .intro-hero-card {
+        padding: 26px 20px;
+      }
+      .nav-shortcuts {
+        flex-direction: column;
+      }
+      .btn-glow, .btn-glass {
+        justify-content: center;
+        width: 100%;
+      }
+      .synth-pad-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      main {
+        margin-top: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Navigation -->
+  <header>
+    <nav class="nav-bar">
+      <div class="logo" onclick="switchPage('intro')">
+        <span class="logo-gem">✦</span>
+        <span>borgorninja</span>
+      </div>
+
+      <!-- Desktop Navigation Tabs -->
+      <ul class="nav-tabs">
+        <li><button class="nav-tab-btn active" id="tab-intro" onclick="switchPage('intro')">Overview</button></li>
+        <li><button class="nav-tab-btn" id="tab-projects" onclick="switchPage('projects')">Featured Systems</button></li>
+        <li><button class="nav-tab-btn" id="tab-stack" onclick="switchPage('stack')">Technical Stack</button></li>
+        <li><button class="nav-tab-btn" id="tab-synth" onclick="switchPage('synth')">Audio Playground</button></li>
+        <li><button class="nav-tab-btn" id="tab-contact" onclick="switchPage('contact')">Contact</button></li>
+      </ul>
+
+      <!-- Mobile Hamburger Toggle -->
+      <button class="burger-btn" id="burger-toggle" onclick="toggleMobileMenu()" aria-label="Toggle navigation menu">
+        <span id="burger-icon">☰</span>
+      </button>
+
+      <!-- Mobile Retractable Drawer -->
+      <div class="mobile-drawer" id="mobile-drawer">
+        <button class="mobile-tab-btn active" id="m-tab-intro" onclick="selectMobilePage('intro')">
+          <span>🌸 Overview</span> <span>→</span>
+        </button>
+        <button class="mobile-tab-btn" id="m-tab-projects" onclick="selectMobilePage('projects')">
+          <span>🚀 Featured Systems</span> <span>→</span>
+        </button>
+        <button class="mobile-tab-btn" id="m-tab-stack" onclick="selectMobilePage('stack')">
+          <span>🛠️ Technical Stack</span> <span>→</span>
+        </button>
+        <button class="mobile-tab-btn" id="m-tab-synth" onclick="selectMobilePage('synth')">
+          <span>🎹 Audio Playground</span> <span>→</span>
+        </button>
+        <button class="mobile-tab-btn" id="m-tab-contact" onclick="selectMobilePage('contact')">
+          <span>📬 Contact</span> <span>→</span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ==================== 1. OVERVIEW / HOME PAGE ==================== -->
+    <div class="page-view active" id="page-intro">
+      <div class="intro-grid">
+        <div class="intro-hero-card">
+          <div class="status-pill">
+            <span class="status-dot"></span>
+            <span>SOFTWARE ENGINEER & SYSTEMS SPECIALIST</span>
+          </div>
+          <h1 class="hero-name">
+            Rochelle
+            <br>
+            <span class="gradient-text">De Santos</span>
+          </h1>
+          <p class="hero-subhead">
+            Software engineer specializing in asynchronous Python backends, event-driven agent architectures, and high-throughput automation pipelines. Passionate about building robust systems and scalable developer tools.
+          </p>
+          <div class="nav-shortcuts">
+            <button class="btn-glow" onclick="switchPage('projects')">View Architecture Projects 🚀</button>
+            <button class="btn-glass" onclick="switchPage('stack')">Technical Proficiencies 🛠️</button>
+            <button class="btn-glass" onclick="switchPage('contact')">Get in Touch 📬</button>
+          </div>
+        </div>
+
+        <div class="intro-side-panel">
+          <div class="intro-meta-card">
+            <div class="meta-head">
+              <span>Professional Profile</span>
+              <span>01</span>
+            </div>
+            <div class="meta-val">Backend & Systems Engineering</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Architecture Design & Automation Solutions</div>
+          </div>
+
+          <div class="intro-meta-card">
+            <div class="meta-head">
+              <span>Core Strengths</span>
+              <span>02</span>
+            </div>
+            <div class="meta-chips">
+              <span class="m-chip">Async Event Loops</span>
+              <span class="m-chip">API Integrations</span>
+              <span class="m-chip">Process Supervision</span>
+              <span class="m-chip">Automated Pipelines</span>
+            </div>
+          </div>
+
+          <div class="intro-meta-card">
+            <div class="meta-head">
+              <span>Availability</span>
+              <span>03</span>
+            </div>
+            <div class="meta-val" style="font-size: 0.95rem; font-family: var(--font-mono); color: var(--aurora-blue);">
+              Software & Systems Roles
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 2. PROJECTS PAGE ==================== -->
+    <div class="page-view" id="page-projects">
+      <div class="page-head">
+        <h2 class="page-title">
+          <span style="color: var(--aurora-purple);">✦</span>
+          <span>Featured Systems & Projects</span>
+        </h2>
+        <p class="page-subhead">Engineered systems, automation platforms, and backend services.</p>
+      </div>
+
+      <div class="projects-stack">
+
+        <!-- Shelby Assistant -->
+        <div class="proj-card">
+          <div class="proj-top">
+            <span class="proj-badge badge-shelby">Autonomous Agent Engine</span>
+            <span style="font-size: 1.3rem;">🤖</span>
+          </div>
+          <h3 class="proj-title">Shelby Autonomous Agent Engine</h3>
+          <p class="proj-desc">
+            An asynchronous multi-tool agent platform designed with extensible execution loops, conversational context retrieval, automated media processing, and self-healing daemon management.
+          </p>
+          <ul class="proj-highlights">
+            <li>Engineered non-blocking concurrent tool orchestration handling real-time requests.</li>
+            <li>Designed persistent semantic conversation retrieval and cross-channel context indexing.</li>
+            <li>Integrated automated media synthesis and low-latency browser telemetry streams.</li>
+          </ul>
+          <div class="proj-tags">
+            <span class="proj-tag">Python 3.11</span>
+            <span class="proj-tag">Asyncio / aiohttp</span>
+            <span class="proj-tag">discord.py SDK</span>
+            <span class="proj-tag">Playwright Automation</span>
+            <span class="proj-tag">SQLite Engine</span>
+          </div>
+          <div class="proj-actions">
+            <span class="action-btn">⚡ Production Deployed</span>
+          </div>
+        </div>
+
+        <!-- BrosieBot -->
+        <div class="proj-card">
+          <div class="proj-top">
+            <span class="proj-badge badge-brosie">API Integration & Data Engine</span>
+            <span style="font-size: 1.3rem;">🧠</span>
+          </div>
+          <h3 class="proj-title">Automated Research & API Retrieval Pipeline</h3>
+          <p class="proj-desc">
+            A high-throughput async data aggregation system connecting directly to GitHub REST API endpoints and academic preprint feeds (arXiv) for structured code inspection and literature search.
+          </p>
+          <ul class="proj-highlights">
+            <li>Implemented authenticated rate-limit management scaling to 5,000 requests/hour.</li>
+            <li>Built automated tree inspection and raw file parsing directly from remote git repositories.</li>
+            <li>Constructed low-latency XML/JSON query normalization for fast search retrieval.</li>
+          </ul>
+          <div class="proj-tags">
+            <span class="proj-tag">Python</span>
+            <span class="proj-tag">GitHub REST API</span>
+            <span class="proj-tag">arXiv Query Engine</span>
+            <span class="proj-tag">Asynchronous Networking</span>
+          </div>
+          <div class="proj-actions">
+            <span class="action-btn">⚡ High-Throughput Pipeline</span>
+          </div>
+        </div>
+
+        <!-- PlayLeak -->
+        <div class="proj-card">
+          <div class="proj-top">
+            <span class="proj-badge badge-stream">Telemetry & Streaming Platform</span>
+            <span style="font-size: 1.3rem;">📡</span>
+          </div>
+          <h3 class="proj-title">PlayLeak Live Session Telemetry Platform</h3>
+          <p class="proj-desc">
+            A real-time browser session streaming tool and telemetry interface designed for live headless test monitoring and session inspection.
+          </p>
+          <ul class="proj-highlights">
+            <li>Developed low-latency WebSocket communication pipelines for real-time viewport frames.</li>
+            <li>Constructed clean diagnostic telemetry dashboard for interactive session visualization.</li>
+          </ul>
+          <div class="proj-tags">
+            <span class="proj-tag">Python</span>
+            <span class="proj-tag">WebSockets</span>
+            <span class="proj-tag">Playwright</span>
+            <span class="proj-tag">Real-Time Telemetry</span>
+          </div>
+          <div class="proj-actions">
+            <a href="https://playleak.duckdns.org" target="_blank" class="action-btn" onclick="playChime(520)">🔗 Live Platform</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==================== 3. TECH STACK PAGE ==================== -->
+    <div class="page-view" id="page-stack">
+      <div class="page-head">
+        <h2 class="page-title">
+          <span style="color: var(--aurora-blue);">✦</span>
+          <span>Technical Competencies</span>
+        </h2>
+        <p class="page-subhead">Core engineering skills, frameworks, and infrastructure tooling.</p>
+      </div>
+
+      <div class="stack-grid">
+        <div class="stack-card">
+          <h3 class="stack-card-title">
+            <span>🐍</span>
+            <span>Languages & Frameworks</span>
+          </h3>
+          <div class="stack-items">
+            <div class="stack-row"><span>Python (Asyncio / aiohttp)</span> <span class="stack-lvl">Advanced</span></div>
+            <div class="stack-row"><span>Event-Driven Bot SDKs</span> <span class="stack-lvl">Advanced</span></div>
+            <div class="stack-row"><span>JavaScript / Modern Web</span> <span class="stack-lvl">Proficient</span></div>
+            <div class="stack-row"><span>Bash / Shell Scripting</span> <span class="stack-lvl">Advanced</span></div>
+          </div>
+        </div>
+
+        <div class="stack-card">
+          <h3 class="stack-card-title">
+            <span>🐧</span>
+            <span>Systems & Architecture</span>
+          </h3>
+          <div class="stack-items">
+            <div class="stack-row"><span>Linux Environment Administration</span> <span class="stack-lvl">Advanced</span></div>
+            <div class="stack-row"><span>Daemon Supervision & Health Checks</span> <span class="stack-lvl">Advanced</span></div>
+            <div class="stack-row"><span>Reverse Proxies & SSL Protocols</span> <span class="stack-lvl">Advanced</span></div>
+            <div class="stack-row"><span>Performance & Concurrency Tuning</span> <span class="stack-lvl">Advanced</span></div>
+          </div>
+        </div>
+
+        <div class="stack-card">
+          <h3 class="stack-card-title">
+            <span>💾</span>
+            <span>Data & Protocols</span>
+          </h3>
+          <div class="stack-items">
+            <div class="stack-row"><span>Relational SQL (MariaDB/MySQL)</span> <span class="stack-lvl">Advanced</span></div>
+            <div class="stack-row"><span>Embedded Storage Engines (SQLite)</span> <span class="stack-lvl">Advanced</span></div>
+            <div class="stack-row"><span>In-Memory Caching (Redis)</span> <span class="stack-lvl">Proficient</span></div>
+            <div class="stack-row"><span>RESTful APIs & WebSockets</span> <span class="stack-lvl">Advanced</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 4. AUDIO SYNTH PAGE ==================== -->
+    <div class="page-view" id="page-synth">
+      <div class="page-head">
+        <h2 class="page-title">
+          <span style="color: var(--aurora-yellow);">✦</span>
+          <span>Interactive Audio Synth</span>
+        </h2>
+        <p class="page-subhead">Client-side Web Audio API oscillator synthesis demonstration.</p>
+      </div>
+
+      <div class="synth-wrapper">
+        <h3 style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; margin-bottom: 6px;">Pentatonic Frequency Synthesizer</h3>
+        <p style="color: var(--text-muted); font-size: 0.92rem;">Generates pure waveform oscillators dynamically in the browser.</p>
+        
+        <div class="synth-pad-grid">
+          <div class="synth-pad" onclick="playChime(261.63)">
+            <span style="font-size: 1.4rem;">🌸</span>
+            <span class="pad-note">C4</span>
+            <span class="pad-solfege">261.63 Hz</span>
+          </div>
+          <div class="synth-pad" onclick="playChime(293.66)">
+            <span style="font-size: 1.4rem;">✨</span>
+            <span class="pad-note">D4</span>
+            <span class="pad-solfege">293.66 Hz</span>
+          </div>
+          <div class="synth-pad" onclick="playChime(329.63)">
+            <span style="font-size: 1.4rem;">💖</span>
+            <span class="pad-note">E4</span>
+            <span class="pad-solfege">329.63 Hz</span>
+          </div>
+          <div class="synth-pad" onclick="playChime(392.00)">
+            <span style="font-size: 1.4rem;">⭐</span>
+            <span class="pad-note">G4</span>
+            <span class="pad-solfege">392.00 Hz</span>
+          </div>
+          <div class="synth-pad" onclick="playChime(440.00)">
+            <span style="font-size: 1.4rem;">🌙</span>
+            <span class="pad-note">A4</span>
+            <span class="pad-solfege">440.00 Hz</span>
+          </div>
+          <div class="synth-pad" onclick="playChime(523.25)">
+            <span style="font-size: 1.4rem;">🔮</span>
+            <span class="pad-note">C5</span>
+            <span class="pad-solfege">523.25 Hz</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 5. CONTACT PAGE ==================== -->
+    <div class="page-view" id="page-contact">
+      <div class="page-head">
+        <h2 class="page-title">
+          <span style="color: var(--aurora-pink);">✦</span>
+          <span>Contact & Collaboration</span>
+        </h2>
+        <p class="page-subhead">Direct channels for engineering opportunities and inquiries.</p>
+      </div>
+
+      <div class="contact-view-card">
+        <h3 style="font-family: var(--font-display); font-size: 1.7rem; font-weight: 900; margin-bottom: 6px;">Let's Connect</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 480px;">
+          Available for software engineering roles, backend systems design, and technical project collaborations.
+        </p>
+
+        <div class="contact-grid-links">
+          <a href="https://github.com/borgorninja" target="_blank" class="c-link-box" onclick="playChime(440)">
+            <span>🐙 GitHub Profile</span>
+            <span style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-dim);">@borgorninja →</span>
+          </a>
+          <a href="https://www.reddit.com/user/borgor_ninja" target="_blank" class="c-link-box" onclick="playChime(490)">
+            <span>👾 Reddit Profile</span>
+            <span style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-dim);">@borgor_ninja →</span>
+          </a>
+          <div class="c-link-box" onclick="copyText('rochelle.de.santos@gmail.com', 'Email address copied!')">
+            <span>📧 Email Inquiries</span>
+            <span style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-dim);">Copy Email 📋</span>
+          </div>
+          <div class="c-link-box" onclick="copyText('borgorninja', 'Discord handle copied!')">
+            <span>💬 Direct Message</span>
+            <span style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-dim);">@borgorninja 📋</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 Rochelle De Santos (borgorninja).</p>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast" id="toast-msg">Copied!</div>
+
+  <script>
+    const validPages = ['intro', 'projects', 'stack', 'synth', 'contact'];
+    
+    function switchPage(pageId) {
+      if (!validPages.includes(pageId)) pageId = 'intro';
+      
+      requestAnimationFrame(() => {
+        playChime(500);
+
+        for (let i = 0; i < validPages.length; i++) {
+          const p = validPages[i];
+          const pageEl = document.getElementById('page-' + p);
+          const tabEl = document.getElementById('tab-' + p);
+          const mTabEl = document.getElementById('m-tab-' + p);
+          if (pageEl) pageEl.classList.remove('active');
+          if (tabEl) tabEl.classList.remove('active');
+          if (mTabEl) mTabEl.classList.remove('active');
+        }
+
+        const targetPage = document.getElementById('page-' + pageId);
+        const targetTab = document.getElementById('tab-' + pageId);
+        const targetMTab = document.getElementById('m-tab-' + pageId);
+        if (targetPage) targetPage.classList.add('active');
+        if (targetTab) targetTab.classList.add('active');
+        if (targetMTab) targetMTab.classList.add('active');
+
+        window.location.hash = pageId;
+        window.scrollTo(0, 0);
+      });
+    }
+
+    function toggleMobileMenu() {
+      playChime(420);
+      const drawer = document.getElementById('mobile-drawer');
+      const icon = document.getElementById('burger-icon');
+      const isOpen = drawer.classList.toggle('open');
+      icon.textContent = isOpen ? '✕' : '☰';
+    }
+
+    function selectMobilePage(pageId) {
+      switchPage(pageId);
+      const drawer = document.getElementById('mobile-drawer');
+      const icon = document.getElementById('burger-icon');
+      if (drawer) drawer.classList.remove('open');
+      if (icon) icon.textContent = '☰';
+    }
+
+    document.addEventListener('click', (e) => {
+      const drawer = document.getElementById('mobile-drawer');
+      const burger = document.getElementById('burger-toggle');
+      if (drawer && drawer.classList.contains('open')) {
+        if (!drawer.contains(e.target) && !burger.contains(e.target)) {
+          drawer.classList.remove('open');
+          document.getElementById('burger-icon').textContent = '☰';
+        }
+      }
+    });
+
+    function handleHash() {
+      const hash = window.location.hash.replace('#', '');
+      if (validPages.includes(hash)) {
+        switchPage(hash);
+      } else {
+        switchPage('intro');
+      }
+    }
+
+    window.addEventListener('hashchange', handleHash);
+    window.addEventListener('DOMContentLoaded', handleHash);
+
+    // Web Audio Synthesizer
+    let audioCtx = null;
+    function playChime(freq) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now);
+        
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start(now);
+        osc.stop(now + 0.4);
+      } catch (e) {}
+    }
+
+    // Toast & Clipboard
+    let toastTimer = null;
+    function copyText(text, message) {
+      playChime(523.25);
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(message);
+      }).catch(() => {
+        showToast('Copied: ' + text);
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast-msg');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
