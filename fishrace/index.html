@@ -2916,26 +2916,44 @@
             threeCamera.lookAt(threeControls.target);
           }
         } else if (cameraMode === 'broadcast') {
-          const packX = (state.phase === 'racing')
-            ? raceCompetitors.reduce((acc, c) => acc + c.x, 0) / 8
-            : TRACK_START_X;
           const isMobile = (window.innerWidth < 640);
-          if (isMobile) {
-            if (threeCamera.fov !== 62) {
-              threeCamera.fov = 62;
-              threeCamera.updateProjectionMatrix();
+          if (state.phase === 'betting') {
+            if (isMobile) {
+              if (threeCamera.fov !== 64) {
+                threeCamera.fov = 64;
+                threeCamera.updateProjectionMatrix();
+              }
+              threeCamera.position.lerp(new THREE.Vector3(-48, 14, 48), 0.05);
+              threeControls.target.lerp(new THREE.Vector3(-88, 0, 0), 0.05);
+            } else {
+              if (threeCamera.fov !== 50) {
+                threeCamera.fov = 50;
+                threeCamera.updateProjectionMatrix();
+              }
+              threeCamera.position.lerp(new THREE.Vector3(-46, 16, 42), 0.05);
+              threeControls.target.lerp(new THREE.Vector3(-88, 0, 0), 0.05);
             }
-            const targetCamX = THREE.MathUtils.clamp(packX - 16, -88, 70);
-            threeCamera.position.lerp(new THREE.Vector3(targetCamX, 26, 62), 0.05);
-            threeControls.target.lerp(new THREE.Vector3(targetCamX + 10, 0, 0), 0.05);
           } else {
-            if (threeCamera.fov !== 50) {
-              threeCamera.fov = 50;
-              threeCamera.updateProjectionMatrix();
+            const packX = (state.phase === 'racing')
+              ? raceCompetitors.reduce((acc, c) => acc + c.x, 0) / 8
+              : TRACK_START_X;
+            if (isMobile) {
+              if (threeCamera.fov !== 62) {
+                threeCamera.fov = 62;
+                threeCamera.updateProjectionMatrix();
+              }
+              const targetCamX = THREE.MathUtils.clamp(packX - 16, -88, 70);
+              threeCamera.position.lerp(new THREE.Vector3(targetCamX, 26, 62), 0.05);
+              threeControls.target.lerp(new THREE.Vector3(targetCamX + 10, 0, 0), 0.05);
+            } else {
+              if (threeCamera.fov !== 50) {
+                threeCamera.fov = 50;
+                threeCamera.updateProjectionMatrix();
+              }
+              const targetCamX = THREE.MathUtils.clamp(packX - 10, -82, 75);
+              threeCamera.position.lerp(new THREE.Vector3(targetCamX, 28, 46), 0.05);
+              threeControls.target.lerp(new THREE.Vector3(targetCamX + 12, 0, 0), 0.05);
             }
-            const targetCamX = THREE.MathUtils.clamp(packX - 10, -82, 75);
-            threeCamera.position.lerp(new THREE.Vector3(targetCamX, 28, 46), 0.05);
-            threeControls.target.lerp(new THREE.Vector3(targetCamX + 12, 0, 0), 0.05);
           }
           threeCamera.lookAt(threeControls.target);
         } else if (cameraMode === 'chase') {
