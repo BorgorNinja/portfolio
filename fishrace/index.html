@@ -2794,7 +2794,9 @@
 
       if (state.phase === 'racing') {
         const elapsed = Date.now() - raceStartTime;
-        state.raceProgress = Math.min(1.0, elapsed / RACE_DURATION_MS);
+        const totalRaceTime = 28.5; // Winner crosses finish line at 28.5s of the 30.0s round
+        const progress = Math.min(1.0, elapsed / (totalRaceTime * 1000));
+        state.raceProgress = progress;
 
         // Lower laser gates smoothly into the floor
         startLaserGates.forEach(g => {
@@ -2802,30 +2804,46 @@
         });
 
         raceCompetitors.forEach(c => {
-          const baseSpeed = TRACK_DISTANCE / (RACE_DURATION_MS / 1000); // 180 / 30s = 6 units/sec
-          const randVariation = Math.sin((timestamp / 1000) * 2.2 + c.lane * 1.4) * 0.9;
+          const isWinner = (state.serverWinnerId && c.fish.id === state.serverWinnerId);
+          const baseSpeed = TRACK_DISTANCE / totalRaceTime;
+          const wobble = Math.sin((timestamp / 1000) * 2.2 + c.lane * 1.4) * 0.7;
 
-          // Check surge event
+          // Surge mechanics
           c.surgeTimer -= delta;
-          if (c.surgeTimer <= 0 && !c.surgeActive && c.distance < 80) {
+          if (c.surgeTimer <= 0 && !c.surgeActive && progress < 0.85) {
             c.surgeActive = true;
-            c.surgeTimer = 3.2;
+            c.surgeTimer = 2.2 + Math.random() * 1.2;
             audio.playSplash();
           }
 
           let surgeBoost = 0;
           if (c.surgeActive) {
-            surgeBoost = 2.4;
+            surgeBoost = 1.4;
             c.surgeTimer -= delta;
             if (c.surgeTimer <= 0) c.surgeActive = false;
           }
 
-          let serverWinBoost = 0;
-          if (state.serverWinnerId && c.fish.id === state.serverWinnerId && state.raceProgress > 0.65) {
-            serverWinBoost = 0.95;
+          // Winner guidance:
+          // Early on (0-60%), all fish jostle freely.
+          // Mid-race (60-80%), winner secures top-2 pack.
+          // Late race (80-100%), winner surges ahead to cross the finish line first!
+          let pacingFactor = 1.0;
+          if (isWinner) {
+            if (progress > 0.75) {
+              pacingFactor = 1.22;
+            } else if (progress > 0.4) {
+              pacingFactor = 1.08;
+            }
+          } else {
+            if (progress > 0.8) {
+              const winFish = raceCompetitors.find(item => item.fish.id === state.serverWinnerId);
+              if (winFish && c.x >= winFish.x - 2.5) {
+                pacingFactor = 0.88;
+              }
+            }
           }
 
-          c.speed = baseSpeed + randVariation + surgeBoost + serverWinBoost;
+          c.speed = (baseSpeed * pacingFactor) + wobble + surgeBoost;
           c.x += c.speed * delta;
 
           // DYNAMIC OBSTACLE SENSING & PATHFINDING
@@ -2848,10 +2866,15 @@
 
           // Check finish line
           if (c.x >= TRACK_FINISH_X) {
-            c.x = TRACK_FINISH_X;
+            c.x = Math.max(c.x, TRACK_FINISH_X);
             if (!state.winner) {
               const targetId = state.serverWinnerId || c.fish.id;
               const winFish = FISH_ROSTER.find(f => f.id === targetId) || c.fish;
+              const winnerComp = raceCompetitors.find(item => item.fish.id === winFish.id);
+              if (winnerComp) {
+                winnerComp.x = Math.max(winnerComp.x, TRACK_FINISH_X + 2.5);
+                if (winnerComp.meshData) winnerComp.meshData.group.position.x = winnerComp.x;
+              }
               triggerPhotoFinish(winFish);
             }
           }
@@ -2876,6 +2899,16 @@
             leaderEl.textContent = `L${currentLeader.lane} ${currentLeader.fish.name.toUpperCase()}`;
           }
         }
+      } else if (state.phase === 'payout') {
+        // Let other non-winning fish glide smoothly past finish line without teleporting or freezing
+        raceCompetitors.forEach(c => {
+          if (!state.winner || c.fish.id !== state.winner.id) {
+            if (c.x < TRACK_FINISH_X + 6) {
+              c.x += delta * 4.5;
+              c.distance = Math.min(100, Math.round(((c.x - TRACK_START_X) / TRACK_DISTANCE) * 100));
+            }
+          }
+        });
       }
 
       // Update 3D Fish Animations & Undulation
@@ -3015,6 +3048,7 @@
 
     /* Trigger Dramatic Photo Finish */
     function triggerPhotoFinish(winnerFish) {
+      if (state.phase === 'payout') return;
       payoutStartTime = Date.now();
       audio.playStarterHorn();
       const flashEl = document.getElementById('finish-flash');
@@ -3670,10 +3704,9 @@
             state.serverWinnerId = g.winner_id;
           }
 
-          const phaseChanged = (state.phase !== g.phase);
           const roundChanged = (state.currentRoundId !== g.round_id);
 
-          if (phaseChanged || roundChanged) {
+          if (roundChanged) {
             state.currentRoundId = g.round_id;
             if (g.phase === 'betting') {
               applyBettingPhase(g.time_left);
@@ -3683,10 +3716,24 @@
               applyPayoutPhase(g.time_left, g.winner_id);
             }
           } else {
-            // Drift correction
-            if (Math.abs(state.timeLeft - g.time_left) > 1.2) {
-              state.timeLeft = g.time_left;
-              updateTimerUI();
+            // Same round: handle server phase transitions
+            if (state.phase !== g.phase) {
+              if (g.phase === 'betting') {
+                applyBettingPhase(g.time_left);
+              } else if (g.phase === 'racing') {
+                // If client already finished race (in payout) for this round, do NOT restart/revert to racing
+                if (state.phase !== 'payout') {
+                  applyRacePhase(g.time_left, g.elapsed, g.winner_id);
+                }
+              } else if (g.phase === 'payout') {
+                applyPayoutPhase(g.time_left, g.winner_id);
+              }
+            } else {
+              // Drift correction
+              if (Math.abs(state.timeLeft - g.time_left) > 1.2) {
+                state.timeLeft = g.time_left;
+                updateTimerUI();
+              }
             }
           }
         }
@@ -3749,6 +3796,7 @@
       state.phase = 'racing';
       state.timeLeft = typeof timeLeft === 'number' ? timeLeft : 30.0;
       if (winnerId) state.serverWinnerId = winnerId;
+      state.winner = null;
       updateTimerUI();
 
       state.lastBets = (state.activeSeat !== -1 && state.players[state.activeSeat]) ? { ...(state.players[state.activeSeat].bets || {}) } : {};
@@ -3764,11 +3812,19 @@
       const actualElapsed = (typeof elapsed === 'number' && elapsed >= 0) ? elapsed : (30.0 - state.timeLeft);
       raceStartTime = Date.now() - (actualElapsed * 1000);
 
-      // If refreshed or joined mid-race, position fish at current elapsed progress
+      // If refreshed or joined mid-race, position fish at current elapsed progress with natural lane spacing
       if (actualElapsed > 0.5) {
-        const progress = Math.min(0.96, actualElapsed / 30.0);
-        raceCompetitors.forEach(c => {
-          c.x = TRACK_START_X + (TRACK_DISTANCE * progress);
+        const baseProgress = Math.min(0.95, actualElapsed / 28.5);
+        raceCompetitors.forEach((c, idx) => {
+          const isWinner = (state.serverWinnerId && c.fish.id === state.serverWinnerId);
+          const laneVariation = Math.sin(idx * 1.7) * 4.5;
+          const winnerAdvantage = isWinner ? (baseProgress > 0.6 ? 5.0 : 1.5) : -2.0;
+          const fishX = THREE.MathUtils.clamp(
+            TRACK_START_X + (TRACK_DISTANCE * baseProgress) + laneVariation + winnerAdvantage,
+            TRACK_START_X,
+            TRACK_FINISH_X - (isWinner ? 0 : 3)
+          );
+          c.x = fishX;
           c.distance = Math.min(100, Math.round(((c.x - TRACK_START_X) / TRACK_DISTANCE) * 100));
           if (c.meshData) {
             c.meshData.group.position.x = c.x;
@@ -3776,6 +3832,7 @@
         });
         startLaserGates.forEach(g => { g.position.y = -12; });
       } else {
+        initRacePositions();
         audio.playStarterHorn();
       }
     }
@@ -3783,6 +3840,13 @@
     function applyPayoutPhase(timeLeft, winnerId) {
       const targetId = winnerId || state.serverWinnerId || 1;
       const winnerFish = FISH_ROSTER.find(item => item.id === targetId) || FISH_ROSTER[0];
+      if (state.phase === 'payout' && state.winner && state.winner.id === winnerFish.id) {
+        if (typeof timeLeft === 'number') {
+          state.timeLeft = timeLeft;
+          updateTimerUI();
+        }
+        return;
+      }
       finishRace(winnerFish, timeLeft);
     }
 
