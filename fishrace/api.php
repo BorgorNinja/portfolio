@@ -83,39 +83,49 @@ if ($action === 'join_or_heartbeat') {
         exit;
     }
 
-    // Check if player is already seated
-    $assignedSeat = -1;
+    // Find any seat currently registered to this user ref
+    $currentSeat = -1;
     for ($i = 0; $i < 4; $i++) {
-        if (isset($room['seats'][$i]) && $room['seats'][$i] !== null && $room['seats'][$i]['ref'] === $ref) {
-            $assignedSeat = $i;
+        if (isset($room['seats'][$i]) && $room['seats'][$i] !== null && ($room['seats'][$i]['ref'] ?? '') === $ref) {
+            $currentSeat = $i;
             break;
         }
     }
 
-    // Allocate seat if not already seated
-    if ($assignedSeat === -1) {
-        if ($seatReq >= 0 && $seatReq < 4 && $room['seats'][$seatReq] === null) {
-            $assignedSeat = $seatReq;
-        } else {
-            for ($i = 0; $i < 4; $i++) {
-                if ($room['seats'][$i] === null) {
-                    $assignedSeat = $i;
-                    break;
-                }
-            }
-        }
-    }
+    $assignedSeat = -1;
 
-    if ($assignedSeat !== -1) {
-        $room['seats'][$assignedSeat] = [
-            'ref' => $ref,
-            'name' => $name,
-            'avatar' => $avatar,
-            'bets' => $bets,
-            'balance' => $balance,
-            'last_seen' => $now
-        ];
-        $changed = true;
+    if ($seatReq === -1) {
+        // User wants to be a spectator or stay a spectator.
+        // If they previously had a seat, free it up immediately!
+        if ($currentSeat !== -1) {
+            $room['seats'][$currentSeat] = null;
+            $changed = true;
+        }
+        $assignedSeat = -1;
+    } else if ($seatReq >= 0 && $seatReq < 4) {
+        // User wants a specific seat ($seatReq).
+        $targetSeatOccupant = $room['seats'][$seatReq] ?? null;
+        if ($targetSeatOccupant !== null && ($targetSeatOccupant['ref'] ?? '') !== $ref) {
+            // Target seat is occupied by another user! Cannot take it.
+            $assignedSeat = $currentSeat; // Remain in existing seat if any, else -1
+        } else {
+            // Target seat is empty or already held by this user.
+            // If switching from another seat, clear the old seat!
+            if ($currentSeat !== -1 && $currentSeat !== $seatReq) {
+                $room['seats'][$currentSeat] = null;
+                $changed = true;
+            }
+            $assignedSeat = $seatReq;
+            $room['seats'][$assignedSeat] = [
+                'ref' => $ref,
+                'name' => $name,
+                'avatar' => $avatar,
+                'bets' => $bets,
+                'balance' => $balance,
+                'last_seen' => $now
+            ];
+            $changed = true;
+        }
     }
 
     if ($changed) {

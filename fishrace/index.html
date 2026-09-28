@@ -274,6 +274,83 @@
       text-align: right;
     }
 
+    .seat-card.open-seat {
+      border: 1px dashed rgba(6, 182, 212, 0.45);
+      background: rgba(8, 28, 48, 0.4);
+    }
+    .seat-card.open-seat:hover {
+      border-color: #06b6d4;
+      background: rgba(6, 182, 212, 0.12);
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.25);
+    }
+    .seat-card.occupied {
+      opacity: 0.88;
+      cursor: default;
+    }
+
+    /* Spectator Alert Banner */
+    .spectator-alert-banner {
+      width: 100%;
+      background: linear-gradient(135deg, rgba(8, 24, 42, 0.95), rgba(15, 38, 64, 0.95));
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      border-radius: 8px;
+      padding: 9px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #94a3b8;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+      margin-top: 4px;
+      transition: all 0.25s ease;
+    }
+    .spectator-alert-banner strong {
+      color: #06b6d4;
+    }
+    .spectator-alert-banner.is-seated {
+      border-color: rgba(56, 189, 248, 0.5);
+      background: linear-gradient(135deg, rgba(14, 35, 60, 0.95), rgba(8, 24, 44, 0.95));
+      color: #cbd5e1;
+    }
+    .spectator-alert-banner.is-seated strong {
+      color: #38bdf8;
+    }
+    .btn-standup {
+      background: rgba(239, 68, 68, 0.25);
+      border: 1px solid #ef4444;
+      color: #fca5a5;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 8px;
+    }
+    .btn-standup:hover {
+      background: rgba(239, 68, 68, 0.5);
+      color: #fff;
+    }
+
+    /* Betting Console Disabled / Locked State */
+    .player-betting-console.betting-locked {
+      opacity: 0.38 !important;
+      pointer-events: none !important;
+      filter: grayscale(0.85) contrast(0.9) !important;
+      cursor: not-allowed !important;
+      transition: opacity 0.25s ease, filter 0.25s ease;
+    }
+    .player-betting-console.betting-locked * {
+      cursor: not-allowed !important;
+    }
+
     /* AQUATIC RACE TRACK STADIUM CONTAINER */
     .stadium-wrapper {
       width: 100%;
@@ -845,48 +922,52 @@
 
     <!-- Multi-Player Seat Ribbon (Up to 4 Players) -->
     <div class="seats-ribbon">
-      <div class="seat-card active-user" id="seat-card-1" onclick="switchPlayerSeat(0)">
+      <!-- Seat 1 -->
+      <div class="seat-card open-seat" id="seat-card-1" onclick="switchPlayerSeat(0)">
         <div class="seat-meta">
-          <div class="seat-avatar">👑</div>
+          <div class="seat-avatar">💺</div>
           <div>
-            <div class="seat-name" id="seat-1-name">mambutan</div>
-            <div class="seat-status" id="seat-1-status">Betting</div>
+            <div class="seat-name" id="seat-1-name">Open Seat</div>
+            <div class="seat-status" id="seat-1-status">Click to Sit</div>
           </div>
         </div>
-        <div class="seat-bet-val" id="seat-1-bet">0 🪙</div>
+        <div class="seat-bet-val" id="seat-1-bet">Empty</div>
       </div>
 
-      <div class="seat-card" id="seat-card-2" onclick="switchPlayerSeat(1)">
+      <!-- Seat 2 -->
+      <div class="seat-card open-seat" id="seat-card-2" onclick="switchPlayerSeat(1)">
         <div class="seat-meta">
-          <div class="seat-avatar">🎮</div>
+          <div class="seat-avatar">💺</div>
           <div>
-            <div class="seat-name" id="seat-2-name">uncomfy</div>
-            <div class="seat-status" id="seat-2-status">Ready</div>
+            <div class="seat-name" id="seat-2-name">Open Seat</div>
+            <div class="seat-status" id="seat-2-status">Click to Sit</div>
           </div>
         </div>
-        <div class="seat-bet-val" id="seat-2-bet">0 🪙</div>
+        <div class="seat-bet-val" id="seat-2-bet">Empty</div>
       </div>
 
-      <div class="seat-card" id="seat-card-3" onclick="switchPlayerSeat(2)">
+      <!-- Seat 3 -->
+      <div class="seat-card open-seat" id="seat-card-3" onclick="switchPlayerSeat(2)">
         <div class="seat-meta">
-          <div class="seat-avatar">🤖</div>
+          <div class="seat-avatar">💺</div>
           <div>
-            <div class="seat-name" id="seat-3-name">BrosieBot</div>
-            <div class="seat-status" id="seat-3-status">Ready</div>
+            <div class="seat-name" id="seat-3-name">Open Seat</div>
+            <div class="seat-status" id="seat-3-status">Click to Sit</div>
           </div>
         </div>
-        <div class="seat-bet-val" id="seat-3-bet">0 🪙</div>
+        <div class="seat-bet-val" id="seat-3-bet">Empty</div>
       </div>
 
-      <div class="seat-card" id="seat-card-4" onclick="switchPlayerSeat(3)">
+      <!-- Seat 4 -->
+      <div class="seat-card open-seat" id="seat-card-4" onclick="switchPlayerSeat(3)">
         <div class="seat-meta">
-          <div class="seat-avatar">⚡</div>
+          <div class="seat-avatar">💺</div>
           <div>
-            <div class="seat-name" id="seat-4-name">Player 4</div>
-            <div class="seat-status" id="seat-4-status">Ready</div>
+            <div class="seat-name" id="seat-4-name">Open Seat</div>
+            <div class="seat-status" id="seat-4-status">Click to Sit</div>
           </div>
         </div>
-        <div class="seat-bet-val" id="seat-4-bet">0 🪙</div>
+        <div class="seat-bet-val" id="seat-4-bet">Empty</div>
       </div>
     </div>
 
@@ -920,8 +1001,13 @@
 
     </div>
 
+    <!-- Spectator Mode Notification Banner -->
+    <div class="spectator-alert-banner is-spectating" id="spectator-banner">
+      <span id="spectator-banner-text">👀 <strong>SPECTATOR MODE:</strong> Pick an <strong style="color: #06b6d4;">Open Seat</strong> above to place bets!</span>
+    </div>
+
     <!-- PLAYER BETTING CONSOLE -->
-    <div class="player-betting-console">
+    <div class="player-betting-console betting-locked">
 
       <!-- 8-Fish Betting Deck with Animated Previews & Odds -->
       <div class="fish-betting-deck" id="fish-betting-deck">
@@ -1111,17 +1197,17 @@
     const state = {
       phase: 'betting', // 'betting' (30s) -> 'racing' (15s) -> 'payout' (6s)
       timeLeft: 30.0,
-      activeSeat: 0,
+      activeSeat: -1, // -1 = Spectating by default. 0-3 = Claimed seat
       userRef: localUserRef,
       userName: localUserName,
       selectedChip: 10,
       balance: 10000,
       lastBets: {},
       players: [
-        { id: 1, ref: localUserRef, name: localUserName, avatar: '👑', isUser: true, bets: {}, balance: 10000 },
-        { id: 2, ref: null, name: 'Empty Seat', avatar: '🎮', isUser: false, bets: {}, balance: 0 },
-        { id: 3, ref: null, name: 'Empty Seat', avatar: '🤖', isUser: false, bets: {}, balance: 0 },
-        { id: 4, ref: null, name: 'Empty Seat', avatar: '⚡', isUser: false, bets: {}, balance: 0 }
+        { id: 1, ref: null, name: 'Open Seat', avatar: '💺', isUser: false, bets: {}, balance: 0 },
+        { id: 2, ref: null, name: 'Open Seat', avatar: '💺', isUser: false, bets: {}, balance: 0 },
+        { id: 3, ref: null, name: 'Open Seat', avatar: '💺', isUser: false, bets: {}, balance: 0 },
+        { id: 4, ref: null, name: 'Open Seat', avatar: '💺', isUser: false, bets: {}, balance: 0 }
       ],
       odds: { 1: 4, 2: 3, 3: 8, 4: 12, 5: 6, 6: 5, 7: 15, 8: 20 },
       history: [2, 1, 6, 5, 3, 2, 8, 4],
@@ -1723,21 +1809,31 @@
           state.balance = parseInt(chosenBal, 10);
         }
 
-        state.players[state.activeSeat].ref = state.userRef;
-        state.players[state.activeSeat].name = state.userName;
-        state.players[state.activeSeat].balance = state.balance;
+        const savedSeat = sessionStorage.getItem('perya_fish_seated_slot');
+        if (savedSeat !== null) {
+          const s = parseInt(savedSeat, 10);
+          if (!isNaN(s) && s >= 0 && s < 4) {
+            state.activeSeat = s;
+            state.players[s].ref = state.userRef;
+            state.players[s].name = state.userName;
+            state.players[s].isUser = true;
+            state.players[s].balance = state.balance;
+          }
+        }
 
         // Restore active bets if player refreshed during active round (< 50s)
-        const savedBetsRaw = localStorage.getItem('perya_fish_active_bets');
-        if (savedBetsRaw) {
-          try {
-            const parsed = JSON.parse(savedBetsRaw);
-            if (parsed && parsed.bets && (Date.now() - (parsed.timestamp || 0) < 50000)) {
-              state.players[state.activeSeat].bets = parsed.bets;
-            } else {
-              localStorage.removeItem('perya_fish_active_bets');
-            }
-          } catch (e) {}
+        if (state.activeSeat !== -1 && state.players[state.activeSeat]) {
+          const savedBetsRaw = localStorage.getItem('perya_fish_active_bets');
+          if (savedBetsRaw) {
+            try {
+              const parsed = JSON.parse(savedBetsRaw);
+              if (parsed && parsed.bets && (Date.now() - (parsed.timestamp || 0) < 50000)) {
+                state.players[state.activeSeat].bets = parsed.bets;
+              } else {
+                localStorage.removeItem('perya_fish_active_bets');
+              }
+            } catch (e) {}
+          }
         }
       } catch (e) {}
 
@@ -1846,7 +1942,27 @@
       } catch (e) {}
     }
 
+    /* Save active round bets to survive refresh and sudden disconnects */
+    function saveActiveBets() {
+      try {
+        if (state.activeSeat === -1 || !state.players[state.activeSeat]) {
+          localStorage.removeItem('perya_fish_active_bets');
+          return;
+        }
+        const p = state.players[state.activeSeat];
+        if (p && p.bets && Object.keys(p.bets).length > 0) {
+          localStorage.setItem('perya_fish_active_bets', JSON.stringify({
+            bets: p.bets,
+            timestamp: Date.now()
+          }));
+        } else {
+          localStorage.removeItem('perya_fish_active_bets');
+        }
+      } catch (e) {}
+    }
+
     function selectChip(amount) {
+      if (state.activeSeat === -1 || state.phase !== 'betting') return;
       state.selectedChip = amount;
       document.querySelectorAll('.chip-btn').forEach(btn => {
         btn.classList.remove('selected-chip');
@@ -1858,6 +1974,10 @@
     }
 
     function placeFishBet(fishId) {
+      if (state.activeSeat === -1 || !state.players[state.activeSeat]) {
+        setAnnouncer('SELECT AN OPEN SEAT ABOVE TO PLACE BETS!');
+        return;
+      }
       if (state.phase !== 'betting') return;
       const player = state.players[state.activeSeat];
       const cost = state.selectedChip;
@@ -1883,6 +2003,10 @@
     }
 
     function placeGroupBet(group) {
+      if (state.activeSeat === -1 || !state.players[state.activeSeat]) {
+        setAnnouncer('SELECT AN OPEN SEAT ABOVE TO PLACE BETS!');
+        return;
+      }
       if (state.phase !== 'betting') return;
       let targets = [];
       if (group === 'warm') targets = [1, 2, 6, 7];
@@ -1919,6 +2043,7 @@
     }
 
     function clearAllBets() {
+      if (state.activeSeat === -1 || !state.players[state.activeSeat]) return;
       if (state.phase !== 'betting') return;
       const player = state.players[state.activeSeat];
       let refund = 0;
@@ -1941,6 +2066,10 @@
     }
 
     function doubleAllBets() {
+      if (state.activeSeat === -1 || !state.players[state.activeSeat]) {
+        setAnnouncer('SELECT AN OPEN SEAT ABOVE TO PLACE BETS!');
+        return;
+      }
       if (state.phase !== 'betting') return;
       const player = state.players[state.activeSeat];
       let totalCurrent = 0;
@@ -1972,6 +2101,10 @@
     }
 
     function repeatLastBet() {
+      if (state.activeSeat === -1 || !state.players[state.activeSeat]) {
+        setAnnouncer('SELECT AN OPEN SEAT ABOVE TO PLACE BETS!');
+        return;
+      }
       if (state.phase !== 'betting') return;
       if (!state.lastBets || Object.keys(state.lastBets).length === 0) return;
 
@@ -1995,17 +2128,16 @@
 
       audio.playChip();
       updatePlayerBetsUI();
-      saveActiveBets();
       renderSeats();
       syncRoomHeartbeat();
     }
 
     function updatePlayerBetsUI() {
-      const player = state.players[state.activeSeat];
+      const player = (state.activeSeat !== -1 && state.players[state.activeSeat]) ? state.players[state.activeSeat] : null;
       for (let id = 1; id <= 8; id++) {
         const pill = document.getElementById(`wager-pill-${id}`);
         const card = document.getElementById(`fish-card-${id}`);
-        const wager = player.bets[id] || 0;
+        const wager = (player && player.bets) ? (player.bets[id] || 0) : 0;
 
         if (pill) pill.textContent = wager > 0 ? wager : '0';
         if (card) {
@@ -2022,65 +2154,188 @@
       } catch (e) {}
     }
 
+    /* Switch Active Seat (Allows claiming, switching, or vacating seats) */
     function switchPlayerSeat(seatIdx) {
       if (seatIdx < 0 || seatIdx > 3) return;
-      if (state.players[seatIdx].ref && !state.players[seatIdx].isUser) {
-        setAnnouncer('SEAT OCCUPIED BY ANOTHER SWIMMER!');
+
+      // If clicking own active seat: stand up!
+      if (seatIdx === state.activeSeat) {
+        standUpFromSeat();
         return;
       }
 
-      const prevSeat = state.activeSeat;
-      state.players[prevSeat].isUser = false;
-      state.players[prevSeat].ref = null;
-      state.players[prevSeat].name = 'Empty Seat';
-      state.players[prevSeat].bets = {};
+      // Check if target seat is occupied by another player
+      const target = state.players[seatIdx];
+      if (target && target.ref && target.ref !== state.userRef && !target.isUser) {
+        setAnnouncer(`SEAT #${seatIdx + 1} IS ALREADY TAKEN BY ${target.name.toUpperCase()}!`);
+        return;
+      }
 
+      // If currently seated in another seat, transfer active bets and clear old seat
+      const prevSeat = state.activeSeat;
+      let carriedBets = {};
+      if (prevSeat !== -1 && prevSeat !== seatIdx && state.players[prevSeat]) {
+        carriedBets = { ...(state.players[prevSeat].bets || {}) };
+        state.players[prevSeat].isUser = false;
+        state.players[prevSeat].ref = null;
+        state.players[prevSeat].name = 'Open Seat';
+        state.players[prevSeat].bets = {};
+        state.players[prevSeat].balance = 0;
+      }
+
+      // Claim target seat
       state.activeSeat = seatIdx;
       state.players[seatIdx].isUser = true;
       state.players[seatIdx].ref = state.userRef;
       state.players[seatIdx].name = state.userName;
+      state.players[seatIdx].avatar = '👑';
       state.players[seatIdx].balance = state.balance;
+      state.players[seatIdx].bets = carriedBets;
+
+      try {
+        sessionStorage.setItem('perya_fish_seated_slot', seatIdx.toString());
+      } catch (e) {}
+
+      saveActiveBets();
+      renderSeats();
+      updatePlayerBetsUI();
+      updateBettingControls();
+      syncRoomHeartbeat();
+      setAnnouncer(`SEATED AT SLOT #${seatIdx + 1}! PLACE YOUR BETS!`);
+    }
+
+    /* Stand up from seat and become a spectator */
+    function standUpFromSeat() {
+      if (state.activeSeat === -1) return;
+
+      // Auto-refund any placed bets during betting phase
+      if (state.phase === 'betting') {
+        clearAllBets();
+      }
+
+      const prevSeat = state.activeSeat;
+      if (prevSeat >= 0 && prevSeat < 4 && state.players[prevSeat]) {
+        state.players[prevSeat].isUser = false;
+        state.players[prevSeat].ref = null;
+        state.players[prevSeat].name = 'Open Seat';
+        state.players[prevSeat].bets = {};
+        state.players[prevSeat].balance = 0;
+      }
+
+      state.activeSeat = -1;
+      try {
+        sessionStorage.removeItem('perya_fish_seated_slot');
+        localStorage.removeItem('perya_fish_active_bets');
+      } catch (e) {}
 
       renderSeats();
       updatePlayerBetsUI();
+      updateBettingControls();
       syncRoomHeartbeat();
+      setAnnouncer('STAND UP: YOU ARE NOW SPECTATING. CLICK ANY OPEN SEAT TO PLAY!');
     }
 
+    /* Update Betting Controls (Greyed out when racing, resolved, or unseated) */
+    function updateBettingControls() {
+      const isSeated = (state.activeSeat !== -1);
+      const isBettingPhase = (state.phase === 'betting');
+      const canBet = (isSeated && isBettingPhase);
+
+      const consoleEl = document.querySelector('.player-betting-console');
+      if (consoleEl) {
+        if (canBet) {
+          consoleEl.classList.remove('betting-locked');
+        } else {
+          consoleEl.classList.add('betting-locked');
+        }
+      }
+
+      // Update spectator banner
+      const banner = document.getElementById('spectator-banner');
+      const bannerText = document.getElementById('spectator-banner-text');
+      if (banner && bannerText) {
+        if (!isSeated) {
+          banner.className = 'spectator-alert-banner is-spectating';
+          const allFull = state.players.every(p => p.ref && p.name && p.name !== 'Open Seat' && p.name !== 'Empty Seat');
+          if (allFull) {
+            bannerText.innerHTML = `👀 <strong>SPECTATOR MODE:</strong> All 4 seats are full. Watching live round.`;
+          } else {
+            bannerText.innerHTML = `👀 <strong>SPECTATOR MODE:</strong> Pick an <strong style="color: #06b6d4; cursor: pointer;">Open Seat</strong> above to place bets!`;
+          }
+        } else {
+          banner.className = 'spectator-alert-banner is-seated';
+          if (isBettingPhase) {
+            bannerText.innerHTML = `<span>🎮 <strong>SEATED (Slot #${state.activeSeat + 1}):</strong> ${state.userName} • Betting is OPEN!</span> <button class="btn-standup" onclick="standUpFromSeat()">Stand Up</button>`;
+          } else {
+            bannerText.innerHTML = `<span>🎮 <strong>SEATED (Slot #${state.activeSeat + 1}):</strong> ${state.userName} • Betting is CLOSED during race.</span> <button class="btn-standup" onclick="standUpFromSeat()">Stand Up</button>`;
+          }
+        }
+      }
+    }
+
+    /* Render Seats with Real JTrash Usernames and Active Bets */
     function renderSeats() {
       state.players.forEach((p, idx) => {
         const seatIdx = idx + 1;
         const cardEl = document.getElementById(`seat-card-${seatIdx}`);
+        const avatarEl = cardEl ? cardEl.querySelector('.seat-avatar') : null;
         const nameEl = document.getElementById(`seat-${seatIdx}-name`);
         const statusEl = document.getElementById(`seat-${seatIdx}-status`);
         const betEl = document.getElementById(`seat-${seatIdx}-bet`);
+        if (!cardEl) return;
 
-        const isLocalUser = (idx === state.activeSeat);
-        if (isLocalUser) cardEl.classList.add('active-user');
-        else cardEl.classList.remove('active-user');
+        const isLocalUser = (idx === state.activeSeat && state.activeSeat !== -1);
+        const isOccupiedByOther = (p.ref && !isLocalUser);
 
-        if (p.ref && p.name && p.name !== 'Empty Seat') {
-          nameEl.textContent = p.name;
+        cardEl.classList.remove('active-user', 'open-seat', 'occupied');
+
+        if (isLocalUser) {
+          cardEl.classList.add('active-user');
+          if (avatarEl) avatarEl.textContent = p.avatar || '👑';
+          if (nameEl) nameEl.textContent = state.userName;
+          let totalBet = 0;
+          if (p.bets) {
+            Object.keys(p.bets).forEach(k => totalBet += (p.bets[k] || 0));
+          }
+          if (betEl) betEl.textContent = `${totalBet.toLocaleString()} 🪙`;
+          if (statusEl) {
+            if (state.phase === 'betting') {
+              statusEl.textContent = totalBet > 0 ? 'Bet Placed' : 'Click to Stand Up';
+            } else if (state.phase === 'racing') {
+              statusEl.textContent = 'Racing!';
+            } else {
+              statusEl.textContent = 'Resolved';
+            }
+          }
+        } else if (isOccupiedByOther) {
+          cardEl.classList.add('occupied');
+          if (avatarEl) avatarEl.textContent = p.avatar || '🐟';
+          if (nameEl) nameEl.textContent = p.name || 'Player';
+          let totalBet = 0;
+          if (p.bets) {
+            Object.keys(p.bets).forEach(k => totalBet += (p.bets[k] || 0));
+          }
+          if (betEl) betEl.textContent = `${totalBet.toLocaleString()} 🪙`;
+          if (statusEl) {
+            if (state.phase === 'betting') {
+              statusEl.textContent = totalBet > 0 ? 'Bet Placed' : 'Waiting...';
+            } else if (state.phase === 'racing') {
+              statusEl.textContent = 'Racing!';
+            } else {
+              statusEl.textContent = 'Resolved';
+            }
+          }
         } else {
-          nameEl.textContent = isLocalUser ? state.userName : 'Open Seat';
-        }
-
-        let totalBet = 0;
-        if (p.bets) {
-          Object.keys(p.bets).forEach(k => totalBet += (p.bets[k] || 0));
-        }
-
-        betEl.textContent = `${totalBet.toLocaleString()} 🪙`;
-
-        if (!p.ref && !isLocalUser) {
-          statusEl.textContent = 'Empty';
-        } else if (state.phase === 'betting') {
-          statusEl.textContent = totalBet > 0 ? 'Bet Placed' : 'Waiting...';
-        } else if (state.phase === 'racing') {
-          statusEl.textContent = 'Racing!';
-        } else {
-          statusEl.textContent = 'Resolved';
+          // Open Seat
+          cardEl.classList.add('open-seat');
+          if (avatarEl) avatarEl.textContent = '💺';
+          if (nameEl) nameEl.textContent = 'Open Seat';
+          if (statusEl) statusEl.textContent = 'Click to Sit';
+          if (betEl) betEl.textContent = 'Empty';
         }
       });
+
+      updateBettingControls();
     }
 
     /* Live Room Sync & Heartbeat */
@@ -2089,9 +2344,9 @@
         const payload = {
           ref: state.userRef,
           name: state.userName,
-          avatar: state.players[state.activeSeat]?.avatar || '👑',
+          avatar: (state.activeSeat !== -1 && state.players[state.activeSeat]) ? (state.players[state.activeSeat].avatar || '👑') : '👤',
           seat: state.activeSeat,
-          bets: state.players[state.activeSeat]?.bets || {},
+          bets: (state.activeSeat !== -1 && state.players[state.activeSeat]) ? (state.players[state.activeSeat].bets || {}) : {},
           balance: state.balance
         };
 
@@ -2104,22 +2359,35 @@
         const data = await res.json();
         if (data && data.seats && Array.isArray(data.seats)) {
           data.seats.forEach((serverSeat, idx) => {
-            if (idx === state.activeSeat) {
+            if (idx === state.activeSeat && state.activeSeat !== -1) {
               state.players[idx].ref = state.userRef;
               state.players[idx].name = state.userName;
               state.players[idx].isUser = true;
+              state.players[idx].balance = state.balance;
             } else if (serverSeat && serverSeat.ref) {
-              state.players[idx].ref = serverSeat.ref;
-              state.players[idx].name = serverSeat.name;
-              state.players[idx].avatar = serverSeat.avatar || '🐟';
-              state.players[idx].isUser = false;
-              state.players[idx].balance = serverSeat.balance || 0;
-              state.players[idx].bets = serverSeat.bets || {};
+              // Check if server still has our ref in another seat (ghost from before switch)
+              if (serverSeat.ref === state.userRef && idx !== state.activeSeat) {
+                state.players[idx].ref = null;
+                state.players[idx].name = 'Open Seat';
+                state.players[idx].avatar = '💺';
+                state.players[idx].isUser = false;
+                state.players[idx].bets = {};
+                state.players[idx].balance = 0;
+              } else {
+                state.players[idx].ref = serverSeat.ref;
+                state.players[idx].name = serverSeat.name;
+                state.players[idx].avatar = serverSeat.avatar || '🐟';
+                state.players[idx].isUser = false;
+                state.players[idx].balance = serverSeat.balance || 0;
+                state.players[idx].bets = serverSeat.bets || {};
+              }
             } else {
               state.players[idx].ref = null;
-              state.players[idx].name = 'Empty Seat';
+              state.players[idx].name = 'Open Seat';
+              state.players[idx].avatar = '💺';
               state.players[idx].isUser = false;
               state.players[idx].bets = {};
+              state.players[idx].balance = 0;
             }
           });
           renderSeats();
@@ -2159,6 +2427,7 @@
       badge.className = 'phase-badge-title betting';
       document.getElementById('phase-text').textContent = 'BETTING PHASE (30s)';
       setAnnouncer('PICK YOUR WINNING FISH! LANES 1-8 OR COLOR GROUPS!');
+      updateBettingControls();
 
       randomizeOdds(true);
       initRacePositions();
@@ -2191,13 +2460,14 @@
       state.timeLeft = 15.0;
       updateTimerUI();
 
-      state.lastBets = { ...state.players[state.activeSeat].bets };
+      state.lastBets = (state.activeSeat !== -1 && state.players[state.activeSeat]) ? { ...(state.players[state.activeSeat].bets || {}) } : {};
 
       const badge = document.getElementById('phase-badge');
       badge.className = 'phase-badge-title racing';
       document.getElementById('phase-text').textContent = 'RACE IN PROGRESS (15s)';
       setAnnouncer("THE GATES ARE OPEN! THEY'RE OFF IN THE AQUA DERBY!");
       renderSeats();
+      updateBettingControls();
 
       raceStartTime = Date.now();
       audio.playStarterHorn();
@@ -2214,6 +2484,7 @@
       state.phase = 'payout';
       state.timeLeft = 6.0;
       updateTimerUI();
+      updateBettingControls();
 
       const payoutInterval = setInterval(() => {
         state.timeLeft = Math.max(0, +(state.timeLeft - 0.1).toFixed(1));
@@ -2244,13 +2515,15 @@
         p.bets = {};
       });
 
-      if (userWonCoins > 0) {
+      if (userWonCoins > 0 && state.activeSeat !== -1 && state.players[state.activeSeat]) {
         state.balance = state.players[state.activeSeat].balance;
         updateBalanceDisplay();
         audio.playVictory();
         setAnnouncer(`🎉 YOU WON ${userWonCoins.toLocaleString()} COINS ON ${winnerFish.name.toUpperCase()}!`);
-      } else {
+      } else if (state.activeSeat !== -1) {
         audio.playSplash();
+      } else {
+        setAnnouncer(`RACE COMPLETE: WINNER IS ${winnerFish.name.toUpperCase()}!`);
       }
 
       // Add to history
@@ -2290,7 +2563,7 @@
     // Auto-refund if user closes tab/leaves during 30s betting countdown
     window.addEventListener('beforeunload', () => {
       try {
-        if (state.phase === 'betting') {
+        if (state.phase === 'betting' && state.activeSeat !== -1 && state.players[state.activeSeat]) {
           const p = state.players[state.activeSeat];
           let refund = 0;
           if (p && p.bets) {
