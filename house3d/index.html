@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Modern House 3D Model & Interior Interactive Preview</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #121418;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #e2e8f0;
+    }
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    #loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(18, 20, 24, 0.95);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: opacity 0.5s ease;
+    }
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      border-top-color: #38bdf8;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading-text {
+      font-size: 14px;
+      letter-spacing: 0.5px;
+      color: #94a3b8;
+    }
+    /* Sleek Floating UI */
+    .top-bar {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(24, 28, 36, 0.78);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 12px 18px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+      z-index: 10;
+      max-width: 380px;
+    }
+    .top-bar h1 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: #0284c7;
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.4px;
+    }
+    .top-bar p {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+    .controls-panel {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(24, 28, 36, 0.85);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 10px 14px;
+      border-radius: 30px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+      z-index: 10;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 90vw;
+    }
+    .btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #cbd5e1;
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: #f8fafc;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .btn.active {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #38bdf8;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+    }
+    .btn-toggle-roof {
+      background: #1e293b;
+      border-color: #38bdf8;
+      color: #38bdf8;
+    }
+    .btn-toggle-roof:hover {
+      background: #0369a1;
+      color: #fff;
+    }
+    .instructions {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      font-size: 11px;
+      color: #64748b;
+      background: rgba(18, 20, 24, 0.6);
+      padding: 6px 10px;
+      border-radius: 6px;
+      pointer-events: none;
+      z-index: 10;
+    }
+    @media (max-width: 640px) {
+      .top-bar {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        max-width: none;
+      }
+      .instructions {
+        display: none;
+      }
+      .controls-panel {
+        bottom: 12px;
+        border-radius: 16px;
+        padding: 8px;
+        gap: 6px;
+      }
+      .btn {
+        padding: 5px 10px;
+        font-size: 11px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading 3D House & Furnished Interiors...</div>
+  </div>
+
+  <div class="top-bar">
+    <h1>Modern Residence 3D <span class="badge">Blender Ready</span></h1>
+    <p>Furnished interiors • Living room, Kitchen, Bed & Bath • Realistic PBR materials</p>
+  </div>
+
+  <div class="controls-panel">
+    <button class="btn btn-toggle-roof" id="btn-roof" onclick="toggleRoof()">
+      <span id="roof-icon">🏠</span> <span id="roof-text">Hide Roof (View Interior)</span>
+    </button>
+    <button class="btn active" id="btn-cam-ext" onclick="setCameraView('exterior')">Exterior 3D</button>
+    <button class="btn" id="btn-cam-top" onclick="setCameraView('topdown')">Top-Down Floorplan</button>
+    <button class="btn" id="btn-cam-living" onclick="setCameraView('living')">Living Room</button>
+    <button class="btn" id="btn-cam-kitchen" onclick="setCameraView('kitchen')">Kitchen</button>
+    <button class="btn" id="btn-cam-bed" onclick="setCameraView('bed')">Bedroom</button>
+    <button class="btn" id="btn-cam-bath" onclick="setCameraView('bath')">Bathroom</button>
+    <button class="btn" id="btn-rotate" onclick="toggleRotate()">Auto-Rotate</button>
+  </div>
+
+  <div class="instructions">
+    Left Click: Rotate • Right Click: Pan • Scroll: Zoom
+  </div>
+
+  <div id="canvas-container"></div>
+
+  <!-- Three.js + Loaders from local vendor bundle -->
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/OrbitControls.js"></script>
+  <script src="vendor/MTLLoader.js"></script>
+  <script src="vendor/OBJLoader.js"></script>
+
+  <script>
+    let scene, camera, renderer, controls;
+    let houseModel = null;
+    let roofMeshes = [];
+    let roofVisible = true;
+    let autoRotate = false;
+
+    const roofObjectNames = [
+      "Roof_Pitched_Gable",
+      "Roof_Fascia_North",
+      "Roof_Fascia_South",
+      "Ceiling_Slab"
+    ];
+
+    function init() {
+      const container = document.getElementById('canvas-container');
+
+      // 1. Scene setup
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x12151c);
+      scene.fog = new THREE.FogExp2(0x12151c, 0.015);
+
+      // 2. Camera setup
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(16, 14, 20);
+
+      // 3. Renderer setup
+      renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.outputEncoding = THREE.sRGBEncoding;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      container.appendChild(renderer.domElement);
+
+      // 4. Controls
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.maxPolarAngle = Math.PI / 2 + 0.05;
+      controls.minDistance = 2;
+      controls.maxDistance = 60;
+      controls.target.set(0, 1.2, 0);
+
+      // 5. Lighting
+      const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444455, 0.55);
+      hemiLight.position.set(0, 30, 0);
+      scene.add(hemiLight);
+
+      const sunLight = new THREE.DirectionalLight(0xfffaed, 0.95);
+      sunLight.position.set(22, 28, 18);
+      sunLight.castShadow = true;
+      sunLight.shadow.mapSize.width = 2048;
+      sunLight.shadow.mapSize.height = 2048;
+      sunLight.shadow.camera.near = 0.5;
+      sunLight.shadow.camera.far = 70;
+      const d = 16;
+      sunLight.shadow.camera.left = -d;
+      sunLight.shadow.camera.right = d;
+      sunLight.shadow.camera.top = d;
+      sunLight.shadow.camera.bottom = -d;
+      sunLight.shadow.bias = -0.0005;
+      scene.add(sunLight);
+
+      // Subtle fill light for interior shadows
+      const fillLight = new THREE.DirectionalLight(0x90b0e0, 0.35);
+      fillLight.position.set(-18, 15, -18);
+      scene.add(fillLight);
+
+      // Interior warm ambient point lights
+      const livingLight = new THREE.PointLight(0xffeedd, 0.8, 8);
+      livingLight.position.set(-3.0, 2.2, 2.5);
+      scene.add(livingLight);
+
+      const kitchenLight = new THREE.PointLight(0xfff4e8, 0.8, 8);
+      kitchenLight.position.set(-3.5, 2.2, -2.0);
+      scene.add(kitchenLight);
+
+      const bedLight = new THREE.PointLight(0xffdcb5, 0.75, 7);
+      bedLight.position.set(3.0, 2.0, -2.0);
+      scene.add(bedLight);
+
+      const bathLight = new THREE.PointLight(0xf0f8ff, 0.7, 6);
+      bathLight.position.set(3.5, 2.2, 2.0);
+      scene.add(bathLight);
+
+      // 6. Ground Plane & Grid
+      const groundGeo = new THREE.PlaneGeometry(120, 120);
+      const groundMat = new THREE.MeshStandardMaterial({
+        color: 0x181c24,
+        roughness: 0.9,
+        metalness: 0.1
+      });
+      const ground = new THREE.Mesh(groundGeo, groundMat);
+      ground.rotation.x = -Math.PI / 2;
+      ground.position.y = -0.31;
+      ground.receiveShadow = true;
+      scene.add(ground);
+
+      const grid = new THREE.GridHelper(60, 60, 0x2b3342, 0x1f2633);
+      grid.position.y = -0.30;
+      scene.add(grid);
+
+      // 7. Load OBJ + MTL
+      loadModel();
+
+      window.addEventListener('resize', onWindowResize);
+      animate();
+    }
+
+    function loadModel() {
+      const mtlLoader = new THREE.MTLLoader();
+      mtlLoader.load('modern_house_interior.mtl', (materials) => {
+        materials.preload();
+        
+        // Enhance materials for PBR look
+        for (let matName in materials.materials) {
+          const mat = materials.materials[matName];
+          mat.side = THREE.DoubleSide;
+          if (mat.opacity < 1.0) {
+            mat.transparent = true;
+            mat.depthWrite = false;
+          }
+        }
+
+        const objLoader = new THREE.OBJLoader();
+        objLoader.setMaterials(materials);
+        objLoader.load('modern_house_interior.obj', (object) => {
+          houseModel = object;
+
+          object.traverse((child) => {
+            if (child.isMesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+
+              // Identify roof & ceiling meshes
+              if (roofObjectNames.some(name => child.name.includes(name))) {
+                roofMeshes.push(child);
+              }
+            }
+          });
+
+          scene.add(houseModel);
+
+          // Hide loading overlay
+          const overlay = document.getElementById('loading-overlay');
+          overlay.style.opacity = '0';
+          setTimeout(() => overlay.style.display = 'none', 500);
+
+        }, (xhr) => {
+          // Progress
+        }, (error) => {
+          console.error("Error loading OBJ:", error);
+          document.querySelector('.loading-text').innerText = "Failed to load model. Please refresh.";
+        });
+      }, null, (err) => {
+        console.error("Error loading MTL:", err);
+      });
+    }
+
+    function toggleRoof() {
+      roofVisible = !roofVisible;
+      roofMeshes.forEach(mesh => {
+        mesh.visible = roofVisible;
+      });
+
+      const btn = document.getElementById('btn-roof');
+      const roofText = document.getElementById('roof-text');
+      const roofIcon = document.getElementById('roof-icon');
+
+      if (roofVisible) {
+        roofText.innerText = "Hide Roof (View Interior)";
+        roofIcon.innerText = "🏠";
+        btn.classList.remove('active');
+      } else {
+        roofText.innerText = "Show Roof";
+        roofIcon.innerText = "🔍";
+        btn.classList.add('active');
+      }
+    }
+
+    function setActiveButton(activeId) {
+      const camBtns = ['btn-cam-ext', 'btn-cam-top', 'btn-cam-living', 'btn-cam-kitchen', 'btn-cam-bed', 'btn-cam-bath'];
+      camBtns.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('active');
+      });
+      const current = document.getElementById(activeId);
+      if (current) current.classList.add('active');
+    }
+
+    function animateCamera(targetPos, targetLookAt, duration = 1000) {
+      const startPos = camera.position.clone();
+      const startLook = controls.target.clone();
+      const startTime = performance.now();
+
+      function update(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1.0);
+        // Smooth ease-in-out
+        const ease = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
+
+        camera.position.lerpVectors(startPos, targetPos, ease);
+        controls.target.lerpVectors(startLook, targetLookAt, ease);
+        controls.update();
+
+        if (progress < 1.0) {
+          requestAnimationFrame(update);
+        }
+      }
+      requestAnimationFrame(update);
+    }
+
+    function setCameraView(view) {
+      if (view === 'exterior') {
+        setActiveButton('btn-cam-ext');
+        if (!roofVisible) toggleRoof();
+        animateCamera(new THREE.Vector3(16, 14, 20), new THREE.Vector3(0, 1.2, 0));
+      } else if (view === 'topdown') {
+        setActiveButton('btn-cam-top');
+        if (roofVisible) toggleRoof();
+        animateCamera(new THREE.Vector3(0, 19, 0.01), new THREE.Vector3(0, 0.5, 0));
+      } else if (view === 'living') {
+        setActiveButton('btn-cam-living');
+        if (roofVisible) toggleRoof();
+        animateCamera(new THREE.Vector3(-1.0, 4.5, 5.8), new THREE.Vector3(-3.2, 0.8, 2.5));
+      } else if (view === 'kitchen') {
+        setActiveButton('btn-cam-kitchen');
+        if (roofVisible) toggleRoof();
+        animateCamera(new THREE.Vector3(-1.2, 4.2, -0.4), new THREE.Vector3(-3.8, 0.9, -2.5));
+      } else if (view === 'bed') {
+        setActiveButton('btn-cam-bed');
+        if (roofVisible) toggleRoof();
+        animateCamera(new THREE.Vector3(1.2, 4.2, 0.2), new THREE.Vector3(3.2, 0.8, -2.4));
+      } else if (view === 'bath') {
+        setActiveButton('btn-cam-bath');
+        if (roofVisible) toggleRoof();
+        animateCamera(new THREE.Vector3(2.0, 4.0, 4.5), new THREE.Vector3(3.6, 0.9, 2.4));
+      }
+    }
+
+    function toggleRotate() {
+      autoRotate = !autoRotate;
+      controls.autoRotate = autoRotate;
+      controls.autoRotateSpeed = 1.2;
+      const btn = document.getElementById('btn-rotate');
+      if (autoRotate) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

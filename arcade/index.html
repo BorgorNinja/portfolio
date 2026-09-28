@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BORGOR ARCADIA • Cyber Game Lounge & Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #06080e;
+      --card-bg: rgba(15, 23, 42, 0.7);
+      --card-border: rgba(56, 189, 248, 0.18);
+      --neon-cyan: #38bdf8;
+      --neon-gold: #fde047;
+      --neon-pink: #f43f5e;
+      --neon-emerald: #10b981;
+      --neon-purple: #c084fc;
+      --font-display: 'Cinzel', serif;
+      --font-sans: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background: var(--bg);
+      color: #f8fafc;
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient Horizon Grid Canvas */
+    #ambient-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      width: 100%;
+      max-width: 1200px;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 20;
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      position: sticky;
+      top: 0;
+      background: rgba(6, 8, 14, 0.85);
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .btn-nav-back {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: #94a3b8;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      transition: all 0.2s;
+    }
+    .btn-nav-back:hover {
+      color: #fff;
+      border-color: var(--neon-cyan);
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: 2.5px;
+      background: linear-gradient(135deg, #fff 0%, var(--neon-gold) 50%, #f59e0b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 25px rgba(245, 158, 11, 0.4);
+    }
+
+    .header-user-hub {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .chip-balance {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 6px 12px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+
+    .chip-balance .val { font-weight: 800; color: #fff; }
+    .chip-balance.gold .val { color: var(--neon-gold); text-shadow: 0 0 8px rgba(253, 224, 71, 0.5); }
+    .chip-balance.cyan .val { color: var(--neon-cyan); }
+
+    .user-ref-card {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 12px;
+      padding: 6px 14px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: #7dd3fc;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .user-ref-card:hover {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: var(--neon-cyan);
+    }
+
+    .btn-matches-bell {
+      position: relative;
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.4);
+      color: #fff;
+      padding: 7px 14px;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-matches-bell:hover {
+      background: rgba(244, 63, 94, 0.3);
+      filter: brightness(1.1);
+    }
+
+    .match-counter-pill {
+      background: #f43f5e;
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 900;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    /* Main Container */
+    main {
+      width: 100%;
+      max-width: 1200px;
+      padding: 32px 24px 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 10;
+      gap: 28px;
+    }
+
+    /* Hero Lounge Banner */
+    .lounge-hero {
+      width: 100%;
+      text-align: center;
+      position: relative;
+      padding: 24px 16px;
+    }
+
+    .lounge-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 3px;
+      color: var(--neon-cyan);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .lounge-heading {
+      font-family: var(--font-display);
+      font-size: 2.8rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      line-height: 1.15;
+      background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+      text-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    }
+
+    .lounge-desc {
+      font-size: 1rem;
+      color: #94a3b8;
+      max-width: 640px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* 3D Interactive Games Grid */
+    .games-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 24px;
+      perspective: 1200px;
+    }
+
+    /* 3D Perspective Card */
+    .game-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(14px);
+      transition: transform 0.15s ease-out, box-shadow 0.25s ease, border-color 0.25s ease;
+      transform-style: preserve-3d;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .game-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.1) 0%, transparent 65%);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 2;
+    }
+
+    .game-card:hover::before { opacity: 1; }
+
+    .game-card:hover {
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 35px var(--glow-color, rgba(56, 189, 248, 0.3));
+      border-color: var(--border-hover, var(--neon-cyan));
+    }
+
+    /* Fake 3D Live Render Viewport */
+    .preview-viewport {
+      width: 100%;
+      height: 190px;
+      position: relative;
+      background: #030712;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .preview-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      pointer-events: none;
+    }
+
+    .live-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 3px 9px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      backdrop-filter: blur(8px);
+      z-index: 3;
+    }
+
+    .live-pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 1.2s infinite alternate;
+    }
+
+    @keyframes pulse { 0% { opacity: 0.4; } 100% { opacity: 1; transform: scale(1.3); } }
+
+    /* Card Info Body */
+    .card-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .game-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .game-name {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .game-genre {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .game-blurb {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    .game-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .tag-badge {
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .btn-play-primary {
+      flex: 1;
+      padding: 12px;
+      background: linear-gradient(135deg, var(--neon-cyan), #0284c7);
+      border: 1px solid #7dd3fc;
+      border-radius: 12px;
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.9rem;
+      text-decoration: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(2, 132, 199, 0.35);
+      transition: all 0.2s;
+    }
+    .btn-play-primary:hover {
+      filter: brightness(1.15);
+      transform: translateY(-2px);
+    }
+
+    .btn-challenge-secondary {
+      padding: 12px 14px;
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.4);
+      border-radius: 12px;
+      color: #f43f5e;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .btn-challenge-secondary:hover {
+      background: rgba(244, 63, 94, 0.3);
+      color: #fff;
+    }
+
+    /* Matches & Challenge Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(10px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      z-index: 100;
+    }
+
+    .modal-box {
+      background: #0f172a;
+      border: 1px solid var(--neon-cyan);
+      border-radius: 24px;
+      padding: 24px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(56, 189, 248, 0.2);
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .matches-list {
+      max-height: 280px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .match-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .match-item-title { font-weight: 800; font-size: 0.92rem; color: #fff; }
+    .match-item-sub { font-size: 0.72rem; color: #94a3b8; font-family: var(--font-mono); }
+
+    .btn-launch-match {
+      padding: 8px 14px;
+      background: linear-gradient(135deg, #10b981, #047857);
+      border: 1px solid #34d399;
+      border-radius: 10px;
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.78rem;
+      text-decoration: none;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--neon-cyan);
+      border-radius: 30px;
+      padding: 10px 20px;
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: none;
+      z-index: 200;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+    }
+
+    @media (max-width: 640px) {
+      .lounge-heading { font-size: 2rem; }
+      .header-user-hub { display: none; }
+    }
+  
+    /* Lobby Filter Bar */
+    .lobby-filter-bar {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 10;
+    }
+    .filter-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .filter-pill:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-1px);
+    }
+    .filter-pill.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: #38bdf8;
+      color: #38bdf8;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
+    }
+
+  </style>
+</head>
+<body>
+
+  <canvas id="ambient-canvas"></canvas>
+
+  <header>
+    <div class="brand-group">
+      <a href="/" class="btn-nav-back">
+        <span>←</span>
+        <span>Portfolio</span>
+      </a>
+      <div class="brand-title">BORGOR ARCADIA</div>
+    </div>
+
+    <div class="header-user-hub">
+      <div class="chip-balance gold">
+        <span>🎰</span>
+        <span class="val" id="hud-slot-bal">10,000</span>
+      </div>
+
+      <div class="chip-balance cyan">
+        <span>🗑️</span>
+        <span class="val" id="hud-wallet-bal">50,000</span>
+      </div>
+
+      <div class="user-ref-card" onclick="copyMyRef()" title="Click to copy your JTrash Ref No.">
+        <span>📱</span>
+        <span id="hud-user-ref">09XX-XXX-XXXX</span>
+      </div>
+
+      <button class="btn-matches-bell" onclick="openMatchesModal()">
+        <span>⚔️ Matches</span>
+        <span class="match-counter-pill" id="hud-match-count">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="lounge-hero">
+      <div class="lounge-eyebrow">Virtual Game Center & High-Roller Lounge</div>
+      <h1 class="lounge-heading">PICK YOUR GAME</h1>
+      <p class="lounge-desc">
+        Experience high-volatility slots, cyber pinball physics, and neon 8-ball billiards. Connect and challenge friends via your permanent JTrash Reference Number.
+      </p>
+    </section>
+
+    <!-- Games Grid with 3D Live Render Previews -->
+        <!-- Category Filter Bar -->
+    <div class="lobby-filter-bar">
+      <button class="filter-pill active" onclick="filterGames('all', this)">✨ All Games (8)</button>
+      <button class="filter-pill" onclick="filterGames('slots', this)">🎰 Slots Arena (4)</button>
+      <button class="filter-pill" onclick="filterGames('arcade', this)">🕹️ Arcade & Table (3)</button>
+      <button class="filter-pill" onclick="filterGames('banking', this)">🗑️ E-Wallet (1)</button>
+    </div>
+
+    <div class="games-grid">
+
+            <!-- Slot 1: Gates of Borgor -->
+      <div class="game-card" id="card-slots" data-category="slots" style="--glow-color: rgba(245, 158, 11, 0.4); --border-hover: #fde047;" onclick="location.href='/slots/?variant=borgor'">
+        <div class="preview-viewport">
+          <canvas class="preview-canvas" id="canvas-preview-slots" width="300" height="190"></canvas>
+          <div class="live-badge">
+            <span class="live-pulse-dot" style="background: #fde047; box-shadow: 0 0 8px #fde047;"></span>
+            <span>3D REELS</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div>
+            <div class="game-title-row">
+              <span class="game-name">Gates of Borgor</span>
+              <span class="game-genre" style="color: #fde047;">Scatter Slot</span>
+            </div>
+            <p class="game-blurb">
+              Vegas-grade 6x5 scatter machine. Multiplier bombs up to 500x, Diamond Vaults crackdown, free spins, and dynamic 40% balance feature buy.
+            </p>
+          </div>
+
+          <div class="game-tags">
+            <span class="tag-badge">6x5 Grid</span>
+            <span class="tag-badge">Diamond Vault</span>
+            <span class="tag-badge">500x Bombs</span>
+            <span class="tag-badge">JTrash Sync</span>
+          </div>
+
+          <div class="card-actions" onclick="event.stopPropagation()">
+            <a href="/slots/?variant=borgor" class="btn-play-primary" style="background: linear-gradient(135deg, #f59e0b, #d97706); border-color: #fde68a;">
+              <span>🎰 Spin Slots</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slot 2: Cyber Overdrive -->
+      <div class="game-card" id="card-slots-cyber" data-category="slots" style="--glow-color: rgba(0, 242, 254, 0.4); --border-hover: #00f2fe;" onclick="location.href='/slots/?variant=cyber'">
+        <div class="preview-viewport">
+          <canvas class="preview-canvas" id="canvas-preview-slots-cyber" width="300" height="190"></canvas>
+          <div class="live-badge">
+            <span class="live-pulse-dot" style="background: #00f2fe; box-shadow: 0 0 8px #00f2fe;"></span>
+            <span>ICE BREACH</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div>
+            <div class="game-title-row">
+              <span class="game-name">Cyber Overdrive</span>
+              <span class="game-genre" style="color: #00f2fe;">Cyberpunk Scatter</span>
+            </div>
+            <p class="game-blurb">
+              High-octane 6x5 cyberpunk tumble machine. Neural ICE Breach bonus hack, Overclock glitch multipliers up to 1000x, and cybernetic free spins.
+            </p>
+          </div>
+
+          <div class="game-tags">
+            <span class="tag-badge">ICE Breach Hack</span>
+            <span class="tag-badge">1000x Overclock</span>
+            <span class="tag-badge">Glitch Cascade</span>
+            <span class="tag-badge">Tokyo 2099</span>
+          </div>
+
+          <div class="card-actions" onclick="event.stopPropagation()">
+            <a href="/slots/?variant=cyber" class="btn-play-primary" style="background: linear-gradient(135deg, #0284c7, #0369a1); border-color: #38bdf8;">
+              <span>⚡ Hack Slots</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slot 3: Sugar Sweet Frenzy -->
+      <div class="game-card" id="card-slots-candy" data-category="slots" style="--glow-color: rgba(244, 114, 182, 0.4); --border-hover: #f472b6;" onclick="location.href='/slots/?variant=candy'">
+        <div class="preview-viewport">
+          <canvas class="preview-canvas" id="canvas-preview-slots-candy" width="300" height="190"></canvas>
+          <div class="live-badge">
+            <span class="live-pulse-dot" style="background: #f472b6; box-shadow: 0 0 8px #f472b6;"></span>
+            <span>PINATA BASH</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div>
+            <div class="game-title-row">
+              <span class="game-name">Sugar Sweet Frenzy</span>
+              <span class="game-genre" style="color: #f472b6;">Candy Pop Scatter</span>
+            </div>
+            <p class="game-blurb">
+              Candy-coated 6x5 cascade wonderland. Sugar Bomb Pinata Bash with sticky multiplier spots, jawbreaker multipliers up to 500x, and sweet re-spins.
+            </p>
+          </div>
+
+          <div class="game-tags">
+            <span class="tag-badge">Pinata Bash</span>
+            <span class="tag-badge">Sticky Spots</span>
+            <span class="tag-badge">Sweet Cascades</span>
+            <span class="tag-badge">Sugar Rush</span>
+          </div>
+
+          <div class="card-actions" onclick="event.stopPropagation()">
+            <a href="/slots/?variant=candy" class="btn-play-primary" style="background: linear-gradient(135deg, #db2777, #be185d); border-color: #fbcfe8;">
+              <span>🍭 Pop Candy</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slot 4: Tomb of Anubis -->
+      <div class="game-card" id="card-slots-anubis" data-category="slots" style="--glow-color: rgba(217, 119, 6, 0.4); --border-hover: #f59e0b;" onclick="location.href='/slots/?variant=anubis'">
+        <div class="preview-viewport">
+          <canvas class="preview-canvas" id="canvas-preview-slots-anubis" width="300" height="190"></canvas>
+          <div class="live-badge">
+            <span class="live-pulse-dot" style="background: #f59e0b; box-shadow: 0 0 8px #f59e0b;"></span>
+            <span>CHAMBER OF RA</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div>
+            <div class="game-title-row">
+              <span class="game-name">Tomb of Anubis</span>
+              <span class="game-genre" style="color: #f59e0b;">Egyptian Relic Scatter</span>
+            </div>
+            <p class="game-blurb">
+              Mystic Egyptian 6x5 relic tumbler. Sarcophagus Chamber of Ra bonus cashout, Sun Disc multipliers up to 500x, and Eye of Horus free spins.
+            </p>
+          </div>
+
+          <div class="game-tags">
+            <span class="tag-badge">Chamber of Ra</span>
+            <span class="tag-badge">Ankh Bounties</span>
+            <span class="tag-badge">500x Sun Discs</span>
+            <span class="tag-badge">Pharaoh Curse</span>
+          </div>
+
+          <div class="card-actions" onclick="event.stopPropagation()">
+            <a href="/slots/?variant=anubis" class="btn-play-primary" style="background: linear-gradient(135deg, #b45309, #78350f); border-color: #fde68a;">
+              <span>⚱️ Enter Tomb</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game 2: Cyber Pinball -->
+      <div class="game-card" id="card-pinball" data-category="arcade" style="--glow-color: rgba(56, 189, 248, 0.4); --border-hover: #38bdf8;" onclick="location.href='/pinball/'">
+        <div class="preview-viewport">
+          <canvas class="preview-canvas" id="canvas-preview-pinball" width="300" height="190"></canvas>
+          <div class="live-badge">
+            <span class="live-pulse-dot"></span>
+            <span>3D TABLE</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div>
+            <div class="game-title-row">
+              <span class="game-name">Cyber Pinball</span>
+              <span class="game-genre" style="color: #38bdf8;">Arcade Physics</span>
+            </div>
+            <p class="game-blurb">
+              High-speed spring plunger, dual flippers, resonant bumpers, rollover combo multipliers, and head-to-head 1v1 score match challenges.
+            </p>
+          </div>
+
+          <div class="game-tags">
+            <span class="tag-badge">60 FPS Verlet</span>
+            <span class="tag-badge">Borgor Combos</span>
+            <span class="tag-badge">1v1 Ref Match</span>
+          </div>
+
+          <div class="card-actions" onclick="event.stopPropagation()">
+            <a href="/pinball/" class="btn-play-primary">
+              <span>🕹️ Play Solo</span>
+            </a>
+            <button class="btn-challenge-secondary" onclick="openDirectChallenge('pinball')">
+              <span>⚔️ Challenge</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game 3: Neon 8-Ball Pool -->
+      <div class="game-card" id="card-pool" data-category="arcade" style="--glow-color: rgba(16, 185, 129, 0.4); --border-hover: #34d399;" onclick="location.href='/pool/'">
+        <div class="preview-viewport">
+          <canvas class="preview-canvas" id="canvas-preview-pool" width="300" height="190"></canvas>
+          <div class="live-badge">
+            <span class="live-pulse-dot" style="background: #34d399; box-shadow: 0 0 8px #34d399;"></span>
+            <span>3D BILLIARDS</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div>
+            <div class="game-title-row">
+              <span class="game-name">Neon 8-Ball Pool</span>
+              <span class="game-genre" style="color: #34d399;">Billiards Sim</span>
+            </div>
+            <p class="game-blurb">
+              Realistic billiard physics with rolling friction, elastic sphere collisions, cue guide line, power meter, and 1v1 match challenges via Ref no.
+            </p>
+          </div>
+
+          <div class="game-tags">
+            <span class="tag-badge">Real Momentum</span>
+            <span class="tag-badge">Solids & Stripes</span>
+            <span class="tag-badge">Ref Invite</span>
+          </div>
+
+          <div class="card-actions" onclick="event.stopPropagation()">
+            <a href="/pool/" class="btn-play-primary" style="background: linear-gradient(135deg, #10b981, #059669); border-color: #6ee7b7;">
+              <span>🎱 Break Table</span>
+            </a>
+            <button class="btn-challenge-secondary" style="border-color: rgba(16, 185, 129, 0.4); color: #34d399;" onclick="openDirectChallenge('pool')">
+              <span>⚔️ Challenge</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game: Neon Velvet Roulette -->
+      <div class="game-card" id="card-roulette" data-category="arcade" style="--glow-color: rgba(245, 158, 11, 0.4); --border-hover: #f59e0b;" onclick="location.href='/roulette/'">
+        <div class="preview-viewport">
+          <canvas class="preview-canvas" id="canvas-preview-roulette" width="300" height="190"></canvas>
+          <div class="live-badge">
+            <span class="live-pulse-dot" style="background: #f59e0b; box-shadow: 0 0 8px #f59e0b;"></span>
+            <span>4-PLAYER ARENA</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div>
+            <div class="game-title-row">
+              <span class="game-name">Perya Billiard Roulette</span>
+              <span class="game-genre" style="color: #f59e0b;">Tabletop Arcade</span>
+            </div>
+            <p class="game-blurb">
+              Authentic 28-tile perya tabletop machine. 30s betting timer, 15s runner spin with reverse rotation, 7-segment LED odds, all-lights-on explosion, and 9th ball mystery bonus.
+            </p>
+          </div>
+
+          <div class="game-tags">
+            <span class="tag-badge">30s Betting</span>
+            <span class="tag-badge">15s Spin</span>
+            <span class="tag-badge">8-Ball Odds</span>
+            <span class="tag-badge">Bonuses</span>
+          </div>
+
+          <div class="card-actions" onclick="event.stopPropagation()">
+            <a href="/roulette/" class="btn-play-primary" style="background: linear-gradient(135deg, #d97706, #b45309); border-color: #fde68a;">
+              <span>🎱 Play Billiard Roulette</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game 4: JTrash E-Wallet -->
+      <div class="game-card" id="card-jtrash" data-category="banking" style="--glow-color: rgba(192, 132, 252, 0.4); --border-hover: #c084fc;" onclick="location.href='/jtrash/'">
+        <div class="preview-viewport">
+          <canvas class="preview-canvas" id="canvas-preview-jtrash" width="300" height="190"></canvas>
+          <div class="live-badge">
+            <span class="live-pulse-dot" style="background: #c084fc; box-shadow: 0 0 8px #c084fc;"></span>
+            <span>3D CARD</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div>
+            <div class="game-title-row">
+              <span class="game-name">JTrash E-Wallet</span>
+              <span class="game-genre" style="color: #c084fc;">Banking Parody</span>
+            </div>
+            <p class="game-blurb">
+              Official unbacked fiat bank. P2P transfers, live slot coin exchange, 999.9% APY JSave dumpster vault, and hourly Ayuda stimulus bonus.
+            </p>
+          </div>
+
+          <div class="game-tags">
+            <span class="tag-badge">P2P Transfers</span>
+            <span class="tag-badge">999.9% APY</span>
+            <span class="tag-badge">Hourly Ayuda</span>
+          </div>
+
+          <div class="card-actions" onclick="event.stopPropagation()">
+            <a href="/jtrash/" class="btn-play-primary" style="background: linear-gradient(135deg, #a855f7, #7e22ce); border-color: #e9d5ff;">
+              <span>🗑️ Open Wallet</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Matches & Invites Modal -->
+  <div class="modal-backdrop" id="modal-matches">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div class="modal-title">⚔️ 1v1 Matches & Invites</div>
+        <button class="modal-close" onclick="closeMatchesModal()">✕</button>
+      </div>
+
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 14px; margin-bottom: 16px;">
+        <div style="font-size: 0.76rem; color: #94a3b8; font-weight: 700; margin-bottom: 6px;">NEW CHALLENGE</div>
+        <div style="display: flex; gap: 8px;">
+          <select id="challenge-game-select" style="background: #020617; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; padding: 8px 12px; font-family: var(--font-sans); font-size: 0.85rem;">
+            <option value="pinball">Cyber Pinball</option>
+            <option value="pool">Neon 8-Ball Pool</option>
+          </select>
+          <input type="text" id="challenge-target-ref" placeholder="Friend JTrash Ref (09XX-XXX-XXXX)" style="flex: 1; background: #020617; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; padding: 8px 12px; font-family: var(--font-mono); font-size: 0.82rem;">
+          <button onclick="sendLobbyChallenge()" style="background: var(--neon-cyan); border: none; border-radius: 10px; color: #030712; font-weight: 800; padding: 8px 16px; font-size: 0.85rem; cursor: pointer;">
+            Invite 🚀
+          </button>
+        </div>
+      </div>
+
+      <div style="font-size: 0.78rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase;">Incoming & Active Matches</div>
+      <div class="matches-list" id="matches-list">
+        <div style="color: #64748b; font-size: 0.85rem; text-align: center; padding: 20px;">Loading matches...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    /* =========================================================================
+       IDENTITY & HUD SYNC
+       ========================================================================= */
+    function getCookie(name) {
+      const nameEQ = encodeURIComponent(name) + "=";
+      const ca = document.cookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i].trim();
+        if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length));
+      }
+      return null;
+    }
+
+    const userRef = getCookie('jtrash_user_ref') || localStorage.getItem('jtrash_user_ref') || '0969-888-1234';
+    const userName = getCookie('jtrash_username') || localStorage.getItem('jtrash_username') || 'Lucky Spinner';
+    const walletBal = parseFloat(getCookie('jtrash_wallet_balance') || localStorage.getItem('jtrash_wallet_balance') || '50000');
+    const slotBal = parseInt(getCookie('borgor_slots_balance') || localStorage.getItem('borgor_slots_balance') || '10000', 10);
+
+    document.getElementById('hud-user-ref').textContent = userRef;
+    document.getElementById('hud-wallet-bal').textContent = Math.floor(walletBal).toLocaleString();
+    document.getElementById('hud-slot-bal').textContent = slotBal.toLocaleString();
+
+    function copyMyRef() {
+      navigator.clipboard.writeText(userRef).then(() => {
+        showToast(`Copied JTrash Ref: ${userRef}`, '📱');
+      });
+    }
+
+    /* =========================================================================
+       3D PERSPECTIVE CARD TILT MOUSE TRACKING
+       ========================================================================= */
+    document.querySelectorAll('.game-card').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = ((y - centerY) / centerY) * -10; // max -10 to +10 deg
+        const rotateY = ((x - centerX) / centerX) * 10;
+
+        card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.02, 1.02, 1.02)`;
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+      });
+    });
+
+    /* =========================================================================
+       FAKE 3D LIVE INTERACTIVE RENDERS
+       ========================================================================= */
+
+    // 1. GATES OF BORGOR: Rotating 3D Golden Cylinder Drum & Sparkles
+    const cvSlots = document.getElementById('canvas-preview-slots');
+    const ctxSlots = cvSlots.getContext('2d');
+    let angleSlots = 0;
+    const slotSymbols = ['👑', '🍔', '💎', '❤️', '🏆', '⭐'];
+
+    
+    // 1B. CYBER OVERDRIVE: Rotating 3D Holographic Cylinder Drum
+    const cvSlotsCyber = document.getElementById('canvas-preview-slots-cyber');
+    const ctxSlotsCyber = cvSlotsCyber ? cvSlotsCyber.getContext('2d') : null;
+    let angleCyber = 0.5;
+    const cyberSymbols = ['⚡', '💾', '🤖', '🔮', '🗡️', '💠'];
+
+    function renderSlotsCyber3D() {
+      if (!ctxSlotsCyber) return;
+      ctxSlotsCyber.clearRect(0, 0, 300, 190);
+      angleCyber += 0.024;
+      const cx = 150;
+      const cy = 95;
+      const radius = 62;
+
+      ctxSlotsCyber.save();
+      ctxSlotsCyber.strokeStyle = 'rgba(0, 242, 254, 0.45)';
+      ctxSlotsCyber.lineWidth = 2;
+      ctxSlotsCyber.beginPath();
+      ctxSlotsCyber.ellipse(cx, cy - 25, radius + 15, 20, 0, 0, Math.PI * 2);
+      ctxSlotsCyber.stroke();
+      ctxSlotsCyber.beginPath();
+      ctxSlotsCyber.ellipse(cx, cy + 25, radius + 15, 20, 0, 0, Math.PI * 2);
+      ctxSlotsCyber.stroke();
+
+      const total = cyberSymbols.length;
+      for (let i = 0; i < total; i++) {
+        const a = angleCyber + (i * (Math.PI * 2 / total));
+        const cos = Math.cos(a);
+        const sin = Math.sin(a);
+        const depth = (sin + 1) / 2;
+        const scale = 0.5 + depth * 0.7;
+        const alpha = 0.2 + depth * 0.8;
+        const x = cx + cos * (radius + 15);
+        const y = cy + sin * 18;
+
+        if (sin > -0.6) {
+          ctxSlotsCyber.save();
+          ctxSlotsCyber.globalAlpha = alpha;
+          ctxSlotsCyber.font = `${Math.round(26 * scale)}px sans-serif`;
+          ctxSlotsCyber.textAlign = 'center';
+          ctxSlotsCyber.textBaseline = 'middle';
+          ctxSlotsCyber.shadowColor = '#00f2fe';
+          ctxSlotsCyber.shadowBlur = depth > 0.7 ? 16 : 0;
+          ctxSlotsCyber.fillText(cyberSymbols[i], x, y);
+          ctxSlotsCyber.restore();
+        }
+      }
+      ctxSlotsCyber.restore();
+    }
+
+    // 1C. SUGAR SWEET FRENZY: Rotating 3D Pastel Candy Carousel Drum
+    const cvSlotsCandy = document.getElementById('canvas-preview-slots-candy');
+    const ctxSlotsCandy = cvSlotsCandy ? cvSlotsCandy.getContext('2d') : null;
+    let angleCandy = 1.0;
+    const candySymbols = ['🍭', '🍬', '🍩', '🧁', '🍓', '🐻'];
+
+    function renderSlotsCandy3D() {
+      if (!ctxSlotsCandy) return;
+      ctxSlotsCandy.clearRect(0, 0, 300, 190);
+      angleCandy += 0.022;
+      const cx = 150;
+      const cy = 95;
+      const radius = 62;
+
+      ctxSlotsCandy.save();
+      ctxSlotsCandy.strokeStyle = 'rgba(244, 114, 182, 0.45)';
+      ctxSlotsCandy.lineWidth = 2;
+      ctxSlotsCandy.beginPath();
+      ctxSlotsCandy.ellipse(cx, cy - 25, radius + 15, 20, 0, 0, Math.PI * 2);
+      ctxSlotsCandy.stroke();
+      ctxSlotsCandy.beginPath();
+      ctxSlotsCandy.ellipse(cx, cy + 25, radius + 15, 20, 0, 0, Math.PI * 2);
+      ctxSlotsCandy.stroke();
+
+      const total = candySymbols.length;
+      for (let i = 0; i < total; i++) {
+        const a = angleCandy + (i * (Math.PI * 2 / total));
+        const cos = Math.cos(a);
+        const sin = Math.sin(a);
+        const depth = (sin + 1) / 2;
+        const scale = 0.5 + depth * 0.7;
+        const alpha = 0.2 + depth * 0.8;
+        const x = cx + cos * (radius + 15);
+        const y = cy + sin * 18;
+
+        if (sin > -0.6) {
+          ctxSlotsCandy.save();
+          ctxSlotsCandy.globalAlpha = alpha;
+          ctxSlotsCandy.font = `${Math.round(26 * scale)}px sans-serif`;
+          ctxSlotsCandy.textAlign = 'center';
+          ctxSlotsCandy.textBaseline = 'middle';
+          ctxSlotsCandy.shadowColor = '#f472b6';
+          ctxSlotsCandy.shadowBlur = depth > 0.7 ? 15 : 0;
+          ctxSlotsCandy.fillText(candySymbols[i], x, y);
+          ctxSlotsCandy.restore();
+        }
+      }
+      ctxSlotsCandy.restore();
+    }
+
+    // 1D. TOMB OF ANUBIS: Rotating 3D Golden Egyptian Obelisk Drum
+    const cvSlotsAnubis = document.getElementById('canvas-preview-slots-anubis');
+    const ctxSlotsAnubis = cvSlotsAnubis ? cvSlotsAnubis.getContext('2d') : null;
+    let angleAnubis = 1.5;
+    const anubisSymbols = ['⚱️', '🏺', '👑', '🐍', '💎', '⭐'];
+
+    function renderSlotsAnubis3D() {
+      if (!ctxSlotsAnubis) return;
+      ctxSlotsAnubis.clearRect(0, 0, 300, 190);
+      angleAnubis += 0.020;
+      const cx = 150;
+      const cy = 95;
+      const radius = 62;
+
+      ctxSlotsAnubis.save();
+      ctxSlotsAnubis.strokeStyle = 'rgba(245, 158, 11, 0.45)';
+      ctxSlotsAnubis.lineWidth = 2;
+      ctxSlotsAnubis.beginPath();
+      ctxSlotsAnubis.ellipse(cx, cy - 25, radius + 15, 20, 0, 0, Math.PI * 2);
+      ctxSlotsAnubis.stroke();
+      ctxSlotsAnubis.beginPath();
+      ctxSlotsAnubis.ellipse(cx, cy + 25, radius + 15, 20, 0, 0, Math.PI * 2);
+      ctxSlotsAnubis.stroke();
+
+      const total = anubisSymbols.length;
+      for (let i = 0; i < total; i++) {
+        const a = angleAnubis + (i * (Math.PI * 2 / total));
+        const cos = Math.cos(a);
+        const sin = Math.sin(a);
+        const depth = (sin + 1) / 2;
+        const scale = 0.5 + depth * 0.7;
+        const alpha = 0.2 + depth * 0.8;
+        const x = cx + cos * (radius + 15);
+        const y = cy + sin * 18;
+
+        if (sin > -0.6) {
+          ctxSlotsAnubis.save();
+          ctxSlotsAnubis.globalAlpha = alpha;
+          ctxSlotsAnubis.font = `${Math.round(26 * scale)}px sans-serif`;
+          ctxSlotsAnubis.textAlign = 'center';
+          ctxSlotsAnubis.textBaseline = 'middle';
+          ctxSlotsAnubis.shadowColor = '#f59e0b';
+          ctxSlotsAnubis.shadowBlur = depth > 0.7 ? 15 : 0;
+          ctxSlotsAnubis.fillText(anubisSymbols[i], x, y);
+          ctxSlotsAnubis.restore();
+        }
+      }
+      ctxSlotsAnubis.restore();
+    }
+
+    function renderSlots3D() {
+      ctxSlots.clearRect(0, 0, 300, 190);
+      angleSlots += 0.022;
+
+      const cx = 150;
+      const cy = 95;
+      const radius = 62;
+
+      // 3D Drum wireframe rings
+      ctxSlots.save();
+      ctxSlots.strokeStyle = 'rgba(253, 224, 71, 0.4)';
+      ctxSlots.lineWidth = 2;
+      ctxSlots.beginPath();
+      ctxSlots.ellipse(cx, cy - 25, radius + 15, 20, 0, 0, Math.PI * 2);
+      ctxSlots.stroke();
+      ctxSlots.beginPath();
+      ctxSlots.ellipse(cx, cy + 25, radius + 15, 20, 0, 0, Math.PI * 2);
+      ctxSlots.stroke();
+
+      // Rotating Symbols along 3D cylinder
+      const total = slotSymbols.length;
+      for (let i = 0; i < total; i++) {
+        const a = angleSlots + (i * (Math.PI * 2 / total));
+        const cos = Math.cos(a);
+        const sin = Math.sin(a);
+
+        // Perspective scale & depth alpha
+        const depth = (sin + 1) / 2; // 0 (back) to 1 (front)
+        const scale = 0.5 + depth * 0.7;
+        const alpha = 0.2 + depth * 0.8;
+
+        const x = cx + cos * (radius + 15);
+        const y = cy + sin * 18;
+
+        if (sin > -0.6) {
+          ctxSlots.save();
+          ctxSlots.globalAlpha = alpha;
+          ctxSlots.font = `${Math.round(26 * scale)}px sans-serif`;
+          ctxSlots.textAlign = 'center';
+          ctxSlots.textBaseline = 'middle';
+          ctxSlots.shadowColor = '#fde047';
+          ctxSlots.shadowBlur = depth > 0.7 ? 15 : 0;
+          ctxSlots.fillText(slotSymbols[i], x, y);
+          ctxSlots.restore();
+        }
+      }
+      ctxSlots.restore();
+    }
+
+    // 2. CYBER PINBALL: Isometric 3D Tilted Table with Bouncing Neon Ball
+    const cvPinball = document.getElementById('canvas-preview-pinball');
+    const ctxPinball = cvPinball.getContext('2d');
+    let pBall = { x: 150, y: 120, vx: 2.6, vy: -2.2 };
+    let pAngle = 0;
+
+    function renderPinball3D() {
+      ctxPinball.clearRect(0, 0, 300, 190);
+      pAngle += 0.04;
+
+      // Isometric table borders
+      ctxPinball.save();
+      ctxPinball.strokeStyle = 'rgba(56, 189, 248, 0.45)';
+      ctxPinball.lineWidth = 2.5;
+      ctxPinball.strokeRect(40, 20, 220, 150);
+
+      // Neon bumpers
+      const bumpers = [
+        { x: 105, y: 70, c: '#38bdf8' },
+        { x: 195, y: 70, c: '#f43f5e' },
+        { x: 150, y: 110, c: '#fde047' }
+      ];
+
+      bumpers.forEach(b => {
+        ctxPinball.save();
+        ctxPinball.shadowColor = b.c;
+        ctxPinball.shadowBlur = 12;
+        ctxPinball.fillStyle = b.c;
+        ctxPinball.beginPath();
+        ctxPinball.arc(b.x, b.y, 14, 0, Math.PI * 2);
+        ctxPinball.fill();
+        ctxPinball.fillStyle = '#0f172a';
+        ctxPinball.beginPath();
+        ctxPinball.arc(b.x, b.y, 7, 0, Math.PI * 2);
+        ctxPinball.fill();
+        ctxPinball.restore();
+      });
+
+      // Move preview ball
+      pBall.x += pBall.vx;
+      pBall.y += pBall.vy;
+      if (pBall.x < 55 || pBall.x > 245) pBall.vx *= -1;
+      if (pBall.y < 35 || pBall.y > 155) pBall.vy *= -1;
+
+      bumpers.forEach(b => {
+        if (Math.hypot(pBall.x - b.x, pBall.y - b.y) < 22) {
+          pBall.vx *= -1.05;
+          pBall.vy *= -1.05;
+          pBall.vx = Math.max(-4, Math.min(4, pBall.vx));
+          pBall.vy = Math.max(-4, Math.min(4, pBall.vy));
+        }
+      });
+
+      // Animated flippers
+      const fAng = Math.sin(pAngle * 2) * 0.35;
+      ctxPinball.strokeStyle = '#38bdf8';
+      ctxPinball.lineWidth = 6;
+      ctxPinball.lineCap = 'round';
+      // Left
+      ctxPinball.beginPath();
+      ctxPinball.moveTo(110, 155);
+      ctxPinball.lineTo(110 + Math.cos(0.4 + fAng) * 28, 155 + Math.sin(0.4 + fAng) * 28);
+      ctxPinball.stroke();
+      // Right
+      ctxPinball.beginPath();
+      ctxPinball.moveTo(190, 155);
+      ctxPinball.lineTo(190 - Math.cos(0.4 + fAng) * 28, 155 + Math.sin(0.4 + fAng) * 28);
+      ctxPinball.stroke();
+
+      // Shiny ball
+      ctxPinball.save();
+      ctxPinball.shadowColor = '#fff';
+      ctxPinball.shadowBlur = 10;
+      ctxPinball.fillStyle = '#f8fafc';
+      ctxPinball.beginPath();
+      ctxPinball.arc(pBall.x, pBall.y, 7, 0, Math.PI * 2);
+      ctxPinball.fill();
+      ctxPinball.restore();
+
+      ctxPinball.restore();
+    }
+
+    // 3. NEON 8-BALL POOL: Isometric Table, Ball Scattering & Swaying Cue
+    const cvPool = document.getElementById('canvas-preview-pool');
+    const ctxPool = cvPool.getContext('2d');
+    let poolTime = 0;
+
+    function renderPool3D() {
+      ctxPool.clearRect(0, 0, 300, 190);
+      poolTime += 0.035;
+
+      // Table felt
+      ctxPool.save();
+      ctxPool.fillStyle = '#064e3b';
+      ctxPool.strokeStyle = '#78350f';
+      ctxPool.lineWidth = 6;
+      ctxPool.beginPath();
+      ctxPool.roundRect(35, 30, 230, 130, 14);
+      ctxPool.fill();
+      ctxPool.stroke();
+
+      // Pockets
+      const pks = [
+        [35, 30], [150, 30], [265, 30],
+        [35, 160], [150, 160], [265, 160]
+      ];
+      pks.forEach(([px, py]) => {
+        ctxPool.fillStyle = '#0f172a';
+        ctxPool.beginPath();
+        ctxPool.arc(px, py, 11, 0, Math.PI * 2);
+        ctxPool.fill();
+      });
+
+      // Billiard balls
+      const poolBalls = [
+        { x: 100, y: 95, c: '#ffffff', n: 0 },
+        { x: 180 + Math.sin(poolTime) * 8, y: 95 + Math.cos(poolTime) * 6, c: '#111827', n: 8 },
+        { x: 195 + Math.cos(poolTime * 1.2) * 6, y: 85, c: '#fbbf24', n: 1 },
+        { x: 195, y: 105 + Math.sin(poolTime * 1.1) * 6, c: '#ef4444', n: 3 },
+        { x: 210, y: 95, c: '#3b82f6', n: 2 }
+      ];
+
+      poolBalls.forEach(b => {
+        ctxPool.save();
+        ctxPool.shadowColor = 'rgba(0,0,0,0.5)';
+        ctxPool.shadowBlur = 6;
+        ctxPool.fillStyle = b.c;
+        ctxPool.beginPath();
+        ctxPool.arc(b.x, b.y, 8, 0, Math.PI * 2);
+        ctxPool.fill();
+        if (b.n === 8) {
+          ctxPool.fillStyle = '#fff';
+          ctxPool.beginPath();
+          ctxPool.arc(b.x, b.y, 3.5, 0, Math.PI * 2);
+          ctxPool.fill();
+        }
+        ctxPool.restore();
+      });
+
+      // Cue stick aiming at cue ball
+      const cueAngle = Math.sin(poolTime * 0.8) * 0.45;
+      const startX = 100 - Math.cos(cueAngle) * (20 + Math.abs(Math.sin(poolTime * 2)) * 12);
+      const startY = 95 - Math.sin(cueAngle) * (20 + Math.abs(Math.sin(poolTime * 2)) * 12);
+      const endX = startX - Math.cos(cueAngle) * 90;
+      const endY = startY - Math.sin(cueAngle) * 90;
+
+      ctxPool.strokeStyle = '#d97706';
+      ctxPool.lineWidth = 4;
+      ctxPool.lineCap = 'round';
+      ctxPool.beginPath();
+      ctxPool.moveTo(startX, startY);
+      ctxPool.lineTo(endX, endY);
+      ctxPool.stroke();
+
+      ctxPool.restore();
+    }
+
+    // 3B. PERYA BILLIARD ROULETTE: Tabletop Arcade Cabinet with Running Light & Pool Balls
+    const cvRoulette = document.getElementById('canvas-preview-roulette');
+    const ctxRoulette = cvRoulette ? cvRoulette.getContext('2d') : null;
+    let rouletteRunnerIndex = 0;
+    let rouletteLastTick = 0;
+
+    const PREVIEW_BALL_COLORS = [
+      '#eab308', '#2563eb', '#dc2626', '#9333ea', '#ea580c', '#16a34a', '#7f1d1d', '#0f172a',
+      '#2563eb', '#facc15', '#9333ea', '#dc2626',
+      '#2563eb', '#7f1d1d', '#0f172a', '#ea580c', '#eab308', '#9333ea', '#2563eb', '#7f1d1d',
+      '#ea580c', '#16a34a', '#facc15', '#0f172a'
+    ];
+
+    function renderRoulette3D() {
+      if (!ctxRoulette) return;
+      ctxRoulette.clearRect(0, 0, 300, 190);
+
+      const now = Date.now();
+      if (now - rouletteLastTick > 80) {
+        rouletteRunnerIndex = (rouletteRunnerIndex + 1) % PREVIEW_BALL_COLORS.length;
+        rouletteLastTick = now;
+      }
+
+      ctxRoulette.save();
+
+      // Cabinet wooden bezel
+      ctxRoulette.fillStyle = '#0a0a10';
+      ctxRoulette.fillRect(10, 10, 280, 170);
+      ctxRoulette.strokeStyle = '#f59e0b';
+      ctxRoulette.lineWidth = 2;
+      ctxRoulette.strokeRect(10, 10, 280, 170);
+
+      // Inner marquee box
+      ctxRoulette.fillStyle = '#11131c';
+      ctxRoulette.fillRect(48, 45, 204, 100);
+      ctxRoulette.strokeStyle = '#332717';
+      ctxRoulette.lineWidth = 1.5;
+      ctxRoulette.strokeRect(48, 45, 204, 100);
+
+      // Center LED Display
+      ctxRoulette.fillStyle = '#ff2222';
+      ctxRoulette.font = 'bold 16px "Share Tech Mono", monospace';
+      ctxRoulette.textAlign = 'center';
+      ctxRoulette.fillText('28.4 SEC', 150, 75);
+
+      // Bonus Text
+      ctxRoulette.fillStyle = '#fde047';
+      ctxRoulette.font = '9px "Orbitron", sans-serif';
+      ctxRoulette.fillText('REVERSE • EXPLOSION • 9TH BALL', 150, 95);
+
+      // Center odds preview
+      ctxRoulette.fillStyle = '#ff8800';
+      ctxRoulette.font = '8px monospace';
+      ctxRoulette.fillText('[ 3 ] [ 11 ] [ 30 ] [ 50 ] [ 44 ]', 150, 125);
+
+      // Perimeter Track Tiles (24 preview tiles)
+      const tilePositions = [];
+      // Top 8
+      for (let i = 0; i < 8; i++) tilePositions.push({ x: 18 + i * 34, y: 18 });
+      // Right 4
+      for (let i = 0; i < 4; i++) tilePositions.push({ x: 256, y: 48 + i * 28 });
+      // Bottom 8
+      for (let i = 0; i < 8; i++) tilePositions.push({ x: 256 - i * 34, y: 146 });
+      // Left 4
+      for (let i = 0; i < 4; i++) tilePositions.push({ x: 18, y: 120 - i * 28 });
+
+      tilePositions.forEach((pos, idx) => {
+        const isRunner = (idx === rouletteRunnerIndex);
+        const col = PREVIEW_BALL_COLORS[idx % PREVIEW_BALL_COLORS.length];
+
+        // Tile background
+        if (isRunner) {
+          ctxRoulette.fillStyle = '#fff7ed';
+          ctxRoulette.shadowColor = '#f59e0b';
+          ctxRoulette.shadowBlur = 12;
+          ctxRoulette.fillRect(pos.x - 2, pos.y - 2, 28, 24);
+          ctxRoulette.shadowBlur = 0;
+        } else {
+          ctxRoulette.fillStyle = '#161924';
+          ctxRoulette.fillRect(pos.x, pos.y, 24, 20);
+        }
+
+        // Mini Ball
+        ctxRoulette.beginPath();
+        ctxRoulette.arc(pos.x + 12, pos.y + 10, isRunner ? 8 : 7, 0, Math.PI * 2);
+        ctxRoulette.fillStyle = col;
+        ctxRoulette.fill();
+
+        // White ball center
+        ctxRoulette.beginPath();
+        ctxRoulette.arc(pos.x + 12, pos.y + 10, 3, 0, Math.PI * 2);
+        ctxRoulette.fillStyle = '#ffffff';
+        ctxRoulette.fill();
+      });
+
+      ctxRoulette.restore();
+    }
+
+    // 4. JTRASH E-WALLET: Rotating 3D Holographic Debit Card & Shimmer
+    const cvJTrash = document.getElementById('canvas-preview-jtrash');
+    const ctxJTrash = cvJTrash.getContext('2d');
+    let jTime = 0;
+
+    function renderJTrash3D() {
+      ctxJTrash.clearRect(0, 0, 300, 190);
+      jTime += 0.025;
+
+      const cx = 150;
+      const cy = 95;
+      const cardW = 140;
+      const cardH = 88;
+
+      // 3D rotation scale (simulated perspective flip)
+      const scaleX = Math.cos(jTime);
+      const tiltY = Math.sin(jTime) * 6;
+
+      ctxJTrash.save();
+      ctxJTrash.translate(cx, cy + tiltY);
+      ctxJTrash.scale(scaleX, 1);
+
+      // Card shadow
+      ctxJTrash.shadowColor = 'rgba(168, 85, 247, 0.4)';
+      ctxJTrash.shadowBlur = 20;
+
+      // Prismatic Card Body
+      const cardGrad = ctxJTrash.createLinearGradient(-cardW / 2, -cardH / 2, cardW / 2, cardH / 2);
+      cardGrad.addColorStop(0, '#38bdf8');
+      cardGrad.addColorStop(0.5, '#a855f7');
+      cardGrad.addColorStop(1, '#ec4899');
+
+      ctxJTrash.fillStyle = cardGrad;
+      ctxJTrash.beginPath();
+      ctxJTrash.roundRect(-cardW / 2, -cardH / 2, cardW, cardH, 10);
+      ctxJTrash.fill();
+
+      // Gold EMV Chip
+      ctxJTrash.fillStyle = '#fde047';
+      ctxJTrash.beginPath();
+      ctxJTrash.roundRect(-cardW / 2 + 16, -10, 22, 18, 4);
+      ctxJTrash.fill();
+
+      // Brand Logo
+      ctxJTrash.fillStyle = '#ffffff';
+      ctxJTrash.font = 'bold 12px "JetBrains Mono"';
+      ctxJTrash.fillText('JTRASH', cardW / 2 - 58, -cardH / 2 + 20);
+
+      // Card number
+      ctxJTrash.fillStyle = 'rgba(255,255,255,0.85)';
+      ctxJTrash.font = '9px "JetBrains Mono"';
+      ctxJTrash.fillText('•••• 8888', -cardW / 2 + 16, 25);
+
+      ctxJTrash.restore();
+    }
+
+    /* Master Animation Loop */
+    function animate() {
+      renderSlots3D();
+      renderSlotsCyber3D();
+      renderSlotsCandy3D();
+      renderSlotsAnubis3D();
+      renderPinball3D();
+      renderPool3D();
+      renderRoulette3D();
+      renderJTrash3D();
+      requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+
+    /* =========================================================================
+       MATCHES & CHALLENGE MODAL SYSTEM
+       ========================================================================= */
+    
+    function filterGames(category, btn) {
+      document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      const cards = document.querySelectorAll('.game-card');
+      cards.forEach(card => {
+        if (category === 'all' || card.getAttribute('data-category') === category) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    function openMatchesModal() {
+      document.getElementById('modal-matches').style.display = 'flex';
+      fetchMatches();
+    }
+
+    function closeMatchesModal() {
+      document.getElementById('modal-matches').style.display = 'none';
+    }
+
+    function openDirectChallenge(game) {
+      document.getElementById('challenge-game-select').value = game;
+      openMatchesModal();
+    }
+
+    async function fetchMatches() {
+      const listEl = document.getElementById('matches-list');
+      try {
+        const res = await fetch(`/jtrash/matches_api.php?action=list_matches&ref=${encodeURIComponent(userRef)}`);
+        const data = await res.json();
+        
+        if (data.matches && data.matches.length > 0) {
+          listEl.innerHTML = '';
+          document.getElementById('hud-match-count').textContent = data.matches.filter(m => m.status === 'pending').length;
+
+          data.matches.forEach(m => {
+            const isHost = m.host_ref === userRef;
+            const oppName = isHost ? m.guest_name : m.host_name;
+            const oppRef = isHost ? m.guest_ref : m.host_ref;
+            const gamePath = m.game === 'pool' ? '/pool/' : '/pinball/';
+
+            const div = document.createElement('div');
+            div.className = 'match-item';
+            div.innerHTML = `
+              <div>
+                <div class="match-item-title">${m.title}</div>
+                <div class="match-item-sub">Vs ${oppName} (${oppRef}) • Status: ${m.status.toUpperCase()}</div>
+              </div>
+              <a href="${gamePath}?match=${encodeURIComponent(m.id)}" class="btn-launch-match">
+                ${m.status === 'pending' && !isHost ? 'Accept & Play' : 'Open Match'} 🎮
+              </a>
+            `;
+            listEl.appendChild(div);
+          });
+        } else {
+          listEl.innerHTML = '<div style="color: #64748b; font-size: 0.85rem; text-align: center; padding: 20px;">No matches found. Enter a friend\'s JTrash Ref above to start a challenge!</div>';
+          document.getElementById('hud-match-count').textContent = '0';
+        }
+      } catch (e) {
+        listEl.innerHTML = '<div style="color: #64748b; font-size: 0.85rem; text-align: center; padding: 20px;">Matches ledger online. Ready for challenges.</div>';
+      }
+    }
+
+    async function sendLobbyChallenge() {
+      const game = document.getElementById('challenge-game-select').value;
+      const targetRef = document.getElementById('challenge-target-ref').value.trim();
+
+      if (!targetRef) {
+        showToast('Please enter an 11-digit friend Ref No.', '⚠️');
+        return;
+      }
+
+      try {
+        const res = await fetch('/jtrash/matches_api.php?action=create_match', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            game,
+            host_ref: userRef,
+            host_name: userName,
+            guest_ref: targetRef,
+            wager: 0
+          })
+        });
+        const data = await res.json();
+        if (data.success && data.match) {
+          showToast(`Match challenge created for ${targetRef}!`, '⚔️');
+          document.getElementById('challenge-target-ref').value = '';
+          fetchMatches();
+        } else {
+          showToast(data.error || 'Failed to create match', '❌');
+        }
+      } catch (err) {
+        showToast('Network error creating challenge', '❌');
+      }
+    }
+
+    function showToast(msg, icon = '✨') {
+      const t = document.getElementById('toast');
+      t.textContent = `${icon} ${msg}`;
+      t.style.display = 'block';
+      setTimeout(() => { t.style.display = 'none'; }, 3200);
+    }
+
+    // Check matches on load
+    fetchMatches();
+  </script>
+</body>
+</html>

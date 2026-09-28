@@ -1,0 +1,5 @@
+.vercel
+*.bak
+*.log
+roulette/room_state.json
+jtrash/data/*.json

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/GLTFLoader.js"></script>
+</head>
+<body>
+<script>
+  const loader = new THREE.GLTFLoader();
+  loader.load('Hand_Nails_low_R.gltf', (gltf) => {
+    let sm = null;
+    gltf.scene.traverse(n => { if (n.isSkinnedMesh) sm = n; });
+    console.log('SkinnedMesh found:', sm !== null);
+    if (sm) {
+      console.log('Skeleton bones count:', sm.skeleton.bones.length);
+      console.log('Skeleton bone 0:', sm.skeleton.bones[0].name);
+    }
+  });
+</script>
+</body>
+</html>

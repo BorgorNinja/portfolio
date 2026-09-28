@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>body { margin: 0; background: #0d0f12; }</style>
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/OBJLoader.js"></script>
+</head>
+<body>
+<script>
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0d0f12);
+  
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+  camera.position.set(0, 0.3, 4.0);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(800, 800);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+  document.body.appendChild(renderer.domElement);
+
+  // Balanced studio lighting
+  const amb = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(amb);
+  const keyLight = new THREE.DirectionalLight(0xfff5e6, 1.8);
+  keyLight.position.set(4, 6, 4);
+  scene.add(keyLight);
+  const fillLight = new THREE.DirectionalLight(0x8bc34a, 0.4);
+  fillLight.position.set(-4, 2, -2);
+  scene.add(fillLight);
+  const rimLight = new THREE.DirectionalLight(0x38bdf8, 1.2);
+  rimLight.position.set(-3, 4, -4);
+  scene.add(rimLight);
+
+  const texLoader = new THREE.TextureLoader();
+  const diff = texLoader.load('handDiffuse.jpg');
+
+  const mat = new THREE.MeshStandardMaterial({
+    map: diff,
+    roughness: 0.55,
+    metalness: 0.05,
+    side: THREE.DoubleSide
+  });
+
+  const objLoader = new THREE.OBJLoader();
+  objLoader.load('hand_middle.obj', (obj) => {
+    const handGroup = new THREE.Group();
+
+    const box = new THREE.Box3().setFromObject(obj);
+    const center = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const scale = 2.6 / maxDim;
+    obj.scale.set(scale, scale, scale);
+    obj.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
+
+    obj.traverse(c => {
+      if (c.isMesh) {
+        c.material = mat;
+        c.geometry.computeVertexNormals();
+      }
+    });
+
+    handGroup.add(obj);
+
+    // Exact orientation as before:
+    handGroup.rotation.x = Math.PI - 0.3;
+    handGroup.rotation.y = -0.65;
+    handGroup.rotation.z = 0.12;
+    handGroup.position.set(0, -0.25, 0);
+
+    scene.add(handGroup);
+    renderer.render(scene, camera);
+    window.__TEST_DONE__ = true;
+  });
+</script>
+</body>
+</html>

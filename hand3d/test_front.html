@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>body { margin: 0; background: #0d0f12; }</style>
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/GLTFLoader.js"></script>
+</head>
+<body>
+<script>
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0d0f12);
+  
+  // Look from the FRONT / FINGERS side (-Z):
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
+  camera.position.set(0, 0.15, -0.35);
+  camera.lookAt(0, -0.02, -0.08);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(400, 400);
+  document.body.appendChild(renderer.domElement);
+
+  const amb = new THREE.AmbientLight(0xffffff, 0.9);
+  scene.add(amb);
+  const dir = new THREE.DirectionalLight(0xffffff, 1.4);
+  dir.position.set(1, 2, -2);
+  scene.add(dir);
+
+  const texLoader = new THREE.TextureLoader();
+  const diff = texLoader.load('caucasian_realistic_baseColor.png');
+  const norm = texLoader.load('hands_normal.png');
+
+  const loader = new THREE.GLTFLoader();
+  loader.load('Hand_Nails_low_R.gltf', (gltf) => {
+    const root = gltf.scene;
+    scene.add(root);
+
+    root.traverse(n => {
+      if (n.isMesh) {
+        n.material = new THREE.MeshStandardMaterial({
+          map: diff,
+          normalMap: norm,
+          roughness: 0.55,
+          metalness: 0.05
+        });
+      }
+    });
+
+    const bones = {};
+    root.traverse(n => { if (n.isBone) bones[n.name] = n; });
+
+    // Curl Index by 90 deg around X:
+    const qCurl = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -1.5);
+    bones['Index_Proximal_R'].quaternion.multiply(qCurl);
+    bones['Index_Intermediate_R'].quaternion.multiply(qCurl);
+
+    root.updateMatrixWorld(true);
+
+    renderer.render(scene, camera);
+    window.__TEST_DONE__ = true;
+  });
+</script>
+</body>
+</html>

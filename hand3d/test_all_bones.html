@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/GLTFLoader.js"></script>
+</head>
+<body>
+<script>
+  const loader = new THREE.GLTFLoader();
+  loader.load('Hand_Nails_low_R.gltf', (gltf) => {
+    const root = gltf.scene;
+    const bones = {};
+    root.traverse(n => { if (n.isBone) bones[n.name] = n; });
+    console.log('All bones:', Object.keys(bones));
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,2952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>JTrash — Ang Pambansang Basura E-Wallet</title>
+  <meta name="description" content="JTrash is a satirical parody E-wallet integrated with Gates of Borgor slot coins. Deposit, save with 999.9% Trash APY, and cash out zero real money.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗑️</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #005ce6;
+      --primary-dark: #0044b3;
+      --primary-glow: rgba(0, 92, 230, 0.4);
+      --accent-cyan: #00d2ff;
+      --accent-gold: #f59e0b;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --bg-dark: #0a0e17;
+      --card-bg: rgba(18, 24, 38, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-display: 'Cinzel', serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(0, 92, 230, 0.18) 0%, transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+        linear-gradient(180deg, #0a0e17 0%, #060910 100%);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 90px;
+      overflow-x: hidden;
+    }
+
+    /* Container Shell */
+    .app-shell {
+      width: 100%;
+      max-width: 500px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background: rgba(11, 15, 25, 0.7);
+      border-left: 1px solid rgba(255, 255, 255, 0.04);
+      border-right: 1px solid rgba(255, 255, 255, 0.04);
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Parody Top Banner */
+    .satire-disclaimer {
+      background: linear-gradient(90deg, #b45309, #d97706, #b45309);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      z-index: 40;
+    }
+
+    /* Header Nav */
+    header {
+      background: linear-gradient(135deg, #005ce6 0%, #0073e6 50%, #0099ff 100%);
+      padding: 16px 18px 22px;
+      border-bottom-left-radius: 26px;
+      border-bottom-right-radius: 26px;
+      box-shadow: 0 12px 30px rgba(0, 92, 230, 0.35);
+      position: relative;
+      z-index: 30;
+    }
+
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .nav-back-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 5px 12px;
+      border-radius: 20px;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s ease;
+    }
+
+    .nav-back-link:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateX(-2px);
+    }
+
+    .brand-title-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .brand-logo-text {
+      font-size: 1.45rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .brand-tagline {
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.85);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-circle-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      backdrop-filter: blur(6px);
+    }
+
+    .icon-circle-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.05);
+    }
+
+    /* User Profile Bar */
+    .user-profile-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid #fde047;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .user-greeting {
+      font-size: 0.75rem;
+      opacity: 0.9;
+      font-weight: 600;
+    }
+
+    .user-name-badge {
+      font-size: 1rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-verified {
+      background: #10b981;
+      color: #fff;
+      font-size: 0.58rem;
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .user-ref-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.68rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 3px 8px;
+      border-radius: 20px;
+      margin-top: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    .user-ref-pill:hover {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: #38bdf8;
+      transform: translateY(-1px);
+    }
+
+    .qr-ref-container {
+      background: rgba(0, 92, 230, 0.15);
+      border: 1.5px dashed var(--primary);
+      border-radius: 12px;
+      padding: 12px;
+      margin: 10px 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .qr-ref-container:hover {
+      background: rgba(0, 92, 230, 0.25);
+      border-color: #38bdf8;
+      transform: scale(1.02);
+    }
+
+    /* Main Balance Card (Floating Glass Deck) */
+    .balance-card {
+      background: rgba(18, 24, 38, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 92, 230, 0.2);
+      backdrop-filter: blur(16px);
+      margin-top: -10px;
+      position: relative;
+    }
+
+    .balance-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .balance-label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-eye-toggle {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .balance-amount-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .currency-symbol {
+      font-family: var(--font-mono);
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--accent-cyan);
+    }
+
+    .balance-value {
+      font-family: var(--font-mono);
+      font-size: 2.3rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+
+    .balance-ticker-pill {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #10b981;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 2px 8px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Sub Balance Reserves */
+    .sub-reserves-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 14px;
+    }
+
+    .reserve-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 8px 10px;
+    }
+
+    .reserve-title {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .reserve-val {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #f1f5f9;
+    }
+
+    /* Quick Action Pills in Header */
+    .quick-wallet-actions {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .action-pill-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 10px 4px;
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .action-pill-btn:hover {
+      background: rgba(0, 92, 230, 0.25);
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .action-pill-btn .pill-icon {
+      font-size: 1.25rem;
+    }
+
+    /* Main App Body Content */
+    .app-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Dedicated Slot Bridge Card */
+    .bridge-card {
+      background: linear-gradient(135deg, rgba(30, 24, 15, 0.95), rgba(18, 22, 34, 0.95));
+      border: 1.5px solid rgba(245, 158, 11, 0.4);
+      border-radius: 20px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .bridge-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 150%;
+      height: 150%;
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.12) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .bridge-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .bridge-title {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 900;
+      color: var(--accent-gold);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .bridge-live-badge {
+      font-size: 0.6rem;
+      font-weight: 800;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      padding: 2px 6px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+      animation: livePulse 1.2s infinite;
+    }
+
+    @keyframes livePulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.5; }
+    }
+
+    .bridge-balance-compare {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+    }
+
+    .compare-side {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .compare-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .compare-val {
+      font-family: var(--font-mono);
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .compare-arrow {
+      font-size: 1.2rem;
+      color: var(--accent-gold);
+      animation: arrowSway 1.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes arrowSway {
+      0% { transform: translateX(-3px); }
+      100% { transform: translateX(3px); }
+    }
+
+    .bridge-inputs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .input-amount-field {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 8px 12px;
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 700;
+      outline: none;
+    }
+
+    .input-amount-field:focus {
+      border-color: var(--accent-gold);
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+    }
+
+    .quick-chip-group {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 12px;
+    }
+
+    .quick-chip {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 4px 8px;
+      color: #cbd5e1;
+      font-size: 0.68rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .quick-chip:hover {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: var(--accent-gold);
+      color: #fff;
+    }
+
+    .bridge-btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .btn-bridge {
+      padding: 10px;
+      border-radius: 12px;
+      border: none;
+      font-size: 0.8rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-deposit-wallet {
+      background: linear-gradient(135deg, #005ce6, #0073e6);
+      border: 1px solid rgba(0, 210, 255, 0.4);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(0, 92, 230, 0.3);
+    }
+
+    .btn-deposit-wallet:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(0, 92, 230, 0.5);
+    }
+
+    .btn-fund-slot {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border: 1px solid #fde68a;
+      color: #451a03;
+      box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3);
+    }
+
+    .btn-fund-slot:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(217, 119, 6, 0.5);
+    }
+
+    /* E-Wallet Grid Services */
+    .services-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .section-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .service-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 12px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+
+    .service-item:hover {
+      background: rgba(0, 92, 230, 0.15);
+      border-color: rgba(0, 92, 230, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .service-icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      position: relative;
+    }
+
+    .service-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      line-height: 1.2;
+    }
+
+    .service-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 0.5rem;
+      font-weight: 900;
+      padding: 1px 4px;
+      border-radius: 6px;
+    }
+
+    /* JSave Vault Widget Card */
+    .jsave-vault-card {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(18, 24, 38, 0.9));
+      border: 1.5px solid rgba(16, 185, 129, 0.35);
+      border-radius: 20px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .jsave-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .jsave-title {
+      font-size: 0.95rem;
+      font-weight: 900;
+      color: #34d399;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .jsave-apy-pill {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid #34d399;
+      color: #34d399;
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 12px;
+      animation: pulseApy 2s infinite;
+    }
+
+    @keyframes pulseApy {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .jsave-numbers {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .jsave-balance-big {
+      font-family: var(--font-mono);
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .jsave-interest-ticker {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      color: #34d399;
+      font-weight: 700;
+    }
+
+    .jsave-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .btn-vault-action {
+      padding: 8px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      transition: all 0.15s ease;
+    }
+
+    .btn-vault-action:hover {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: #34d399;
+    }
+
+    /* Transactions / Activity Feed */
+    .activity-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .activity-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .activity-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+      transform: translateX(2px);
+    }
+
+    .activity-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .activity-icon-bubble {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .activity-details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .activity-title {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #f1f5f9;
+    }
+
+    .activity-date {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+    }
+
+    .activity-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .activity-amt {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+
+    .activity-amt.income {
+      color: #10b981;
+    }
+
+    .activity-amt.expense {
+      color: #f87171;
+    }
+
+    .activity-status {
+      font-size: 0.6rem;
+      color: var(--text-muted);
+    }
+
+    /* Fixed Bottom Nav Bar (Mobile App Style) */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 500px;
+      background: rgba(15, 20, 32, 0.95);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(16px);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 12px 14px;
+      z-index: 50;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .nav-tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: var(--text-muted);
+      font-size: 0.65rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+
+    .nav-tab-item:hover, .nav-tab-item.active {
+      color: var(--accent-cyan);
+    }
+
+    .nav-tab-item .tab-icon {
+      font-size: 1.25rem;
+    }
+
+    .nav-tab-item.slot-highlight {
+      color: var(--accent-gold);
+    }
+
+    .nav-tab-item.slot-highlight .tab-icon {
+      animation: slotBounce 2s infinite ease-in-out;
+    }
+
+    @keyframes slotBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    /* Universal Modal Layer */
+    .modal-layer {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 7, 12, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      animation: fadeIn 0.2s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-box {
+      background: #111625;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 420px;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .modal-head h3 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-close-modal {
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      color: #fff;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .modal-field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .modal-field-group label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .modal-input {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: #fff;
+      font-family: var(--font-main);
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .modal-input:focus {
+      border-color: var(--primary);
+    }
+
+    .btn-modal-submit {
+      width: 100%;
+      padding: 13px;
+      border-radius: 14px;
+      border: none;
+      background: linear-gradient(135deg, #005ce6, #0073e6);
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 92, 230, 0.4);
+      transition: all 0.15s ease;
+      margin-top: 8px;
+    }
+
+    .btn-modal-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(0, 92, 230, 0.6);
+    }
+
+    /* Official JTrash Receipt Slip */
+    .receipt-paper {
+      background: #f8fafc;
+      color: #0f172a;
+      border-radius: 16px;
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .receipt-paper::before, .receipt-paper::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: radial-gradient(circle, transparent, transparent 50%, #111625 50%, #111625 100%);
+      background-size: 12px 12px;
+    }
+
+    .receipt-paper::before {
+      top: -3px;
+    }
+
+    .receipt-paper::after {
+      bottom: -3px;
+    }
+
+    .receipt-brand {
+      text-align: center;
+      border-bottom: 2px dashed #cbd5e1;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+    }
+
+    .receipt-logo {
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: #005ce6;
+    }
+
+    .receipt-amount-display {
+      font-family: var(--font-mono);
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #047857;
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    .receipt-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: #475569;
+    }
+
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .receipt-row span:last-child {
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    /* Toast Notification */
+    .toast-popup {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(0, 210, 255, 0.4);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 24px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
+      z-index: 200;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast-popup.show {
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- App Main Shell -->
+  <div class="app-shell">
+
+
+    <!-- Header Section -->
+    <header>
+      <div class="top-nav">
+        <a href="https://borgorninja.duckdns.org/" class="nav-back-link" title="Return to Portfolio">
+          <span>←</span>
+          <span>Portfolio</span>
+        </a>
+
+        <div class="brand-title-wrap">
+          <div class="brand-logo-text">
+            <span>🗑️</span>
+            <span>JTrash</span>
+          </div>
+          <span class="brand-tagline">Ang Pambansang Basura Wallet</span>
+        </div>
+
+        <div class="nav-actions">
+          <button class="icon-circle-btn" onclick="openReceiveQR()" title="Receive Trash QR Code">
+            <span>📷</span>
+          </button>
+          <button class="icon-circle-btn" onclick="toggleMute()" id="btn-sound" title="Toggle Sound">
+            <span id="sound-icon">🔊</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- User Profile Greeting Bar -->
+      <div class="user-profile-bar">
+        <div class="user-info">
+          <div class="user-avatar" onclick="editUserName()" style="cursor: pointer;" title="Tap to change avatar or nickname">👑</div>
+          <div>
+            <div class="user-greeting">Kumusta!</div>
+            <div class="user-name-badge" onclick="editUserName()" style="cursor: pointer;" title="Tap to change your name">
+              <span id="user-display-name">Lucky Spinner</span>
+              <span style="font-size: 0.65rem; opacity: 0.7;">✏️</span>
+              <span class="badge-verified">Verified Pasaway</span>
+            </div>
+            <div class="user-ref-pill" onclick="copyMyRefNumber()" title="Click to copy your unique account number to receive money">
+              <span style="opacity: 0.75;">📱 Acct No:</span>
+              <span id="user-ref-display" style="font-family: var(--font-mono); font-weight: 800; color: #38bdf8;">0969-420-1337</span>
+              <span style="font-size: 0.7rem; opacity: 0.8;">📋</span>
+              <span id="ref-copied-badge" style="display: none; font-size: 0.55rem; background: #10b981; color: #fff; padding: 1px 4px; border-radius: 4px; margin-left: 2px;">COPIED!</span>
+            </div>
+          </div>
+        </div>
+        <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
+          <span style="font-size: 0.65rem; color: rgba(255,255,255,0.8); font-weight: 700; text-transform: uppercase;">Tier</span>
+          <div style="font-size: 0.75rem; font-weight: 800; color: #fde047;">Diamond Basurero</div>
+        </div>
+      </div>
+
+      <!-- Main Balance Card -->
+      <div class="balance-card">
+        <div class="balance-card-header">
+          <div class="balance-label">
+            <span>AVAILABLE JTRASH BALANCE</span>
+            <button class="btn-eye-toggle" onclick="toggleBalanceMask()" id="eye-btn" title="Toggle balance display">👁️</button>
+          </div>
+          <div class="balance-ticker-pill">
+            <span>▲ +420.69%</span>
+          </div>
+        </div>
+
+        <div class="balance-amount-row">
+          <span class="currency-symbol">🗑️</span>
+          <span class="balance-value" id="val-wallet-balance">50,000.00</span>
+        </div>
+
+        <!-- Sub Reserves -->
+        <div class="sub-reserves-grid">
+          <div class="reserve-box">
+            <div class="reserve-title">
+              <span>🎰 Slot Reserve</span>
+            </div>
+            <div class="reserve-val" id="val-slot-reserve">10,000</div>
+          </div>
+          <div class="reserve-box">
+            <div class="reserve-title">
+              <span>🐷 JSave Vault</span>
+            </div>
+            <div class="reserve-val" id="val-jsave-reserve">15,000.00</div>
+          </div>
+        </div>
+
+        <!-- Quick Top Action Pills -->
+        <div class="quick-wallet-actions">
+          <button class="action-pill-btn" onclick="quickCashInSlots()">
+            <span class="pill-icon">📥</span>
+            <span>Sweep Slots</span>
+          </button>
+          <button class="action-pill-btn" onclick="quickFundSlots(5000)">
+            <span class="pill-icon">📤</span>
+            <span>Send 5k</span>
+          </button>
+          <button class="action-pill-btn" onclick="openJSaveModal()">
+            <span class="pill-icon">🐷</span>
+            <span>JSave</span>
+          </button>
+          <a href="/arcade/" class="action-pill-btn" style="color: #c084fc; border-color: rgba(168, 85, 247, 0.4);" title="Borgor Arcadia Lobby">
+            <span class="pill-icon">🎮</span>
+            <span>Arcade</span>
+          </a>
+          <a href="/slots/" class="action-pill-btn" style="color: #fde047; border-color: rgba(245, 158, 11, 0.4);" title="Play Gates of Borgor">
+            <span class="pill-icon">🎰</span>
+            <span>Spin Slots</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <div class="app-body">
+
+      <!-- Interactive Slot Bridge Card -->
+      <div class="bridge-card">
+        <div class="bridge-header">
+          <div class="bridge-title">
+            <span>⚡ Gates of Borgor Bridge</span>
+          </div>
+          <div class="bridge-live-badge">
+            <div class="live-dot"></div>
+            <span>LIVE SYNC</span>
+          </div>
+        </div>
+
+        <!-- Comparison Display -->
+        <div class="bridge-balance-compare">
+          <div class="compare-side">
+            <span class="compare-label">Slot Machine</span>
+            <span class="compare-val" id="bridge-slot-display">10,000</span>
+          </div>
+          <div class="compare-arrow">⇄</div>
+          <div class="compare-side" style="text-align: right;">
+            <span class="compare-label">JTrash Wallet</span>
+            <span class="compare-val" id="bridge-wallet-display">50,000</span>
+          </div>
+        </div>
+
+        <!-- Input & Quick Chips -->
+        <div class="bridge-inputs">
+          <input type="number" id="bridge-amount-input" class="input-amount-field" placeholder="Enter coin amount..." value="5000">
+        </div>
+
+        <div class="quick-chip-group">
+          <button class="quick-chip" onclick="setBridgeAmount(1000)">+1,000</button>
+          <button class="quick-chip" onclick="setBridgeAmount(5000)">+5,000</button>
+          <button class="quick-chip" onclick="setBridgeAmount(20000)">+20,000</button>
+          <button class="quick-chip" onclick="setBridgeAmountMax()">MAX ALL</button>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="bridge-btn-group">
+          <button class="btn-bridge btn-deposit-wallet" onclick="handleDepositToWallet()">
+            <span>📥 Cash Out to JTrash</span>
+          </button>
+          <button class="btn-bridge btn-fund-slot" onclick="handleFundSlot()">
+            <span>📤 Transfer to Slot</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Services Grid (The Classic GCash Parody Suite) -->
+      <div class="services-section">
+        <div class="section-title">
+          <span>Basura Financial Services</span>
+          <span style="font-size: 0.65rem; color: var(--accent-cyan);">Zero Fees Guaranteed</span>
+        </div>
+
+        <div class="services-grid">
+          <!-- Send Trash -->
+          <div class="service-item" onclick="openSendTrashModal()">
+            <div class="service-icon-box" style="background: rgba(0, 92, 230, 0.2); color: #38bdf8;">
+              <span>💸</span>
+            </div>
+            <div class="service-title">Send Trash</div>
+          </div>
+
+          <!-- Bank Dump -->
+          <div class="service-item" onclick="openBankDumpModal()">
+            <div class="service-icon-box" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">
+              <span>🏦</span>
+            </div>
+            <div class="service-title">Bank Dump</div>
+          </div>
+
+          <!-- JSave -->
+          <div class="service-item" onclick="openJSaveModal()">
+            <div class="service-icon-box" style="background: rgba(236, 72, 153, 0.2); color: #f472b6;">
+              <span class="service-badge">999%</span>
+              <span>🐷</span>
+            </div>
+            <div class="service-title">JSave</div>
+          </div>
+
+          <!-- JInvest Crypto -->
+          <div class="service-item" onclick="openJInvestModal()">
+            <div class="service-icon-box" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">
+              <span>📈</span>
+            </div>
+            <div class="service-title">JInvest</div>
+          </div>
+
+          <!-- Pay Bills -->
+          <div class="service-item" onclick="openPayBillsModal()">
+            <div class="service-icon-box" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">
+              <span>⚡</span>
+            </div>
+            <div class="service-title">Pay Bills</div>
+          </div>
+
+          <!-- JInsure -->
+          <div class="service-item" onclick="openJInsureModal()">
+            <div class="service-icon-box" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">
+              <span>🛡️</span>
+            </div>
+            <div class="service-title">JInsure</div>
+          </div>
+
+          <!-- A-Basura Hourly Ayuda -->
+          <div class="service-item" onclick="claimDailyBonus()" title="Claim Hourly Ayuda (100 coins)">
+            <div class="service-icon-box" style="background: rgba(234, 179, 8, 0.2); color: #facc15;">
+              <span class="service-badge" id="ayuda-badge">100 🪙</span>
+              <span>🎁</span>
+            </div>
+            <div class="service-title">Ayuda</div>
+          </div>
+
+          <!-- Gates of Borgor direct link -->
+          <a href="/slots/" class="service-item" style="text-decoration: none;" title="Open Gates of Borgor">
+            <div class="service-icon-box" style="background: rgba(245, 158, 11, 0.25); color: #fde047;">
+              <span>🎰</span>
+            </div>
+            <div class="service-title">Gates Slot</div>
+          </a>
+
+          <!-- Arcade Center -->
+          <a href="/arcade/" class="service-item" style="text-decoration: none;" title="Open Borgor Arcadia Games Dashboard">
+            <div class="service-icon-box" style="background: rgba(168, 85, 247, 0.25); color: #d8b4fe;">
+              <span class="service-badge" style="background: #a855f7;">LOBBY</span>
+              <span>🕹️</span>
+            </div>
+            <div class="service-title">Arcade</div>
+          </a>
+
+          <!-- Cyber Pinball -->
+          <a href="/pinball/" class="service-item" style="text-decoration: none;" title="Play Cyber Pinball 1v1">
+            <div class="service-icon-box" style="background: rgba(236, 72, 153, 0.25); color: #f472b6;">
+              <span class="service-badge" style="background: #ec4899;">1V1</span>
+              <span>⚡</span>
+            </div>
+            <div class="service-title">Pinball</div>
+          </a>
+
+          <!-- Neon 8-Ball Pool -->
+          <a href="/pool/" class="service-item" style="text-decoration: none;" title="Play Neon 8-Ball Pool 1v1">
+            <div class="service-icon-box" style="background: rgba(16, 185, 129, 0.25); color: #34d399;">
+              <span class="service-badge" style="background: #10b981;">1V1</span>
+              <span>🎱</span>
+            </div>
+            <div class="service-title">Neon Pool</div>
+          </a>
+        </div>
+      </div>
+
+      <!-- JSave High-Yield Dumpster Vault Card -->
+      <div class="jsave-vault-card">
+        <div class="jsave-head">
+          <div class="jsave-title">
+            <span>🐷 JSave Dumpster Vault</span>
+          </div>
+          <span class="jsave-apy-pill">+999.9% Trash APY</span>
+        </div>
+
+        <div class="jsave-numbers">
+          <div class="jsave-balance-big" id="jsave-main-display">15,000.00</div>
+          <div class="jsave-interest-ticker" id="jsave-interest-pulse">+0.00 interest earned</div>
+        </div>
+
+        <div class="jsave-actions">
+          <button class="btn-vault-action" onclick="promptDepositJSave()">📥 Deposit to JSave</button>
+          <button class="btn-vault-action" onclick="promptWithdrawJSave()">📤 Withdraw to Wallet</button>
+        </div>
+      </div>
+
+      <!-- Recent Activity / Transactions Section -->
+      <div class="activity-section">
+        <div class="section-title">
+          <span>Recent Activity & Receipts</span>
+          <button onclick="clearTxHistory()" style="background: none; border: none; color: var(--text-muted); font-size: 0.65rem; cursor: pointer;">Clear Logs</button>
+        </div>
+
+        <div class="activity-list" id="activity-list-container">
+          <!-- Dynamic Items Injected by JS -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Fixed Mobile Bottom Navigation Bar -->
+    <div class="bottom-nav">
+      <div class="nav-tab-item active" onclick="switchNavTab('home')">
+        <span class="tab-icon">🏠</span>
+        <span>Home</span>
+      </div>
+      <div class="nav-tab-item" onclick="openJSaveModal()">
+        <span class="tab-icon">🐷</span>
+        <span>JSave</span>
+      </div>
+      <div class="nav-tab-item" onclick="openJInvestModal()">
+        <span class="tab-icon">📈</span>
+        <span>JInvest</span>
+      </div>
+      <div class="nav-tab-item" onclick="scrollToActivity()">
+        <span class="tab-icon">📜</span>
+        <span>Activity</span>
+      </div>
+      <a href="/arcade/" class="nav-tab-item slot-highlight" title="Borgor Arcadia Lobby & Games">
+        <span class="tab-icon">🎮</span>
+        <span>Arcade</span>
+      </a>
+    </div>
+
+  </div>
+
+  <!-- Toast Notification Popup -->
+  <div class="toast-popup" id="toast-popup">
+    <span id="toast-icon">✨</span>
+    <span id="toast-msg">Notification message</span>
+  </div>
+
+  <!-- Modal: Send Trash -->
+  <div class="modal-layer" id="modal-send-trash" onclick="closeAllModals(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-head">
+        <h3>💸 Express Send $TRASH</h3>
+        <button class="btn-close-modal" onclick="closeAllModals()">✕</button>
+      </div>
+
+      <!-- Sender's own account number box -->
+      <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 10px; padding: 8px 12px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-size: 0.62rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Your Account Number</div>
+          <div id="send-modal-my-ref" style="font-family: var(--font-mono); font-size: 0.95rem; font-weight: 800; color: #38bdf8;">0969-420-1337</div>
+        </div>
+        <button type="button" onclick="copyMyRefNumber()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 4px 8px; border-radius: 8px; font-size: 0.68rem; cursor: pointer;">Copy 📋</button>
+      </div>
+
+      <div class="modal-field-group">
+        <label>Recipient Account Number (09XX-XXX-XXXX)</label>
+        <input type="text" id="send-phone-input" class="modal-input" placeholder="e.g. 0917-333-4444" oninput="onRecipientInput(this.value)">
+        <div id="send-recipient-preview" style="font-size: 0.72rem; color: #94a3b8; margin-top: 5px; min-height: 18px; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+          <span>📱</span> <span>Enter 11-digit mobile ref number</span>
+        </div>
+      </div>
+
+      <div class="modal-field-group">
+        <label>Amount ($TRASH)</label>
+        <input type="number" id="send-amount-input" class="modal-input" placeholder="0.00" value="1000" min="1">
+      </div>
+
+      <div class="modal-field-group">
+        <label>Message / Paldo Note (Optional)</label>
+        <input type="text" id="send-note-input" class="modal-input" placeholder="Pang scatter at meryenda bossing">
+      </div>
+
+      <button class="btn-modal-submit" id="btn-execute-send" onclick="executeSendTrash()">Send Instant Trash</button>
+    </div>
+  </div>
+
+  <!-- Modal: Bank Dump -->
+  <div class="modal-layer" id="modal-bank-dump" onclick="closeAllModals(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-head">
+        <h3>🏦 Bank Dump Transfer</h3>
+        <button class="btn-close-modal" onclick="closeAllModals()">✕</button>
+      </div>
+
+      <div class="modal-field-group">
+        <label>Select Partner Dumpster Bank</label>
+        <select id="bank-select" class="modal-input">
+          <option>BDO (We Find Ways to Lose It)</option>
+          <option>BPI (Basura Bank of the Phils)</option>
+          <option>LandBank of Rotten Produce</option>
+          <option>MetroDump Universal</option>
+          <option>UnionDump Crypto Exchange</option>
+        </select>
+      </div>
+
+      <div class="modal-field-group">
+        <label>Account Number</label>
+        <input type="text" id="bank-acc-input" class="modal-input" placeholder="10-digit number" value="1234-5678-9999">
+      </div>
+
+      <div class="modal-field-group">
+        <label>Account Name</label>
+        <input type="text" id="bank-name-input" class="modal-input" placeholder="Account Name" value="Lucky Spinner">
+      </div>
+
+      <div class="modal-field-group">
+        <label>Transfer Amount ($TRASH)</label>
+        <input type="number" id="bank-amt-input" class="modal-input" value="2500">
+      </div>
+
+      <button class="btn-modal-submit" onclick="executeBankDump()">Dump to Bank</button>
+    </div>
+  </div>
+
+  <!-- Modal: JInvest (Meme Crypto Market) -->
+  <div class="modal-layer" id="modal-jinvest" onclick="closeAllModals(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-head">
+        <h3>📈 JInvest Meme Crypto</h3>
+        <button class="btn-close-modal" onclick="closeAllModals()">✕</button>
+      </div>
+
+      <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 14px;">
+        High-volatility junk assets backed exclusively by vibes and dopamine.
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+        <!-- Token 1 -->
+        <div style="background: rgba(255,255,255,0.04); padding: 10px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-weight: 800; font-size: 0.85rem;">🍔 $BORGOR</div>
+            <div style="font-size: 0.65rem; color: #10b981;">▲ +69.4% (Hot Patty)</div>
+          </div>
+          <button class="quick-chip" onclick="buyCrypto('$BORGOR', 1000)">Buy 1,000</button>
+        </div>
+
+        <!-- Token 2 -->
+        <div style="background: rgba(255,255,255,0.04); padding: 10px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-weight: 800; font-size: 0.85rem;">⚡ $SCATTER</div>
+            <div style="font-size: 0.65rem; color: #f59e0b;">▲ +100.0x Multiplier</div>
+          </div>
+          <button class="quick-chip" onclick="buyCrypto('$SCATTER', 2500)">Buy 2,500</button>
+        </div>
+
+        <!-- Token 3 -->
+        <div style="background: rgba(255,255,255,0.04); padding: 10px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-weight: 800; font-size: 0.85rem;">👑 $PALDO</div>
+            <div style="font-size: 0.65rem; color: #10b981;">▲ Pure Dopamine</div>
+          </div>
+          <button class="quick-chip" onclick="buyCrypto('$PALDO', 5000)">Buy 5,000</button>
+        </div>
+      </div>
+
+      <button class="btn-modal-submit" onclick="closeAllModals()">Close Market</button>
+    </div>
+  </div>
+
+  <!-- Modal: Pay Bills -->
+  <div class="modal-layer" id="modal-pay-bills" onclick="closeAllModals(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-head">
+        <h3>⚡ Pay Fictional Bills</h3>
+        <button class="btn-close-modal" onclick="closeAllModals()">✕</button>
+      </div>
+
+      <div class="modal-field-group">
+        <label>Biller Entity</label>
+        <select id="biller-select" class="modal-input">
+          <option>Meralco — Server Overclock Electricity Fee</option>
+          <option>Maynilad — Water Cooling Slime Fee</option>
+          <option>CVSU — Thesis Defense Mental Health Tax</option>
+          <option>Barangay — Loud Keyboard Typing Violation</option>
+        </select>
+      </div>
+
+      <div class="modal-field-group">
+        <label>Bill Amount ($TRASH)</label>
+        <input type="number" id="bill-amount-input" class="modal-input" value="1250">
+      </div>
+
+      <button class="btn-modal-submit" onclick="executePayBill()">Pay Biller Immediately</button>
+    </div>
+  </div>
+
+  <!-- Modal: JInsure -->
+  <div class="modal-layer" id="modal-jinsure" onclick="closeAllModals(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-head">
+        <h3>🛡️ JInsure Dead-Spin Policy</h3>
+        <button class="btn-close-modal" onclick="closeAllModals()">✕</button>
+      </div>
+
+      <div style="font-size: 0.8rem; line-height: 1.5; color: #cbd5e1; margin-bottom: 14px;">
+        Comprehensive insurance coverage against getting 50 dead spins with zero scatters on Gates of Borgor.
+      </div>
+
+      <div style="background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.4); border-radius: 12px; padding: 12px; margin-bottom: 14px;">
+        <div style="font-weight: 800; font-size: 0.85rem; color: #93c5fd;">Policy #TRASH-SECURE-99</div>
+        <div style="font-size: 0.72rem; color: #bfdbfe;">Premium: 300 $TRASH / lifetime</div>
+        <div style="font-size: 0.72rem; color: #bfdbfe;">Payout: 100,000 $TRASH in emotional damages</div>
+      </div>
+
+      <button class="btn-modal-submit" onclick="executeBuyInsurance()">Purchase Protection (300 $TRASH)</button>
+    </div>
+  </div>
+
+  <!-- Modal: Receive QR -->
+  <div class="modal-layer" id="modal-receive-qr" onclick="closeAllModals(event)">
+    <div class="modal-box" onclick="event.stopPropagation();" style="text-align: center;">
+      <div class="modal-head">
+        <h3>📷 Receive Trash QR</h3>
+        <button class="btn-close-modal" onclick="closeAllModals()">✕</button>
+      </div>
+
+      <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 16px;">
+        Scan this QR code to transfer imaginary slot coins directly into your dumpster.
+      </div>
+
+      <div style="text-align: center; margin-bottom: 12px;">
+        <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Your JTrash Account Number</span>
+        <div class="qr-ref-container" onclick="copyMyRefNumber()" title="Click to copy your account number">
+          <div style="font-size: 0.65rem; color: #38bdf8; font-weight: 800; text-transform: uppercase; margin-bottom: 4px;">Share this account number to receive $TRASH:</div>
+          <div id="qr-ref-number-big" style="font-family: var(--font-mono); font-size: 1.35rem; font-weight: 900; color: #fff; letter-spacing: 1px;">0969-420-1337</div>
+          <div style="font-size: 0.68rem; color: #94a3b8; margin-top: 4px;">Tap anywhere here to copy 📋</div>
+        </div>
+      </div>
+
+      <div class="qr-code-frame" style="display: flex; justify-content: center; margin: 10px 0;">
+        <svg viewBox="0 0 200 200" width="160" height="160" style="background: #fff; border-radius: 12px; padding: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.4);">
+          <!-- Position Marks -->
+          <rect x="20" y="20" width="45" height="45" fill="#005ce6"/>
+          <rect x="27" y="27" width="31" height="31" fill="#fff"/>
+          <rect x="34" y="34" width="17" height="17" fill="#005ce6"/>
+
+          <rect x="135" y="20" width="45" height="45" fill="#005ce6"/>
+          <rect x="142" y="27" width="31" height="31" fill="#fff"/>
+          <rect x="149" y="34" width="17" height="17" fill="#005ce6"/>
+
+          <rect x="20" y="135" width="45" height="45" fill="#005ce6"/>
+          <rect x="27" y="142" width="31" height="31" fill="#fff"/>
+          <rect x="34" y="149" width="17" height="17" fill="#005ce6"/>
+
+          <!-- Mock Pattern Dots -->
+          <rect x="75" y="25" width="12" height="12" fill="#005ce6"/>
+          <rect x="95" y="25" width="12" height="12" fill="#005ce6"/>
+          <rect x="115" y="25" width="12" height="12" fill="#005ce6"/>
+          <rect x="80" y="45" width="12" height="12" fill="#005ce6"/>
+          <rect x="105" y="45" width="12" height="12" fill="#005ce6"/>
+
+          <rect x="25" y="75" width="12" height="12" fill="#005ce6"/>
+          <rect x="45" y="75" width="12" height="12" fill="#005ce6"/>
+          <rect x="65" y="75" width="12" height="12" fill="#005ce6"/>
+          <rect x="85" y="75" width="12" height="12" fill="#005ce6"/>
+          <rect x="105" y="75" width="12" height="12" fill="#005ce6"/>
+          <rect x="125" y="75" width="12" height="12" fill="#005ce6"/>
+          <rect x="145" y="75" width="12" height="12" fill="#005ce6"/>
+          <rect x="165" y="75" width="12" height="12" fill="#005ce6"/>
+
+          <!-- Center Icon -->
+          <circle cx="100" cy="100" r="22" fill="#005ce6"/>
+          <text x="100" y="108" font-size="20" text-anchor="middle" fill="#fff">🗑️</text>
+
+          <rect x="75" y="130" width="12" height="12" fill="#005ce6"/>
+          <rect x="95" y="130" width="12" height="12" fill="#005ce6"/>
+          <rect x="115" y="130" width="12" height="12" fill="#005ce6"/>
+          <rect x="145" y="130" width="12" height="12" fill="#005ce6"/>
+          <rect x="165" y="130" width="12" height="12" fill="#005ce6"/>
+
+          <rect x="75" y="150" width="12" height="12" fill="#005ce6"/>
+          <rect x="105" y="150" width="12" height="12" fill="#005ce6"/>
+          <rect x="135" y="150" width="12" height="12" fill="#005ce6"/>
+          <rect x="155" y="150" width="12" height="12" fill="#005ce6"/>
+
+          <rect x="85" y="170" width="12" height="12" fill="#005ce6"/>
+          <rect x="115" y="170" width="12" height="12" fill="#005ce6"/>
+          <rect x="145" y="170" width="12" height="12" fill="#005ce6"/>
+        </svg>
+      </div>
+
+      <div id="qr-handle-display" style="font-family: var(--font-mono); font-size: 1.05rem; font-weight: 800; color: #38bdf8; margin-top: 8px; margin-bottom: 2px;">
+        Account No: 0969-420-1337
+      </div>
+      <div id="qr-name-display" style="font-size: 0.72rem; color: #94a3b8; font-weight: 600; margin-bottom: 14px;">
+        Lucky Spinner • Verified Account
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <button class="btn-modal-submit" onclick="copyMyRefNumber()">📋 Copy My Account Number</button>
+        <button class="btn-modal-submit" onclick="copyQRLink()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);">🔗 Copy Direct Payment Link</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Official Receipt -->
+  <div class="modal-layer" id="modal-receipt" onclick="closeAllModals(event)">
+    <div class="modal-box" onclick="event.stopPropagation();" style="background: transparent; border: none; padding: 0;">
+      <div class="receipt-paper">
+        <div class="receipt-brand">
+          <div class="receipt-logo">🗑️ JTrash Official Slip</div>
+          <div style="font-size: 0.65rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Transaction Complete</div>
+        </div>
+
+        <div class="receipt-amount-display" id="receipt-amount">+0.00 $TRASH</div>
+
+        <div class="receipt-rows">
+          <div class="receipt-row">
+            <span>Transaction Type</span>
+            <span id="receipt-type">Transfer</span>
+          </div>
+          <div class="receipt-row">
+            <span>Reference No.</span>
+            <span id="receipt-ref" style="font-family: var(--font-mono);">TRASH-2026-9999</span>
+          </div>
+          <div class="receipt-row">
+            <span>Date & Time</span>
+            <span id="receipt-date">Sep 26, 2026</span>
+          </div>
+          <div class="receipt-row">
+            <span>Sender</span>
+            <span id="receipt-sender">Lucky Spinner</span>
+          </div>
+          <div class="receipt-row">
+            <span>Sender Ref</span>
+            <span id="receipt-sender-ref" style="font-family: var(--font-mono); font-size: 0.72rem; color: #38bdf8;">0969-XXX-XXXX</span>
+          </div>
+          <div class="receipt-row">
+            <span>Recipient / Channel</span>
+            <span id="receipt-recipient">Gates of Borgor</span>
+          </div>
+          <div class="receipt-row">
+            <span>Recipient Ref</span>
+            <span id="receipt-recipient-ref" style="font-family: var(--font-mono); font-size: 0.72rem; color: #38bdf8;">0917-XXX-XXXX</span>
+          </div>
+          <div class="receipt-row">
+            <span>Convenience Fee</span>
+            <span style="color: #10b981;">0.00 $TRASH (FREE)</span>
+          </div>
+          <div class="receipt-row">
+            <span>Refund Policy</span>
+            <span style="color: #ef4444;">Walang Bawian</span>
+          </div>
+        </div>
+
+        <button class="btn-modal-submit" onclick="closeAllModals()" style="margin-top: 16px; background: #0f172a;">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================================
+       AUDIO SYNTHESIZER (Web Audio API for GCash Parody SFX)
+       ========================================================================= */
+    class JTrashAudio {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+      }
+      playChime() {
+        if (this.muted) return;
+        this.init();
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+        const now = this.ctx.currentTime;
+        
+        // Characteristic 2-tone melodic e-wallet chime (C6 -> G6)
+        const osc1 = this.ctx.createOscillator();
+        const gain1 = this.ctx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(1046.5, now); // C6
+        gain1.gain.setValueAtTime(0.2, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        osc1.connect(gain1);
+        gain1.connect(this.ctx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.25);
+
+        const osc2 = this.ctx.createOscillator();
+        const gain2 = this.ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(1567.98, now + 0.12); // G6
+        gain2.gain.setValueAtTime(0.25, now + 0.12);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        osc2.connect(gain2);
+        gain2.connect(this.ctx.destination);
+        osc2.start(now + 0.12);
+        osc2.stop(now + 0.45);
+      }
+      playCoinDrop() {
+        if (this.muted) return;
+        this.init();
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+        const now = this.ctx.currentTime;
+        const freqs = [1760, 2200, 2637];
+        freqs.forEach((f, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(f, now + idx * 0.05);
+          gain.gain.setValueAtTime(0.18, now + idx * 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.05 + 0.2);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.05);
+          osc.stop(now + idx * 0.05 + 0.2);
+        });
+      }
+      playError() {
+        if (this.muted) return;
+        this.init();
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.setValueAtTime(110, now + 0.1);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      }
+    }
+
+    const sound = new JTrashAudio();
+
+    /* =========================================================================
+       STATE & PERSISTENT COOKIE / LOCALSTORAGE INTEGRATION
+       ========================================================================= */
+    const STORAGE_KEY_WALLET = 'jtrash_wallet_balance';
+    const STORAGE_KEY_SLOTS  = 'borgor_slots_balance';
+    const STORAGE_KEY_JSAVE  = 'jtrash_jsave_balance';
+    const STORAGE_KEY_TXS    = 'jtrash_transactions';
+    const STORAGE_KEY_REF    = 'jtrash_user_ref';
+    const STORAGE_KEY_NAME   = 'jtrash_username';
+    const STORAGE_KEY_AYUDA  = 'jtrash_last_ayuda_timestamp';
+
+    function setPersistentCookie(name, value, days = 365) {
+      const maxAge = days * 24 * 60 * 60;
+      document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; SameSite=Lax`;
+    }
+
+    function getPersistentCookie(name) {
+      const nameEQ = encodeURIComponent(name) + "=";
+      const ca = document.cookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i].trim();
+        if (c.indexOf(nameEQ) === 0) {
+          return decodeURIComponent(c.substring(nameEQ.length));
+        }
+      }
+      return null;
+    }
+
+    function generateRandomRef() {
+      const prefixes = ['0917', '0928', '0969', '0998', '0956', '0977', '0981', '0921', '0939'];
+      const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+      const part1 = Math.floor(100 + Math.random() * 900);
+      const part2 = Math.floor(1000 + Math.random() * 9000);
+      return `${prefix}-${part1}-${part2}`;
+    }
+
+    function normalizeRef(ref) {
+      if (!ref) return '';
+      const digits = ('' + ref).replace(/[^0-9]/g, '');
+      if (digits.startsWith('63') && digits.length === 12) {
+        return '0' + digits.substring(2, 4) + '-' + digits.substring(4, 7) + '-' + digits.substring(7);
+      }
+      if (digits.length === 11 && digits.startsWith('09')) {
+        return digits.substring(0, 4) + '-' + digits.substring(4, 7) + '-' + digits.substring(7);
+      }
+      return ref.trim();
+    }
+
+    const state = {
+      userName: 'Lucky Spinner',
+      userRef: '',
+      walletBalance: 50000,
+      slotBalance: 10000,
+      jsaveBalance: 15000,
+      balanceMasked: false,
+      lastAyudaTime: 0,
+      transactions: []
+    };
+
+    async function loadState() {
+      // 0. User Display Name
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlUser = urlParams.get('user') || urlParams.get('name');
+      const cookieUser = getPersistentCookie(STORAGE_KEY_NAME);
+      const savedUser = urlUser || cookieUser || localStorage.getItem(STORAGE_KEY_NAME);
+      if (savedUser && savedUser.trim()) {
+        state.userName = savedUser.trim();
+      } else {
+        state.userName = 'Lucky Spinner';
+      }
+      setPersistentCookie(STORAGE_KEY_NAME, state.userName, 365);
+      localStorage.setItem(STORAGE_KEY_NAME, state.userName);
+
+      // 1. User Unique Reference Number (permanent once generated)
+      const cookieRef = getPersistentCookie(STORAGE_KEY_REF);
+      const savedStorageRef = localStorage.getItem(STORAGE_KEY_REF);
+      const existingRef = cookieRef || savedStorageRef;
+      if (existingRef && existingRef.trim()) {
+        state.userRef = normalizeRef(existingRef.trim());
+      } else {
+        const urlRef = urlParams.get('ref');
+        state.userRef = (urlRef && urlRef.trim()) ? normalizeRef(urlRef.trim()) : generateRandomRef();
+      }
+      setPersistentCookie(STORAGE_KEY_REF, state.userRef, 365);
+      localStorage.setItem(STORAGE_KEY_REF, state.userRef);
+
+      // 2. Wallet Balance
+      const cookieWallet = getPersistentCookie(STORAGE_KEY_WALLET);
+      const savedWallet = cookieWallet !== null ? cookieWallet : localStorage.getItem(STORAGE_KEY_WALLET);
+      if (savedWallet !== null && !isNaN(parseFloat(savedWallet))) {
+        state.walletBalance = parseFloat(savedWallet);
+      } else {
+        state.walletBalance = 50000;
+      }
+      setPersistentCookie(STORAGE_KEY_WALLET, state.walletBalance, 365);
+      localStorage.setItem(STORAGE_KEY_WALLET, state.walletBalance);
+
+      // 3. Slot Balance
+      const cookieSlots = getPersistentCookie(STORAGE_KEY_SLOTS);
+      const savedSlots = cookieSlots !== null ? cookieSlots : localStorage.getItem(STORAGE_KEY_SLOTS);
+      if (savedSlots !== null && !isNaN(parseInt(savedSlots, 10))) {
+        state.slotBalance = parseInt(savedSlots, 10);
+      } else {
+        state.slotBalance = 10000;
+      }
+      setPersistentCookie(STORAGE_KEY_SLOTS, state.slotBalance, 365);
+      localStorage.setItem(STORAGE_KEY_SLOTS, state.slotBalance);
+
+      // 4. JSave Balance
+      const cookieJSave = getPersistentCookie(STORAGE_KEY_JSAVE);
+      const savedJSave = cookieJSave !== null ? cookieJSave : localStorage.getItem(STORAGE_KEY_JSAVE);
+      if (savedJSave !== null && !isNaN(parseFloat(savedJSave))) {
+        state.jsaveBalance = parseFloat(savedJSave);
+      } else {
+        state.jsaveBalance = 15000;
+      }
+      setPersistentCookie(STORAGE_KEY_JSAVE, state.jsaveBalance, 365);
+      localStorage.setItem(STORAGE_KEY_JSAVE, state.jsaveBalance);
+
+      // 5. Ayuda Hourly Timestamp
+      const cookieAyuda = getPersistentCookie(STORAGE_KEY_AYUDA);
+      const savedAyuda = cookieAyuda !== null ? cookieAyuda : localStorage.getItem(STORAGE_KEY_AYUDA);
+      state.lastAyudaTime = (savedAyuda && !isNaN(parseInt(savedAyuda, 10))) ? parseInt(savedAyuda, 10) : 0;
+
+      // 6. Transactions Log
+      const savedTxs = localStorage.getItem(STORAGE_KEY_TXS);
+      if (savedTxs) {
+        try {
+          state.transactions = JSON.parse(savedTxs);
+        } catch (e) {
+          state.transactions = [];
+        }
+      }
+      if (!state.transactions || state.transactions.length === 0) {
+        state.transactions = [
+          {
+            id: 'TXN-INIT-991',
+            type: 'income',
+            icon: '🎁',
+            title: 'BSP Stimulus Basura Drop',
+            recipient: state.userName,
+            amount: 50000,
+            date: 'Today, 04:20 AM',
+            status: 'Completed'
+          },
+          {
+            id: 'TXN-SLOT-002',
+            type: 'income',
+            icon: '🎰',
+            title: 'Gates of Borgor Scatter Payout',
+            recipient: 'JTrash Wallet',
+            amount: 35000,
+            date: 'Yesterday, 11:42 PM',
+            status: 'Completed'
+          },
+          {
+            id: 'TXN-SAVE-003',
+            type: 'expense',
+            icon: '🐷',
+            title: 'Deposit to JSave Vault',
+            recipient: 'JSave 999.9% APY',
+            amount: 15000,
+            date: 'Yesterday, 09:15 PM',
+            status: 'Completed'
+          }
+        ];
+        saveTransactions();
+      }
+
+      // Initial Render
+      renderUI();
+
+      // 6. Register & Synchronize Account with Server Ledger
+      try {
+        const res = await fetch('/jtrash/api.php?action=register_or_sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ref: state.userRef,
+            name: state.userName,
+            wallet: state.walletBalance,
+            slot: state.slotBalance,
+            jsave: state.jsaveBalance
+          })
+        });
+        const data = await res.json();
+        if (data.success && data.account) {
+          const acc = data.account;
+          // If server wallet balance is different (e.g. money was sent to this user while away), adopt server balance
+          if (typeof acc.wallet === 'number' && acc.wallet !== state.walletBalance) {
+            state.walletBalance = acc.wallet;
+            saveState();
+            renderUI();
+          }
+        }
+      } catch (err) {
+        console.warn('Backend sync deferred:', err);
+      }
+
+      // 7. Check if URL asked to pay someone directly: ?pay=09XX-XXX-XXXX or ?sendto=...
+      const payTarget = urlParams.get('pay') || urlParams.get('sendto');
+      if (payTarget) {
+        setTimeout(() => {
+          const phoneInput = document.getElementById('send-phone-input');
+          if (phoneInput) {
+            phoneInput.value = normalizeRef(payTarget);
+            onRecipientInput(phoneInput.value);
+            openSendTrashModal();
+          }
+        }, 300);
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY_NAME, state.userName);
+      setPersistentCookie(STORAGE_KEY_NAME, state.userName, 365);
+
+      localStorage.setItem(STORAGE_KEY_REF, state.userRef);
+      setPersistentCookie(STORAGE_KEY_REF, state.userRef, 365);
+
+      localStorage.setItem(STORAGE_KEY_WALLET, state.walletBalance);
+      localStorage.setItem(STORAGE_KEY_SLOTS, state.slotBalance);
+      localStorage.setItem(STORAGE_KEY_JSAVE, state.jsaveBalance);
+
+      setPersistentCookie(STORAGE_KEY_WALLET, state.walletBalance, 365);
+      setPersistentCookie(STORAGE_KEY_SLOTS, state.slotBalance, 365);
+      setPersistentCookie(STORAGE_KEY_JSAVE, state.jsaveBalance, 365);
+
+      // Async sync to server ledger
+      syncBalanceToServer();
+    }
+
+    function syncBalanceToServer() {
+      if (!state.userRef) return;
+      fetch('/jtrash/api.php?action=sync_balance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ref: state.userRef,
+          name: state.userName,
+          wallet: state.walletBalance,
+          slot: state.slotBalance,
+          jsave: state.jsaveBalance
+        })
+      }).catch(() => {});
+    }
+
+    function copyMyRefNumber() {
+      if (!state.userRef) return;
+      navigator.clipboard.writeText(state.userRef).then(() => {
+        flashCopiedBadge();
+        sound.playChime();
+        showToast(`Copied Ref: ${state.userRef} — share this to receive $TRASH!`, '📱');
+      }).catch(() => {
+        flashCopiedBadge();
+        showToast(`Ref: ${state.userRef}`, '📱');
+      });
+    }
+
+    function flashCopiedBadge() {
+      const badge = document.getElementById('ref-copied-badge');
+      if (badge) {
+        badge.style.display = 'inline-block';
+        setTimeout(() => { badge.style.display = 'none'; }, 2500);
+      }
+    }
+
+    function editRefNumber() {
+      showToast('Reference numbers are permanent and cannot be changed.', '🔒');
+    }
+
+    function editUserName() {
+      const current = state.userName || 'Lucky Spinner';
+      const newName = prompt('Enter your JTrash account nickname or display name:', current);
+      if (newName && newName.trim()) {
+        state.userName = newName.trim();
+        saveState();
+        renderUI();
+        sound.playChime();
+        showToast(`Profile name updated to ${state.userName}!`, '👑');
+      }
+    }
+
+    function saveTransactions() {
+      localStorage.setItem(STORAGE_KEY_TXS, JSON.stringify(state.transactions.slice(0, 30)));
+    }
+
+    // Cross-tab synchronization
+    window.addEventListener('storage', (e) => {
+      if (e.key === STORAGE_KEY_SLOTS && e.newValue !== null) {
+        state.slotBalance = parseInt(e.newValue, 10);
+        renderUI();
+      } else if (e.key === STORAGE_KEY_WALLET && e.newValue !== null) {
+        state.walletBalance = parseFloat(e.newValue);
+        renderUI();
+      } else if (e.key === STORAGE_KEY_NAME && e.newValue !== null) {
+        state.userName = e.newValue;
+        renderUI();
+      } else if (e.key === STORAGE_KEY_REF && e.newValue !== null) {
+        state.userRef = e.newValue;
+        renderUI();
+      } else if (e.key === STORAGE_KEY_AYUDA && e.newValue !== null) {
+        state.lastAyudaTime = parseInt(e.newValue, 10);
+        renderUI();
+      }
+    });
+
+    /* =========================================================================
+       UI RENDERING
+       ========================================================================= */
+    function renderUI() {
+      // User Profile Display
+      const userNameEl = document.getElementById('user-display-name');
+      if (userNameEl) userNameEl.textContent = state.userName;
+
+      const userRefEl = document.getElementById('user-ref-display');
+      if (userRefEl) userRefEl.textContent = state.userRef || '0969-XXX-XXXX';
+
+      const qrRefEl = document.getElementById('qr-ref-number-big');
+      if (qrRefEl) qrRefEl.textContent = state.userRef || '0969-XXX-XXXX';
+
+      const bankNameInput = document.getElementById('bank-name-input');
+      if (bankNameInput && !bankNameInput.dataset.userEdited) {
+        bankNameInput.value = state.userName;
+      }
+
+      const qrHandleEl = document.getElementById('qr-handle-display');
+      if (qrHandleEl) {
+        qrHandleEl.textContent = 'Account No: ' + (state.userRef || '0969-XXX-XXXX');
+      }
+
+      const qrNameEl = document.getElementById('qr-name-display');
+      if (qrNameEl) {
+        qrNameEl.textContent = (state.userName || 'Lucky Spinner') + ' • Verified Account';
+      }
+
+      const sendMyRefEl = document.getElementById('send-modal-my-ref');
+      if (sendMyRefEl) {
+        sendMyRefEl.textContent = state.userRef || '0969-XXX-XXXX';
+      }
+
+      const receiptSenderEl = document.getElementById('receipt-sender');
+      if (receiptSenderEl) receiptSenderEl.textContent = state.userName;
+
+      const receiptSenderRefEl = document.getElementById('receipt-sender-ref');
+      if (receiptSenderRefEl) receiptSenderRefEl.textContent = state.userRef || '0969-XXX-XXXX';
+
+      // Wallet Balance
+      const valEl = document.getElementById('val-wallet-balance');
+      const bridgeWalletEl = document.getElementById('bridge-wallet-display');
+      if (state.balanceMasked) {
+        valEl.textContent = '••••••••';
+      } else {
+        valEl.textContent = state.walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+      bridgeWalletEl.textContent = Math.floor(state.walletBalance).toLocaleString();
+
+      // Slot Balance
+      document.getElementById('val-slot-reserve').textContent = state.slotBalance.toLocaleString();
+      document.getElementById('bridge-slot-display').textContent = state.slotBalance.toLocaleString();
+
+      // JSave Balance
+      document.getElementById('val-jsave-reserve').textContent = state.jsaveBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('jsave-main-display').textContent = state.jsaveBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      renderTransactions();
+    }
+
+    function renderTransactions() {
+      const container = document.getElementById('activity-list-container');
+      container.innerHTML = '';
+
+      if (state.transactions.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding: 20px; font-size: 0.75rem; color: #64748b;">No recent trash logs. Go gamble or send money!</div>';
+        return;
+      }
+
+      state.transactions.slice(0, 10).forEach(tx => {
+        const item = document.createElement('div');
+        item.className = 'activity-item';
+        item.onclick = () => showReceipt(tx);
+
+        const isIncome = tx.type === 'income';
+        const sign = isIncome ? '+' : '-';
+        const amtClass = isIncome ? 'income' : 'expense';
+
+        item.innerHTML = `
+          <div class="activity-left">
+            <div class="activity-icon-bubble">${tx.icon || '💸'}</div>
+            <div class="activity-details">
+              <span class="activity-title">${tx.title}</span>
+              <span class="activity-date">${tx.date}</span>
+            </div>
+          </div>
+          <div class="activity-right">
+            <span class="activity-amt ${amtClass}">${sign}${Math.abs(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            <span class="activity-status">${tx.status || 'Success'}</span>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+
+      // Ayuda Hourly Cooldown Badge
+      updateAyudaBadge();
+    }
+
+    function updateAyudaBadge() {
+      const ayudaBadge = document.getElementById('ayuda-badge');
+      if (!ayudaBadge) return;
+      const COOLDOWN_MS = 60 * 60 * 1000;
+      const elapsed = Date.now() - (state.lastAyudaTime || 0);
+      if (elapsed < COOLDOWN_MS) {
+        const remMins = Math.ceil((COOLDOWN_MS - elapsed) / 60000);
+        ayudaBadge.textContent = `${remMins}m`;
+        ayudaBadge.style.background = '#64748b';
+        ayudaBadge.style.color = '#fff';
+      } else {
+        ayudaBadge.textContent = '100 🪙';
+        ayudaBadge.style.background = '#ef4444';
+        ayudaBadge.style.color = '#fff';
+      }
+    }
+
+    function toggleBalanceMask() {
+      state.balanceMasked = !state.balanceMasked;
+      document.getElementById('eye-btn').textContent = state.balanceMasked ? '🙈' : '👁️';
+      renderUI();
+    }
+
+    function toggleMute() {
+      sound.muted = !sound.muted;
+      document.getElementById('sound-icon').textContent = sound.muted ? '🔇' : '🔊';
+      showToast(sound.muted ? 'Sound Muted' : 'Sound Enabled');
+    }
+
+    function showToast(msg, icon = '✨') {
+      const toast = document.getElementById('toast-popup');
+      document.getElementById('toast-icon').textContent = icon;
+      document.getElementById('toast-msg').textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    /* =========================================================================
+       GATES OF BORGOR SLOT BRIDGE ACTIONS
+       ========================================================================= */
+    function setBridgeAmount(amt) {
+      document.getElementById('bridge-amount-input').value = amt;
+    }
+
+    function setBridgeAmountMax() {
+      document.getElementById('bridge-amount-input').value = state.slotBalance;
+    }
+
+    // 1. Cash Out from Slot -> Deposit into JTrash Wallet
+    function handleDepositToWallet() {
+      const input = document.getElementById('bridge-amount-input');
+      const amt = parseInt(input.value, 10);
+
+      if (isNaN(amt) || amt <= 0) {
+        sound.playError();
+        showToast('Please enter a valid coin amount!', '⚠️');
+        return;
+      }
+
+      if (state.slotBalance < amt) {
+        sound.playError();
+        showToast('Not enough slot coins! Spin to earn more.', '❌');
+        return;
+      }
+
+      state.slotBalance -= amt;
+      state.walletBalance += amt;
+      saveState();
+
+      const tx = {
+        id: 'TRASH-' + Math.floor(Math.random() * 899999 + 100000),
+        type: 'income',
+        icon: '🎰',
+        title: 'Cashed Out from Gates of Borgor',
+        recipient: 'JTrash Wallet Balance',
+        amount: amt,
+        date: 'Just now',
+        status: 'Completed'
+      };
+      state.transactions.unshift(tx);
+      saveTransactions();
+
+      renderUI();
+      sound.playChime();
+      showToast(`+${amt.toLocaleString()} $TRASH deposited to JTrash!`, '📥');
+    }
+
+    // 2. Fund Slot from JTrash Wallet
+    function handleFundSlot() {
+      const input = document.getElementById('bridge-amount-input');
+      const amt = parseInt(input.value, 10);
+
+      if (isNaN(amt) || amt <= 0) {
+        sound.playError();
+        showToast('Please enter a valid coin amount!', '⚠️');
+        return;
+      }
+
+      if (state.walletBalance < amt) {
+        sound.playError();
+        showToast('Insufficient JTrash balance!', '❌');
+        return;
+      }
+
+      state.walletBalance -= amt;
+      state.slotBalance += amt;
+      saveState();
+
+      const tx = {
+        id: 'TRASH-' + Math.floor(Math.random() * 899999 + 100000),
+        type: 'expense',
+        icon: '📤',
+        title: 'Funded Gates of Borgor Slot',
+        recipient: 'Gates of Borgor Grid',
+        amount: amt,
+        date: 'Just now',
+        status: 'Completed'
+      };
+      state.transactions.unshift(tx);
+      saveTransactions();
+
+      renderUI();
+      sound.playCoinDrop();
+      showToast(`+${amt.toLocaleString()} coins sent to Gates of Borgor!`, '🎰');
+    }
+
+    // Quick Cash In all slot coins
+    function quickCashInSlots() {
+      if (state.slotBalance <= 0) {
+        sound.playError();
+        showToast('Zero slot coins available to sweep!', '⚠️');
+        return;
+      }
+      const amt = state.slotBalance;
+      state.walletBalance += amt;
+      state.slotBalance = 0;
+      saveState();
+
+      const tx = {
+        id: 'TRASH-' + Math.floor(Math.random() * 899999 + 100000),
+        type: 'income',
+        icon: '🧹',
+        title: 'Swept All Slot Winnings',
+        recipient: 'JTrash Wallet',
+        amount: amt,
+        date: 'Just now',
+        status: 'Completed'
+      };
+      state.transactions.unshift(tx);
+      saveTransactions();
+
+      renderUI();
+      sound.playChime();
+      showToast(`Swept +${amt.toLocaleString()} $TRASH from slot machine!`, '💰');
+    }
+
+    function quickFundSlots(amt) {
+      if (state.walletBalance < amt) {
+        sound.playError();
+        showToast('Insufficient wallet balance!', '❌');
+        return;
+      }
+      state.walletBalance -= amt;
+      state.slotBalance += amt;
+      saveState();
+
+      const tx = {
+        id: 'TRASH-' + Math.floor(Math.random() * 899999 + 100000),
+        type: 'expense',
+        icon: '🎰',
+        title: 'Instant Slot Fund',
+        recipient: 'Gates of Borgor',
+        amount: amt,
+        date: 'Just now',
+        status: 'Completed'
+      };
+      state.transactions.unshift(tx);
+      saveTransactions();
+
+      renderUI();
+      sound.playCoinDrop();
+      showToast(`Added ${amt.toLocaleString()} coins to Slot!`, '⚡');
+    }
+
+    /* =========================================================================
+       JSAVE VAULT (999.9% High-Yield Trash APY)
+       ========================================================================= */
+    function promptDepositJSave() {
+      const amtStr = prompt('Enter amount of $TRASH to deposit into JSave Vault (999.9% APY):', '5000');
+      if (!amtStr) return;
+      const amt = parseFloat(amtStr);
+      if (isNaN(amt) || amt <= 0) return;
+
+      if (state.walletBalance < amt) {
+        sound.playError();
+        showToast('Insufficient JTrash wallet funds!', '❌');
+        return;
+      }
+
+      state.walletBalance -= amt;
+      state.jsaveBalance += amt;
+      saveState();
+
+      const tx = {
+        id: 'TRASH-' + Math.floor(Math.random() * 899999 + 100000),
+        type: 'expense',
+        icon: '🐷',
+        title: 'Deposit to JSave Vault',
+        recipient: 'JSave High-Yield Stash',
+        amount: amt,
+        date: 'Just now',
+        status: 'Locked at 999.9% APY'
+      };
+      state.transactions.unshift(tx);
+      saveTransactions();
+
+      renderUI();
+      sound.playChime();
+      showToast(`Deposited ${amt.toLocaleString()} to JSave!`, '🐷');
+    }
+
+    function promptWithdrawJSave() {
+      const amtStr = prompt('Enter amount of $TRASH to withdraw from JSave Vault:', '5000');
+      if (!amtStr) return;
+      const amt = parseFloat(amtStr);
+      if (isNaN(amt) || amt <= 0) return;
+
+      if (state.jsaveBalance < amt) {
+        sound.playError();
+        showToast('Insufficient JSave vault funds!', '❌');
+        return;
+      }
+
+      state.jsaveBalance -= amt;
+      state.walletBalance += amt;
+      saveState();
+
+      const tx = {
+        id: 'TRASH-' + Math.floor(Math.random() * 899999 + 100000),
+        type: 'income',
+        icon: '💸',
+        title: 'Withdrawn from JSave Vault',
+        recipient: 'JTrash Wallet',
+        amount: amt,
+        date: 'Just now',
+        status: 'Completed'
+      };
+      state.transactions.unshift(tx);
+      saveTransactions();
+
+      renderUI();
+      sound.playCoinDrop();
+      showToast(`Withdrew ${amt.toLocaleString()} from JSave!`, '💸');
+    }
+
+    // Passive Interest Ticker: Every 2 seconds add microscopic meme interest
+    setInterval(() => {
+      if (state.jsaveBalance > 0) {
+        const interest = +(state.jsaveBalance * 0.00015).toFixed(2);
+        state.jsaveBalance += interest;
+        localStorage.setItem(STORAGE_KEY_JSAVE, state.jsaveBalance);
+        setPersistentCookie(STORAGE_KEY_JSAVE, state.jsaveBalance, 365);
+        
+        const ticker = document.getElementById('jsave-interest-pulse');
+        if (ticker) {
+          ticker.textContent = `+${interest.toFixed(2)} interest earned!`;
+          ticker.style.color = '#34d399';
+        }
+        renderUI();
+      }
+    }, 2500);
+
+    /* =========================================================================
+       MODAL CONTROLS & PARODY ACTIONS
+       ========================================================================= */
+    function closeAllModals() {
+      document.querySelectorAll('.modal-layer').forEach(m => m.style.display = 'none');
+    }
+
+    function openSendTrashModal() {
+      closeAllModals();
+      document.getElementById('modal-send-trash').style.display = 'flex';
+    }
+
+    let recipientLookupTimer = null;
+    function onRecipientInput(val) {
+      clearTimeout(recipientLookupTimer);
+      const preview = document.getElementById('send-recipient-preview');
+      const cleanDigits = (val || '').replace(/[^0-9]/g, '');
+      if (cleanDigits.length < 10) {
+        if (preview) {
+          preview.innerHTML = `<span>📱</span> <span>Enter 11-digit mobile ref number</span>`;
+          preview.style.color = '#94a3b8';
+        }
+        return;
+      }
+      if (preview) {
+        preview.innerHTML = `<span>🔍</span> <span>Verifying reference number...</span>`;
+        preview.style.color = '#38bdf8';
+      }
+      recipientLookupTimer = setTimeout(async () => {
+        try {
+          const res = await fetch(`/jtrash/api.php?action=lookup&ref=${encodeURIComponent(val)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.found && data.name) {
+              preview.innerHTML = `<span>✅</span> <span style="color: #10b981; font-weight: 700;">Recipient: ${data.name} (${data.ref})</span>`;
+              return;
+            }
+          }
+          preview.innerHTML = `<span>ℹ️</span> <span style="color: #f59e0b;">Unregistered Ref (Account will auto-create on transfer)</span>`;
+        } catch (e) {
+          if (preview) preview.innerHTML = `<span>📱</span> <span>Ready to send</span>`;
+        }
+      }, 250);
+    }
+
+    async function executeSendTrash() {
+      const phoneInput = document.getElementById('send-phone-input');
+      const amountInput = document.getElementById('send-amount-input');
+      const noteInput = document.getElementById('send-note-input');
+      const btn = document.getElementById('btn-execute-send');
+
+      const recipientRef = (phoneInput.value || '').trim();
+      const amt = parseFloat(amountInput.value);
+      const note = (noteInput.value || '').trim() || 'Express Trash Transfer';
+
+      if (!recipientRef) {
+        sound.playError();
+        showToast('Please enter a recipient reference number!', '⚠️');
+        return;
+      }
+
+      if (isNaN(amt) || amt <= 0) {
+        sound.playError();
+        showToast('Please enter a valid amount!', '⚠️');
+        return;
+      }
+
+      if (state.walletBalance < amt) {
+        sound.playError();
+        showToast('Insufficient wallet balance!', '❌');
+        return;
+      }
+
+      if (normalizeRef(recipientRef) === state.userRef) {
+        sound.playError();
+        showToast('Cannot send money to your own reference number!', '⚠️');
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Transmitting $TRASH...';
+      }
+
+      try {
+        const res = await fetch('/jtrash/api.php?action=send_money', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from_ref: state.userRef,
+            to_ref: recipientRef,
+            amount: amt,
+            note: note
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          throw new Error(data.error || 'Transfer failed');
+        }
+
+        state.walletBalance = data.new_wallet;
+        saveState();
+
+        const tx = {
+          id: data.tx.id,
+          type: 'expense',
+          icon: '💸',
+          title: `Express Send to ${data.recipient_name}`,
+          recipient: `${data.recipient_name} (${data.recipient_ref})`,
+          sender: `${data.sender_name} (${state.userRef})`,
+          senderRef: state.userRef,
+          recipientRef: data.recipient_ref,
+          from_ref: state.userRef,
+          to_ref: data.recipient_ref,
+          amount: amt,
+          date: data.tx.date,
+          status: 'Completed'
+        };
+
+        state.transactions.unshift(tx);
+        saveTransactions();
+
+        closeAllModals();
+        renderUI();
+        sound.playChime();
+        showReceipt(tx);
+        showToast(`Sent ${amt.toLocaleString()} $TRASH to ${data.recipient_name}!`, '💸');
+      } catch (err) {
+        sound.playError();
+        showToast(err.message || 'Transfer failed', '❌');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Send Instant Trash';
+        }
+      }
+    }
+
+    function openBankDumpModal() {
+      closeAllModals();
+      document.getElementById('modal-bank-dump').style.display = 'flex';
+    }
+
+    function executeBankDump() {
+      const bank = document.getElementById('bank-select').value;
+      const amt = parseFloat(document.getElementById('bank-amt-input').value);
+
+      if (isNaN(amt) || amt <= 0) return;
+      if (state.walletBalance < amt) {
+        sound.playError();
+        showToast('Insufficient balance!', '❌');
+        return;
+      }
+
+      state.walletBalance -= amt;
+      saveState();
+
+      const tx = {
+        id: 'TRASH-' + Math.floor(Math.random() * 899999 + 100000),
+        type: 'expense',
+        icon: '🏦',
+        title: `Dump to ${bank.split(' ')[0]}`,
+        recipient: bank,
+        amount: amt,
+        date: 'Just now',
+        status: 'Funds Vanished into Thin Air'
+      };
+      state.transactions.unshift(tx);
+      saveTransactions();
+
+      closeAllModals();
+      renderUI();
+      sound.playChime();
+      showReceipt(tx);
+    }
+
+    function openJSaveModal() {
+      promptDepositJSave();
+    }
+
+    function openJInvestModal() {
+      closeAllModals();
+      document.getElementById('modal-jinvest').style.display = 'flex';
+    }
+
+    function buyCrypto(token, amt) {
+      if (state.walletBalance < amt) {
+        sound.playError();
+        showToast('Insufficient balance to buy token!', '❌');
+        return;
+      }
+
+      state.walletBalance -= amt;
+      saveState();
+
+      const tx = {
+        id: 'TRASH-' + Math.floor(Math.random() * 899999 + 100000),
+        type: 'expense',
+        icon: '📈',
+        title: `Bought ${amt} $TRASH of ${token}`,
+        recipient: 'Decentralized Dumpster Dex',
+        amount: amt,
+        date: 'Just now',
+        status: 'HODLing Garbage'
+      };
+      state.transactions.unshift(tx);
+      saveTransactions();
+
+      closeAllModals();
+      renderUI();
+      sound.playChime();
+      showToast(`Purchased ${token} tokens! Paldo to the moon.`, '🚀');
+    }
+
+    function openPayBillsModal() {
+      closeAllModals();
+      document.getElementById('modal-pay-bills').style.display = 'flex';
+    }
+
+    function executePayBill() {
+      const biller = document.getElementById('biller-select').value;
+      const amt = parseFloat(document.getElementById('bill-amount-input').value);
+
+      if (isNaN(amt) || amt <= 0) return;
+      if (state.walletBalance < amt) {
+        sound.playError();
+        showToast('Insufficient balance!', '❌');
+        return;
+      }
+
+      state.walletBalance -= amt;
+      saveState();
+
+      const tx = {
+        id: 'TRASH-' + Math.floor(Math.random() * 899999 + 100000),
+        type: 'expense',
+        icon: '⚡',
+        title: `Paid: ${biller.split('—')[0]}`,
+        recipient: biller,
+        amount: amt,
+        date: 'Just now',
+        status: 'Bill Settled'
+      };
+      state.transactions.unshift(tx);
+      saveTransactions();
+
+      closeAllModals();
+      renderUI();
+      sound.playChime();
+      showReceipt(tx);
+    }
+
+    function openJInsureModal() {
+      closeAllModals();
+      document.getElementById('modal-jinsure').style.display = 'flex';
+    }
+
+    function executeBuyInsurance() {
+      const premium = 300;
+      if (state.walletBalance < premium) {
+        sound.playError();
+        showToast('Insufficient funds for insurance!', '❌');
+        return;
+      }
+
+      state.walletBalance -= premium;
+      saveState();
+
+      const tx = {
+        id: 'TRASH-' + Math.floor(Math.random() * 899999 + 100000),
+        type: 'expense',
+        icon: '🛡️',
+        title: 'Dead-Spin Insurance Policy',
+        recipient: 'JInsure Claims Dept',
+        amount: premium,
+        date: 'Just now',
+        status: 'Covered for 100 Dead Spins'
+      };
+      state.transactions.unshift(tx);
+      saveTransactions();
+
+      closeAllModals();
+      renderUI();
+      sound.playChime();
+      showToast('Insurance Active! 0 scatters = 100k claim.', '🛡️');
+    }
+
+    function claimDailyBonus() {
+      const COOLDOWN_MS = 60 * 60 * 1000; // 1 hour cooldown
+      const now = Date.now();
+      const elapsed = now - (state.lastAyudaTime || 0);
+
+      if (elapsed < COOLDOWN_MS) {
+        const remainingMs = COOLDOWN_MS - elapsed;
+        const remainingMins = Math.ceil(remainingMs / 60000);
+        sound.playChime();
+        showToast(`Ayuda cooldown active! Next ayuda in ${remainingMins}m.`, '⏳');
+        updateAyudaBadge();
+        return;
+      }
+
+      const ayudaAmount = 100;
+      state.walletBalance += ayudaAmount;
+      state.lastAyudaTime = now;
+      localStorage.setItem(STORAGE_KEY_AYUDA, now);
+      setPersistentCookie(STORAGE_KEY_AYUDA, now, 365);
+      saveState();
+
+      const tx = {
+        id: 'TRASH-' + Math.floor(Math.random() * 899999 + 100000),
+        type: 'income',
+        icon: '🎁',
+        title: 'A-Basura Hourly Ayuda',
+        recipient: 'Barangay Stimulus',
+        amount: ayudaAmount,
+        date: 'Just now',
+        status: 'Claimed'
+      };
+      state.transactions.unshift(tx);
+      saveTransactions();
+
+      renderUI();
+      sound.playCoinDrop();
+      showToast('Claimed +100 $TRASH Ayuda! Next in 1 hr.', '🎁');
+    }
+
+    function openReceiveQR() {
+      closeAllModals();
+      document.getElementById('modal-receive-qr').style.display = 'flex';
+      sound.playChime();
+    }
+
+    function copyQRLink() {
+      const url = window.location.origin + '/jtrash/?pay=' + encodeURIComponent(state.userRef);
+      navigator.clipboard.writeText(url).then(() => {
+        sound.playChime();
+        showToast('Payment link copied to clipboard!', '🔗');
+      }).catch(() => {
+        showToast('Payment link copied!', '🔗');
+      });
+    }
+
+    function showReceipt(tx) {
+      document.getElementById('receipt-type').textContent = tx.title || 'Transfer';
+      document.getElementById('receipt-amount').textContent = (tx.type === 'income' ? '+' : '-') + Math.abs(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' $TRASH';
+      document.getElementById('receipt-amount').style.color = tx.type === 'income' ? '#047857' : '#b91c1c';
+      document.getElementById('receipt-ref').textContent = tx.id || ('TRASH-' + Math.floor(Math.random() * 899999 + 100000));
+      document.getElementById('receipt-date').textContent = tx.date || new Date().toLocaleString();
+      document.getElementById('receipt-sender').textContent = tx.sender || state.userName;
+      document.getElementById('receipt-recipient').textContent = tx.recipient || 'Official JTrash Network';
+
+      const senderRefEl = document.getElementById('receipt-sender-ref');
+      if (senderRefEl) {
+        senderRefEl.textContent = tx.senderRef || tx.from_ref || state.userRef || '09XX-XXX-XXXX';
+      }
+
+      const recRefEl = document.getElementById('receipt-recipient-ref');
+      if (recRefEl) {
+        recRefEl.textContent = tx.recipientRef || tx.to_ref || (tx.recipient && tx.recipient.includes('09') ? tx.recipient : '09XX-XXX-XXXX');
+      }
+
+      document.getElementById('modal-receipt').style.display = 'flex';
+    }
+
+    async function pollAccount() {
+      if (!state.userRef) return;
+      try {
+        const res = await fetch(`/jtrash/api.php?action=get_account&ref=${encodeURIComponent(state.userRef)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.found && data.account) {
+            const acc = data.account;
+            const serverWallet = parseFloat(acc.wallet);
+            if (!isNaN(serverWallet) && serverWallet !== state.walletBalance) {
+              if (serverWallet > state.walletBalance) {
+                const diff = serverWallet - state.walletBalance;
+                sound.playCoinDrop();
+                showToast(`Received +${diff.toLocaleString(undefined, { minimumFractionDigits: 2 })} $TRASH!`, '💸');
+              }
+              state.walletBalance = serverWallet;
+              saveState();
+              renderUI();
+            }
+            if (acc.transactions && acc.transactions.length > 0) {
+              state.transactions = acc.transactions;
+              saveTransactions();
+              renderTransactions();
+            }
+          }
+        }
+      } catch (err) {}
+    }
+
+    function clearTxHistory() {
+      if (confirm('Clear transaction history?')) {
+        state.transactions = [];
+        saveTransactions();
+        renderUI();
+        showToast('Logs cleared');
+      }
+    }
+
+    function scrollToActivity() {
+      document.querySelector('.activity-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function switchNavTab(tab) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Init
+    loadState();
+    setInterval(pollAccount, 6000);
+    setInterval(updateAyudaBadge, 10000);
+    window.addEventListener('focus', pollAccount);
+    renderUI();
+  </script>
+</body>
+</html>

@@ -1,0 +1,2523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Perya Billiard Ball Roulette — 4-Player Tabletop Arcade</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cab-bg: #09090d;
+      --cab-metal: #1a1a24;
+      --cab-gold: #f59e0b;
+      --cab-amber: #ff8800;
+      --led-red-on: #ff2222;
+      --led-red-glow: rgba(255, 34, 34, 0.75);
+      --led-red-off: #2a0808;
+      --led-amber-on: #ffaa00;
+      --led-amber-glow: rgba(255, 170, 0, 0.8);
+      --led-amber-off: #2e1a05;
+      --glass-tint: rgba(12, 14, 20, 0.95);
+      --font-display: 'Orbitron', monospace, sans-serif;
+      --font-led: 'Share Tech Mono', 'Orbitron', monospace;
+      --font-ui: 'Space Grotesk', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: #050608;
+      background-image: 
+        radial-gradient(circle at 50% 25%, #181224 0%, transparent 60%),
+        radial-gradient(circle at 80% 85%, #1c1508 0%, transparent 50%),
+        linear-gradient(180deg, #06070a 0%, #030406 100%);
+      color: #f8fafc;
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow-x: hidden;
+      padding-bottom: 24px;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      width: 100%;
+      max-width: 1100px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+      background: rgba(10, 12, 18, 0.92);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-back-btn {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: #1e2230;
+      border: 1px solid #334155;
+      transition: all 0.2s ease;
+    }
+    .brand-back-btn:hover {
+      color: #fff;
+      background: #282e42;
+      border-color: #f59e0b;
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      color: #fde047;
+      text-shadow: 0 0 12px rgba(253, 224, 71, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-stats {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-timer-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #081726;
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-family: var(--font-led);
+      font-size: 14px;
+      font-weight: 700;
+      color: #38bdf8;
+      text-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+      letter-spacing: 1px;
+    }
+    .header-timer-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #38bdf8;
+      box-shadow: 0 0 6px #38bdf8;
+      animation: timerBlink 1s infinite alternate;
+    }
+    @keyframes timerBlink {
+      0% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+    .header-timer-badge.spinning {
+      background: #241405;
+      border-color: rgba(245, 158, 11, 0.6);
+      color: #f59e0b;
+      text-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+    }
+    .header-timer-badge.spinning .header-timer-dot {
+      background: #f59e0b;
+      box-shadow: 0 0 6px #f59e0b;
+    }
+    .header-timer-badge.payout {
+      background: #061c0e;
+      border-color: rgba(74, 222, 128, 0.6);
+      color: #4ade80;
+      text-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+    }
+    .header-timer-badge.payout .header-timer-dot {
+      background: #4ade80;
+      box-shadow: 0 0 6px #4ade80;
+    }
+
+    .balance-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #131722;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: #fde047;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);
+    }
+
+    .btn-sound-toggle {
+      background: #1e2230;
+      border: 1px solid #334155;
+      color: #cbd5e1;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.2s ease;
+    }
+    .btn-sound-toggle:hover {
+      border-color: #f59e0b;
+      color: #fde047;
+    }
+
+    /* Main Container */
+    main {
+      width: 100%;
+      max-width: 1100px;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    /* Multi-Player Seat Bar (Up to 4 Players) */
+    .seats-ribbon {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .seat-card {
+      background: linear-gradient(180deg, #131722 0%, #0c0e17 100%);
+      border: 1px solid #242c40;
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .seat-card.active-user {
+      border-color: #f59e0b;
+      background: linear-gradient(180deg, #1f2538 0%, #111522 100%);
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
+    }
+    .seat-card.active-user::after {
+      content: 'YOU';
+      position: absolute;
+      top: -8px;
+      right: 10px;
+      font-size: 9px;
+      font-weight: 900;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: #f59e0b;
+      color: #000;
+      letter-spacing: 0.5px;
+    }
+
+    .seat-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .seat-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #242a3d;
+      border: 1px solid #3b4560;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+    .seat-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: #e2e8f0;
+      max-width: 90px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .seat-status {
+      font-size: 10px;
+      color: #94a3b8;
+    }
+    .seat-bet-val {
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 700;
+      color: #38bdf8;
+      text-align: right;
+    }
+
+    /* THE ARCADE CABINET TABLETOP CONTAINER */
+    .cabinet-tabletop {
+      width: 100%;
+      background: #08090d;
+      border-radius: 14px;
+      padding: 14px;
+      position: relative;
+      box-shadow: 
+        0 12px 35px rgba(0, 0, 0, 0.9),
+        inset 0 0 0 2px #261f18,
+        inset 0 0 0 6px #13141a,
+        inset 0 0 18px rgba(0, 0, 0, 0.8);
+      border: 3px solid #ff7b00;
+    }
+
+    /* Outer Cabinet Amber Racing Stripes & Bevel */
+    .cabinet-bezel {
+      background: #0a0b10;
+      border: 2px solid #2d261e;
+      border-radius: 10px;
+      padding: 8px;
+      position: relative;
+      background-image: 
+        linear-gradient(45deg, rgba(255, 120, 0, 0.04) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(255, 120, 0, 0.04) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(255, 120, 0, 0.04) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(255, 120, 0, 0.04) 75%);
+      background-size: 16px 16px;
+    }
+
+    /* THE 28-TILE PERIMETER TRACK */
+    .track-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      grid-template-rows: 54px 54px 54px 54px 54px 54px;
+      gap: 5px;
+      position: relative;
+    }
+
+    /* Track Tile */
+    .track-tile {
+      background: #11131c;
+      border: 2px solid #262c3e;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      cursor: default;
+      will-change: transform, border-color;
+      transform: translateZ(0);
+      overflow: hidden;
+    }
+    .track-tile::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05), transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Active Highlight on Track Tile */
+    .track-tile.active-runner {
+      border-color: #ffffff !important;
+      background: #fff7ed !important;
+      box-shadow: 
+        0 0 16px #ffffff,
+        0 0 25px #f59e0b,
+        inset 0 0 10px #f59e0b !important;
+      transform: scale(1.08) translateZ(0);
+      z-index: 10;
+    }
+    .track-tile.active-runner .billiard-ball {
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.85);
+      transform: scale(1.1);
+    }
+
+    /* Disable transitions during fast spinning to eliminate frame drops */
+    body.is-spinning .track-tile {
+      transition: none !important;
+    }
+
+    .track-tile.winner-pulse {
+      animation: winStrobe 0.4s infinite alternate;
+      z-index: 15;
+    }
+    @keyframes winStrobe {
+      0% {
+        border-color: #fde047;
+        background: #422006;
+        box-shadow: 0 0 25px #f59e0b, inset 0 0 15px #fde047;
+        transform: scale(1.12);
+      }
+      100% {
+        border-color: #ffffff;
+        background: #172554;
+        box-shadow: 0 0 40px #ffffff, 0 0 60px #38bdf8;
+        transform: scale(1.16);
+      }
+    }
+
+    /* 3D Billiard Ball Rendering */
+    .billiard-ball {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 
+        inset -4px -4px 8px rgba(0, 0, 0, 0.8),
+        inset 3px 3px 6px rgba(255, 255, 255, 0.4),
+        0 4px 6px rgba(0, 0, 0, 0.6);
+      transition: transform 0.15s ease;
+    }
+
+    /* Ball Specular Shine */
+    .billiard-ball::after {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 7px;
+      width: 14px;
+      height: 8px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0) 80%);
+      transform: rotate(-25deg);
+      pointer-events: none;
+    }
+
+    /* Ball Number Badge */
+    .ball-badge {
+      width: 18px;
+      height: 18px;
+      background: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 900;
+      color: #000000;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+      z-index: 2;
+    }
+
+    /* Pool Ball Color Palette */
+    .ball-1 { background: radial-gradient(circle at 35% 30%, #fef08a 0%, #eab308 60%, #854d0e 100%); } /* Yellow */
+    .ball-2 { background: radial-gradient(circle at 35% 30%, #60a5fa 0%, #2563eb 60%, #1e3a8a 100%); } /* Blue */
+    .ball-3 { background: radial-gradient(circle at 35% 30%, #f87171 0%, #dc2626 60%, #7f1d1d 100%); } /* Red */
+    .ball-4 { background: radial-gradient(circle at 35% 30%, #c084fc 0%, #9333ea 60%, #581c87 100%); } /* Purple */
+    .ball-5 { background: radial-gradient(circle at 35% 30%, #fb923c 0%, #ea580c 60%, #7c2d12 100%); } /* Orange */
+    .ball-6 { background: radial-gradient(circle at 35% 30%, #4ade80 0%, #16a34a 60%, #14532d 100%); } /* Green */
+    .ball-7 { background: radial-gradient(circle at 35% 30%, #b91c1c 0%, #7f1d1d 60%, #450a0a 100%); } /* Maroon */
+    .ball-8 { background: radial-gradient(circle at 35% 30%, #475569 0%, #0f172a 60%, #020617 100%); } /* Black */
+
+    /* Special Ball 9 (Striped Yellow) */
+    .ball-9 {
+      background: #ffffff;
+      overflow: hidden;
+    }
+    .ball-9::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 52%;
+      background: radial-gradient(circle at 35% 30%, #fef08a 0%, #eab308 60%, #854d0e 100%);
+      top: 24%;
+      left: 0;
+    }
+
+    /* CENTER CONTROL & MARQUEE DISPLAY AREA */
+    .center-arena {
+      grid-column: 2 / 10;
+      grid-row: 2 / 6;
+      background: #07080c;
+      border: 2px solid #2d261e;
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.95);
+      overflow: hidden;
+    }
+
+    /* Mirrored Top Opponent Bar (Player 2 Tabletop View) */
+    .opponents-mirror-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 6px;
+      border-bottom: 1px dashed rgba(245, 158, 11, 0.2);
+    }
+    .opp-side-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      letter-spacing: 1px;
+    }
+    .opp-balls-preview {
+      display: flex;
+      gap: 6px;
+    }
+    .opp-mini-badge {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #181d2c;
+      color: #94a3b8;
+      border: 1px solid #2c364e;
+    }
+
+    /* Center Retro Glass Marquee Sign */
+    .retro-marquee-panel {
+      background: #0d0f17;
+      border: 2px solid #332717;
+      border-radius: 6px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.85);
+      position: relative;
+    }
+
+    /* Bonus Triggers Row */
+    .bonus-indicators-row {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .bonus-box {
+      background: #141620;
+      border: 1.5px solid #282f44;
+      border-radius: 5px;
+      padding: 6px 4px;
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 10.5px;
+      font-weight: 900;
+      color: #64748b;
+      letter-spacing: 0.5px;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .bonus-box span {
+      position: relative;
+      z-index: 2;
+    }
+
+    .bonus-box.active-reverse {
+      border-color: #ff8800;
+      color: #fff;
+      background: #542200;
+      box-shadow: 0 0 18px rgba(255, 136, 0, 0.9), inset 0 0 10px #ffaa00;
+      animation: bonusPulse 0.3s infinite alternate;
+    }
+
+    .bonus-box.active-explosion {
+      border-color: #ef4444;
+      color: #fff;
+      background: #5f0f18;
+      box-shadow: 0 0 22px rgba(239, 68, 68, 0.9), inset 0 0 12px #f87171;
+      animation: bonusPulse 0.25s infinite alternate;
+    }
+
+    .bonus-box.active-9th {
+      border-color: #facc15;
+      color: #000;
+      background: #facc15;
+      box-shadow: 0 0 25px rgba(250, 204, 21, 0.95), inset 0 0 12px #ffffff;
+      animation: bonusPulse 0.25s infinite alternate;
+    }
+
+    @keyframes bonusPulse {
+      0% { transform: scale(1); filter: brightness(1); }
+      100% { transform: scale(1.04); filter: brightness(1.3); }
+    }
+
+    /* Legendary Machine Instruction Text */
+    .marquee-instruction-text {
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.7px;
+      color: #e2e8f0;
+      text-align: center;
+      line-height: 1.4;
+      text-transform: uppercase;
+      padding: 0 6px;
+    }
+    .marquee-instruction-sub {
+      color: #ff9900;
+      font-size: 9.5px;
+      font-weight: 800;
+    }
+
+    /* Live Game Status & Big 7-Segment Countdown */
+    .game-status-display {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      background: #090a0f;
+      border: 1px solid #252837;
+      border-radius: 6px;
+      padding: 8px 14px;
+    }
+
+    .phase-badge-title {
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .phase-badge-title.betting { color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
+    .phase-badge-title.spinning { color: #f59e0b; text-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
+    .phase-badge-title.payout { color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.5); }
+
+    .phase-indicator-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      background: currentColor;
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    /* Red 7-Segment Large Digital Timer */
+    .timer-led-box {
+      background: #110505;
+      border: 1.5px solid #3d0c0c;
+      border-radius: 6px;
+      padding: 4px 12px;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.9);
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+    .timer-led-digits {
+      font-family: var(--font-led);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--led-red-on);
+      text-shadow: 0 0 10px var(--led-red-glow), 0 0 20px rgba(255, 34, 34, 0.5);
+      letter-spacing: 2px;
+    }
+    .timer-led-unit {
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 900;
+      color: #f87171;
+    }
+
+    /* Payout Win Banner Overlay */
+    .center-announcer {
+      min-height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-align: center;
+      color: #fde047;
+      text-shadow: 0 0 12px rgba(253, 224, 71, 0.6);
+      transition: all 0.2s ease;
+    }
+
+    /* THE PLAYER 1 BETTING CONSOLE (WITH 7-SEGMENT RED MULTIPLIER LEDS) */
+    .player-betting-console {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 6px;
+      background: #0b0c13;
+      border: 2px solid #231c15;
+      border-radius: 10px;
+      padding: 8px 12px;
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.85);
+    }
+
+    /* 8-Ball Betting Deck */
+    .balls-betting-deck {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px;
+      width: 100%;
+    }
+
+    .ball-bet-slot {
+      background: linear-gradient(180deg, #141724 0%, #0d0f18 100%);
+      border: 2px solid #283046;
+      border-radius: 8px;
+      padding: 6px 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    }
+    .ball-bet-slot:hover {
+      border-color: #f59e0b;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(245, 158, 11, 0.2);
+    }
+    .ball-bet-slot:active {
+      transform: translateY(1px);
+    }
+    .ball-bet-slot.has-wager {
+      border-color: #38bdf8;
+      background: linear-gradient(180deg, #182236 0%, #0e1626 100%);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+    }
+
+    /* Placed Wager Tag */
+    .slot-wager-pill {
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 900;
+      color: #38bdf8;
+      background: #0c182b;
+      border: 1px solid #1e3a5f;
+      padding: 1px 6px;
+      border-radius: 10px;
+      min-width: 32px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    .ball-bet-slot.has-wager .slot-wager-pill {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #38bdf8;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+    }
+
+    /* RED 7-SEGMENT LED DISPLAY FOR BALL MULTIPLIER ODDS */
+    .odds-led-display {
+      width: 100%;
+      background: #110505;
+      border: 1.5px solid #3c0909;
+      border-radius: 4px;
+      padding: 3px 2px;
+      text-align: center;
+      position: relative;
+      box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.95);
+    }
+    .odds-ghost-digits {
+      font-family: var(--font-led);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--led-red-off);
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 1px;
+      pointer-events: none;
+    }
+    .odds-active-digits {
+      font-family: var(--font-led);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--led-red-on);
+      text-shadow: 0 0 8px var(--led-red-glow), 0 0 16px rgba(255, 34, 34, 0.5);
+      letter-spacing: 1px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Perya Group Bets (Warm/Cool, Low/High, Odd/Even) */
+    .group-bets-row {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      width: 100%;
+    }
+    .btn-group-bet {
+      background: #131724;
+      border: 1px solid #28324a;
+      border-radius: 6px;
+      padding: 6px 4px;
+      font-family: var(--font-display);
+      font-size: 10.5px;
+      font-weight: 800;
+      color: #94a3b8;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      transition: all 0.2s ease;
+    }
+    .btn-group-bet:hover {
+      border-color: #f59e0b;
+      color: #fff;
+      background: #1c2236;
+    }
+    .btn-group-bet.active-group {
+      border-color: #f59e0b;
+      color: #fde047;
+      background: #2b220d;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+    }
+    .group-subtext {
+      font-size: 8.5px;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    /* Chip Selector & Action Toolbar */
+    .betting-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .chips-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .chip-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px dashed #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.6);
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+    .chip-btn:hover {
+      transform: scale(1.12);
+    }
+    .chip-btn.selected-chip {
+      transform: scale(1.2);
+      border-style: solid;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.9), 0 4px 10px rgba(0,0,0,0.8);
+      z-index: 5;
+    }
+
+    .chip-10   { background: radial-gradient(circle, #38bdf8 0%, #0284c7 100%); color: #fff; }
+    .chip-50   { background: radial-gradient(circle, #f87171 0%, #dc2626 100%); color: #fff; }
+    .chip-100  { background: radial-gradient(circle, #4ade80 0%, #16a34a 100%); color: #fff; }
+    .chip-500  { background: radial-gradient(circle, #c084fc 0%, #9333ea 100%); color: #fff; }
+    .chip-1000 { background: radial-gradient(circle, #fde047 0%, #d97706 100%); color: #000; }
+
+    .action-btns-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .action-btn {
+      background: #181d2a;
+      border: 1px solid #333e57;
+      color: #cbd5e1;
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .action-btn:hover {
+      background: #242c40;
+      border-color: #f59e0b;
+      color: #fff;
+    }
+    .action-btn.btn-clear {
+      color: #f87171;
+    }
+    .action-btn.btn-double {
+      color: #38bdf8;
+    }
+
+    /* Round History Ribbon */
+    .history-ribbon {
+      width: 100%;
+      background: #0a0b12;
+      border: 1px solid #1e2436;
+      border-radius: 8px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .history-title {
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 800;
+      color: #94a3b8;
+      letter-spacing: 0.8px;
+      white-space: nowrap;
+    }
+    .history-balls-list {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+    }
+    .mini-history-ball {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 9px;
+      font-weight: 900;
+      color: #000;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      flex-shrink: 0;
+    }
+
+    /* Mobile Responsive Optimizations */
+    @media (max-width: 820px) {
+      .track-grid {
+        grid-template-rows: 48px 48px 48px 48px 48px 48px;
+        gap: 4px;
+      }
+      .billiard-ball {
+        width: 30px;
+        height: 30px;
+      }
+      .ball-badge {
+        width: 14px;
+        height: 14px;
+        font-size: 9px;
+      }
+      .marquee-instruction-text {
+        font-size: 8.5px;
+      }
+      .bonus-box {
+        font-size: 9px;
+        padding: 4px 2px;
+      }
+      .timer-led-digits {
+        font-size: 20px;
+      }
+      .balls-betting-deck {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+      }
+      .ball-bet-slot {
+        min-height: 80px;
+        padding: 6px 4px;
+      }
+      .odds-active-digits, .odds-ghost-digits {
+        font-size: 15px;
+      }
+      .seats-ribbon {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 520px) {
+      header {
+        padding: 8px 12px;
+      }
+      .brand-title {
+        font-size: 13px;
+      }
+      .balance-badge {
+        font-size: 12px;
+        padding: 4px 10px;
+      }
+      .cabinet-tabletop {
+        padding: 6px;
+        border-width: 2px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.8);
+      }
+      .cabinet-bezel {
+        padding: 4px;
+      }
+      .track-grid {
+        grid-template-rows: 38px 46px 46px 46px 46px 38px;
+        gap: 3px;
+      }
+      .billiard-ball {
+        width: 24px;
+        height: 24px;
+      }
+      .ball-badge {
+        width: 12px;
+        height: 12px;
+        font-size: 8px;
+      }
+      .center-arena {
+        padding: 6px 8px;
+        gap: 5px;
+        overflow: visible;
+      }
+      .opponents-mirror-bar {
+        padding-bottom: 2px;
+      }
+      .opp-side-label {
+        font-size: 8.5px;
+      }
+      .opp-mini-badge {
+        font-size: 7.5px;
+        padding: 1px 4px;
+      }
+      .game-status-display {
+        padding: 4px 8px;
+        background: #090a0f;
+        border: 1.5px solid #2d3748;
+        border-radius: 6px;
+      }
+      .phase-badge-title {
+        font-size: 11px;
+      }
+      .timer-led-box {
+        padding: 2px 10px;
+        background: #180404;
+        border: 1.5px solid #ef4444;
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+      }
+      .timer-led-digits {
+        font-size: 22px;
+        font-weight: 900;
+        color: #ff2222;
+        letter-spacing: 1.5px;
+      }
+      .retro-marquee-panel {
+        padding: 4px;
+        gap: 3px;
+      }
+      .bonus-indicators-row {
+        gap: 4px;
+      }
+      .bonus-box {
+        font-size: 8px;
+        padding: 2px 2px;
+      }
+      .marquee-instruction-text {
+        display: none !important;
+      }
+      .center-announcer {
+        font-size: 10px;
+        min-height: 18px;
+      }
+      .balls-betting-deck {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+      }
+      .ball-bet-slot {
+        min-height: 72px;
+        padding: 5px 3px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+      }
+      .group-bets-row {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+      }
+      .btn-group-bet {
+        padding: 6px 2px;
+        font-size: 9.5px;
+      }
+      .group-subtext {
+        font-size: 7.5px;
+      }
+      .betting-toolbar {
+        gap: 6px;
+      }
+      .chips-group {
+        gap: 4px;
+      }
+      .chip-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 9px;
+        touch-action: manipulation;
+      }
+      .action-btns-group {
+        gap: 4px;
+      }
+      .action-btn {
+        padding: 6px 8px;
+        font-size: 10px;
+        touch-action: manipulation;
+      }
+      .track-tile.active-runner {
+        box-shadow: 0 0 10px #ffffff, 0 0 16px #f59e0b !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top App Navigation -->
+  <header>
+    <div class="brand-group">
+      <a href="/arcade/" class="brand-back-btn">‹ Arcade Lobby</a>
+      <div class="brand-title">
+        <span>🎱</span> PERYA BILLIARD ROULETTE
+      </div>
+    </div>
+
+    <div class="nav-stats">
+      <div class="header-timer-badge betting" id="header-timer-badge">
+        <span class="header-timer-dot"></span>
+        <span id="header-timer-digits">30.0s</span>
+      </div>
+      <div class="balance-badge">
+        <span>🪙</span>
+        <span id="player-balance">10,000</span>
+      </div>
+      <button class="btn-sound-toggle" id="btn-sound" title="Toggle Sound" onclick="toggleMute()">🔊</button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Multi-Player Seat Bar (Up to 4 Players) -->
+    <div class="seats-ribbon">
+      <!-- Seat 1: Primary User -->
+      <div class="seat-card active-user" id="seat-card-1" onclick="switchPlayerSeat(0)">
+        <div class="seat-meta">
+          <div class="seat-avatar">👑</div>
+          <div>
+            <div class="seat-name" id="seat-1-name">mambutan</div>
+            <div class="seat-status" id="seat-1-status">Betting</div>
+          </div>
+        </div>
+        <div class="seat-bet-val" id="seat-1-bet">0 🪙</div>
+      </div>
+
+      <!-- Seat 2: uncomfyhalomacro -->
+      <div class="seat-card" id="seat-card-2" onclick="switchPlayerSeat(1)">
+        <div class="seat-meta">
+          <div class="seat-avatar">🎮</div>
+          <div>
+            <div class="seat-name" id="seat-2-name">uncomfy</div>
+            <div class="seat-status" id="seat-2-status">Ready</div>
+          </div>
+        </div>
+        <div class="seat-bet-val" id="seat-2-bet">0 🪙</div>
+      </div>
+
+      <!-- Seat 3: BrosieBot -->
+      <div class="seat-card" id="seat-card-3" onclick="switchPlayerSeat(2)">
+        <div class="seat-meta">
+          <div class="seat-avatar">🤖</div>
+          <div>
+            <div class="seat-name" id="seat-3-name">BrosieBot</div>
+            <div class="seat-status" id="seat-3-status">Ready</div>
+          </div>
+        </div>
+        <div class="seat-bet-val" id="seat-3-bet">0 🪙</div>
+      </div>
+
+      <!-- Seat 4: Guest / Live Player -->
+      <div class="seat-card" id="seat-card-4" onclick="switchPlayerSeat(3)">
+        <div class="seat-meta">
+          <div class="seat-avatar">⚡</div>
+          <div>
+            <div class="seat-name" id="seat-4-name">Player 4</div>
+            <div class="seat-status" id="seat-4-status">Ready</div>
+          </div>
+        </div>
+        <div class="seat-bet-val" id="seat-4-bet">0 🪙</div>
+      </div>
+    </div>
+
+    <!-- THE ARCADE CABINET TABLETOP -->
+    <div class="cabinet-tabletop">
+      <div class="cabinet-bezel">
+
+        <!-- 28-TILE PERIMETER RUNNER TRACK -->
+        <div class="track-grid" id="track-grid">
+          <!-- 
+            Track tiles 0 to 27 will be dynamically generated by JS
+            Top row: 10 tiles (0 - 9)
+            Right column: 4 tiles (10 - 13)
+            Bottom row: 10 tiles (14 - 23)
+            Left column: 4 tiles (24 - 27)
+          -->
+
+          <!-- CENTER ARENA (SPANS GRID 2-9 COL, 2-5 ROW) -->
+          <div class="center-arena">
+
+            <!-- Mirrored Top Console (Player 2 Tabletop View) -->
+            <div class="opponents-mirror-bar">
+              <span class="opp-side-label">TABLETOP DUAL TERMINAL</span>
+              <div class="opp-balls-preview" id="opp-balls-preview">
+                <span class="opp-mini-badge">P2: BALL 6 [50x]</span>
+                <span class="opp-mini-badge">P3: BALL 3 [30x]</span>
+                <span class="opp-mini-badge">P4: BALL 1 [3x]</span>
+              </div>
+            </div>
+
+            <!-- Game Phase & Big 7-Segment Countdown (PLACED RIGHT AT TOP OF ARENA) -->
+            <div class="game-status-display">
+              <div class="phase-badge-title betting" id="phase-badge">
+                <span class="phase-indicator-dot"></span>
+                <span id="phase-text">BETTING PHASE (30s)</span>
+              </div>
+
+              <div class="timer-led-box">
+                <span class="timer-led-digits" id="timer-digits">30.0</span>
+                <span class="timer-led-unit">SEC</span>
+              </div>
+            </div>
+
+            <!-- Authentic Center Retro Marquee Glass Sign -->
+            <div class="retro-marquee-panel">
+              <div class="bonus-indicators-row">
+                <div class="bonus-box" id="bonus-box-reverse">
+                  <span>◀ REVERSE ▶</span>
+                </div>
+                <div class="bonus-box" id="bonus-box-explosion">
+                  <span>💥 ALL LIGHTS</span>
+                </div>
+                <div class="bonus-box" id="bonus-box-9th">
+                  <span>⭐ 9TH BALL</span>
+                </div>
+              </div>
+
+              <div class="marquee-instruction-text">
+                WHEN REVERSE ROTATION, EXPLOSION/ ALL LIGHTS ON, OR 9TH BALL APPEAR<br>
+                <span class="marquee-instruction-sub">MACHINE WILL RANDOMLY SELECT MULTIPLE WINNER, MAX BONUS OR NO WINNER</span>
+              </div>
+            </div>
+
+            <!-- Live Round Announcements / Payout Header -->
+            <div class="center-announcer" id="center-announcer">
+              PLACE YOUR BETS ON BALLS 1-8 OR COLOR GROUPS!
+            </div>
+
+          </div><!-- /center-arena -->
+
+        </div><!-- /track-grid -->
+
+      </div><!-- /cabinet-bezel -->
+    </div><!-- /cabinet-tabletop -->
+
+    <!-- PLAYER BETTING CONSOLE -->
+    <div class="player-betting-console">
+
+      <!-- 8-Ball Betting Deck with 7-Segment Multiplier Displays -->
+      <div class="balls-betting-deck" id="balls-betting-deck">
+        <!-- Balls 1 to 8 will be rendered with their respective real-time odds -->
+      </div>
+
+      <!-- Quick Perya Group Bets (Color / Range / Parity) -->
+      <div class="group-bets-row">
+        <button class="btn-group-bet" onclick="placeGroupBet('warm')">
+          <span>WARM</span>
+          <span class="group-subtext">1, 3, 5, 7</span>
+        </button>
+        <button class="btn-group-bet" onclick="placeGroupBet('cool')">
+          <span>COOL</span>
+          <span class="group-subtext">2, 4, 6, 8</span>
+        </button>
+        <button class="btn-group-bet" onclick="placeGroupBet('low')">
+          <span>LOW</span>
+          <span class="group-subtext">1 - 4</span>
+        </button>
+        <button class="btn-group-bet" onclick="placeGroupBet('high')">
+          <span>HIGH</span>
+          <span class="group-subtext">5 - 8</span>
+        </button>
+        <button class="btn-group-bet" onclick="placeGroupBet('odd')">
+          <span>ODD</span>
+          <span class="group-subtext">1, 3, 5, 7</span>
+        </button>
+        <button class="btn-group-bet" onclick="placeGroupBet('even')">
+          <span>EVEN</span>
+          <span class="group-subtext">2, 4, 6, 8</span>
+        </button>
+      </div>
+
+      <!-- Betting Toolbar: Chips & Controls -->
+      <div class="betting-toolbar">
+        <div class="chips-group">
+          <button class="chip-btn chip-10 selected-chip" onclick="selectChip(10)">10</button>
+          <button class="chip-btn chip-50" onclick="selectChip(50)">50</button>
+          <button class="chip-btn chip-100" onclick="selectChip(100)">100</button>
+          <button class="chip-btn chip-500" onclick="selectChip(500)">500</button>
+          <button class="chip-btn chip-1000" onclick="selectChip(1000)">1K</button>
+        </div>
+
+        <div class="action-btns-group">
+          <button class="action-btn btn-double" onclick="doubleAllBets()">2x Double</button>
+          <button class="action-btn" onclick="repeatLastBet()">↺ Rebet</button>
+          <button class="action-btn btn-clear" onclick="clearAllBets()">✕ Clear</button>
+        </div>
+      </div>
+
+    </div><!-- /player-betting-console -->
+
+    <!-- Recent History Ribbon -->
+    <div class="history-ribbon">
+      <div class="history-title">RECENT WINNERS:</div>
+      <div class="history-balls-list" id="history-balls-list">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    /* =========================================================================
+       PERYA BILLIARD ROULETTE ENGINE
+       Authentic 28-tile runner track, 30s betting, 15s spinning, 7-segment odds,
+       reverse rotation, explosion all-lights-on, 9th ball mystery mechanics.
+       ========================================================================= */
+
+    // Ball Definitions (1 to 8 + special 9-ball)
+    const BALL_CONFIG = {
+      1: { color: 'Yellow', cls: 'ball-1', name: 'Ball 1' },
+      2: { color: 'Blue',   cls: 'ball-2', name: 'Ball 2' },
+      3: { color: 'Red',    cls: 'ball-3', name: 'Ball 3' },
+      4: { color: 'Purple', cls: 'ball-4', name: 'Ball 4' },
+      5: { color: 'Orange', cls: 'ball-5', name: 'Ball 5' },
+      6: { color: 'Green',  cls: 'ball-6', name: 'Ball 6' },
+      7: { color: 'Maroon', cls: 'ball-7', name: 'Ball 7' },
+      8: { color: 'Black',  cls: 'ball-8', name: 'Ball 8' },
+      9: { color: 'Striped',cls: 'ball-9', name: 'Ball 9 (Bonus)' }
+    };
+
+    // 28 Tiles mapped around perimeter (matching photo layout)
+    // 0-9: Top row (10)
+    // 10-13: Right col (4)
+    // 14-23: Bottom row (10, right to left)
+    // 24-27: Left col (4, bottom to top)
+    const TRACK_LAYOUT = [
+      8, 1, 6, 4, 5, 8, 3, 2, 7, 1, // Top (10)
+      6, 9, 4, 3,                   // Right (4) - includes 9-ball
+      2, 7, 8, 5, 1, 4, 2, 7, 3, 2, // Bottom (10)
+      5, 6, 9, 8                    // Left (4) - includes 9-ball
+    ];
+
+    // Helper to read cookie
+    function getPersistentCookie(name) {
+      const nameEQ = name + '=';
+      const ca = document.cookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length));
+      }
+      return null;
+    }
+
+    const localUserRef = getPersistentCookie('jtrash_user_ref') || localStorage.getItem('jtrash_user_ref') || '0969-888-1234';
+    const localUserName = getPersistentCookie('jtrash_username') || localStorage.getItem('jtrash_username') || 'Lucky Spinner';
+
+    // Game State
+    const state = {
+      phase: 'betting', // 'betting' (30s) -> 'spinning' (15s) -> 'payout' (6s)
+      timeLeft: 30.0,
+      activeRunnerIndex: 0,
+      activeSeat: 0, // Assigned seat index (0-3)
+      userRef: localUserRef,
+      userName: localUserName,
+      selectedChip: 10,
+      balance: 10000,
+      lastBets: {},
+      players: [
+        { id: 1, ref: localUserRef, name: localUserName, avatar: '👑', isUser: true, isBot: false, bets: {}, balance: 10000 },
+        { id: 2, ref: null, name: 'Empty Seat', avatar: '🎮', isUser: false, isBot: false, bets: {}, balance: 0 },
+        { id: 3, ref: null, name: 'Empty Seat', avatar: '🤖', isUser: false, isBot: false, bets: {}, balance: 0 },
+        { id: 4, ref: null, name: 'Empty Seat', avatar: '⚡', isUser: false, isBot: false, bets: {}, balance: 0 }
+      ],
+      odds: {
+        1: 3,
+        2: 11,
+        3: 30,
+        4: 2,
+        5: 5,
+        6: 50,
+        7: 44,
+        8: 29
+      },
+      bonusState: {
+        reverse: false,
+        explosion: false,
+        ninthBall: false
+      },
+      winningTiles: [],
+      history: [6, 2, 8, 3, 1, 7, 5, 4]
+    };
+
+    /* =========================================================================
+       AUDIO SYNTHESIZER (Web Audio API)
+       Authentic arcade relay clicks, whirs, screech, explosion, and coin cascades
+       ========================================================================= */
+    class ArcadeAudio {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      // Solenoid / Relay mechanical click for each runner step
+      playRelayTick(speed = 1.0) {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1200 * speed, now);
+        osc.frequency.exponentialRampToValueAtTime(180, now + 0.025);
+
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.03);
+      }
+
+      // Chip clink
+      playChip() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(2400, now);
+        osc.frequency.exponentialRampToValueAtTime(700, now + 0.05);
+
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.06);
+      }
+
+      // 7-segment odds scramble click
+      playOddsTick() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(500 + Math.random() * 400, now);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.025);
+      }
+
+      // Reverse rotation screech
+      playReverseScreech() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(1400, now);
+        osc.frequency.linearRampToValueAtTime(300, now + 0.4);
+
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      }
+
+      // Explosion / All Lights On siren
+      playExplosionSiren() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        for (let i = 0; i < 3; i++) {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(250 + i * 200, now + i * 0.1);
+          osc.frequency.linearRampToValueAtTime(800 + i * 300, now + i * 0.1 + 0.15);
+
+          gain.gain.setValueAtTime(0.2, now + i * 0.1);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.18);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + i * 0.1);
+          osc.stop(now + i * 0.1 + 0.2);
+        }
+      }
+
+      // 9th Ball Fanfare
+      playNinthBallFanfare() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+          const now = this.ctx.currentTime + idx * 0.08;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.18);
+        });
+      }
+
+      // Payout coin cascade
+      playWinCascade() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        for (let i = 0; i < 6; i++) {
+          const delay = i * 0.08;
+          const now = this.ctx.currentTime + delay;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(900 + i * 160, now);
+          gain.gain.setValueAtTime(0.22, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.14);
+        }
+      }
+
+      // Countdown Warning Beep
+      playBeep(isFinal = false) {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(isFinal ? 1200 : 800, now);
+        gain.gain.setValueAtTime(isFinal ? 0.3 : 0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + (isFinal ? 0.3 : 0.08));
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + (isFinal ? 0.35 : 0.1));
+      }
+    }
+
+    const audio = new ArcadeAudio();
+
+    function toggleMute() {
+      audio.muted = !audio.muted;
+      document.getElementById('btn-sound').textContent = audio.muted ? '🔇' : '🔊';
+    }
+
+    /* =========================================================================
+       INITIALIZATION & GRID GENERATION
+       ========================================================================= */
+    function init() {
+      // Load JTrash Profile & Balances
+      try {
+        const cookieUser = getPersistentCookie('jtrash_username');
+        const storageUser = localStorage.getItem('jtrash_username');
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlUser = urlParams.get('user') || urlParams.get('name');
+        const resolvedName = urlUser || cookieUser || storageUser;
+        if (resolvedName && resolvedName.trim()) {
+          state.userName = resolvedName.trim();
+        }
+
+        const cookieRef = getPersistentCookie('jtrash_user_ref');
+        const storageRef = localStorage.getItem('jtrash_user_ref');
+        const urlRef = urlParams.get('ref');
+        const resolvedRef = urlRef || cookieRef || storageRef;
+        if (resolvedRef && resolvedRef.trim()) {
+          state.userRef = resolvedRef.trim();
+        }
+
+        // Slot/Arcade balance from JTrash wallet or local balance
+        const savedSlot = localStorage.getItem('borgor_slots_balance') || getPersistentCookie('borgor_slots_balance');
+        const savedRoulette = localStorage.getItem('perya_billiard_roulette_balance');
+        const chosenBal = savedRoulette || savedSlot;
+        if (chosenBal && !isNaN(parseInt(chosenBal, 10))) {
+          state.balance = parseInt(chosenBal, 10);
+        }
+
+        const savedTile = localStorage.getItem('perya_billiard_roulette_last_tile');
+        if (savedTile !== null) {
+          const parsed = parseInt(savedTile, 10);
+          if (!isNaN(parsed) && parsed >= 0 && parsed < TRACK_LAYOUT.length) {
+            state.activeRunnerIndex = parsed;
+          }
+        }
+
+        state.players[state.activeSeat].ref = state.userRef;
+        state.players[state.activeSeat].name = state.userName;
+        state.players[state.activeSeat].balance = state.balance;
+
+        // Restore active bets if player refreshed during active round (< 50s)
+        const savedBetsRaw = localStorage.getItem('perya_active_bets');
+        if (savedBetsRaw) {
+          try {
+            const parsed = JSON.parse(savedBetsRaw);
+            if (parsed && parsed.bets && (Date.now() - (parsed.timestamp || 0) < 50000)) {
+              state.players[state.activeSeat].bets = parsed.bets;
+            } else {
+              localStorage.removeItem('perya_active_bets');
+            }
+          } catch (e) {}
+        }
+      } catch (e) {}
+
+      updateBalanceDisplay();
+      buildTrackGrid();
+      buildBettingConsole();
+      updatePlayerBetsUI();
+      renderHistory();
+      renderSeats();
+      randomizeOdds(false);
+
+      // Join room and pull other JTrash players
+      syncRoomHeartbeat();
+
+      // Start main game loop (30s betting timer)
+      startBettingPhase();
+    }
+
+    // Pre-allocated array of 28 track DOM elements for zero querySelector latency
+    const trackTileElements = new Array(28);
+
+    /* Build 28-Tile Perimeter Track */
+    function buildTrackGrid() {
+      const grid = document.getElementById('track-grid');
+
+      // Top Row (10 tiles): row 1, col 1 to 10
+      for (let i = 0; i < 10; i++) {
+        const ballNum = TRACK_LAYOUT[i];
+        const tile = createTileElement(i, ballNum, 1, i + 1);
+        grid.appendChild(tile);
+      }
+
+      // Right Column (4 tiles): row 2 to 5, col 10
+      for (let i = 0; i < 4; i++) {
+        const trackIdx = 10 + i;
+        const ballNum = TRACK_LAYOUT[trackIdx];
+        const tile = createTileElement(trackIdx, ballNum, 2 + i, 10);
+        grid.appendChild(tile);
+      }
+
+      // Bottom Row (10 tiles): row 6, col 10 down to 1
+      for (let i = 0; i < 10; i++) {
+        const trackIdx = 14 + i;
+        const ballNum = TRACK_LAYOUT[trackIdx];
+        const tile = createTileElement(trackIdx, ballNum, 6, 10 - i);
+        grid.appendChild(tile);
+      }
+
+      // Left Column (4 tiles): row 5 down to 2, col 1
+      for (let i = 0; i < 4; i++) {
+        const trackIdx = 24 + i;
+        const ballNum = TRACK_LAYOUT[trackIdx];
+        const tile = createTileElement(trackIdx, ballNum, 5 - i, 1);
+        grid.appendChild(tile);
+      }
+
+      // Highlight initial tile
+      highlightTrackTile(state.activeRunnerIndex);
+    }
+
+    function createTileElement(index, ballNum, row, col) {
+      const el = document.createElement('div');
+      el.className = 'track-tile';
+      el.id = `track-tile-${index}`;
+      el.style.gridRow = row;
+      el.style.gridColumn = col;
+
+      const conf = BALL_CONFIG[ballNum];
+      el.innerHTML = `
+        <div class="billiard-ball ${conf.cls}">
+          <div class="ball-badge">${ballNum}</div>
+        </div>
+      `;
+      trackTileElements[index] = el;
+      return el;
+    }
+
+    /* Build 8-Ball Betting Deck on Player Console */
+    function buildBettingConsole() {
+      const deck = document.getElementById('balls-betting-deck');
+      deck.innerHTML = '';
+
+      for (let num = 1; num <= 8; num++) {
+        const conf = BALL_CONFIG[num];
+        const slot = document.createElement('div');
+        slot.className = 'ball-bet-slot';
+        slot.id = `bet-slot-${num}`;
+        slot.onclick = () => placeBallBet(num);
+
+        slot.innerHTML = `
+          <div class="slot-wager-pill" id="wager-pill-${num}">0</div>
+          <div class="billiard-ball ${conf.cls}">
+            <div class="ball-badge">${num}</div>
+          </div>
+          <div class="odds-led-display">
+            <span class="odds-ghost-digits">88</span>
+            <span class="odds-active-digits" id="odds-digits-${num}">${state.odds[num]}</span>
+          </div>
+        `;
+        deck.appendChild(slot);
+      }
+    }
+
+    /* =========================================================================
+       RANDOMIZE 7-SEGMENT ODDS FOR EACH BALL (Matching Perya Odds)
+       ========================================================================= */
+    function randomizeOdds(animate = true) {
+      // Common odds distribution from perya machines:
+      // Low balls (2x-5x), Medium balls (10x-30x), High balls (40x-50x)
+      const lowPool = [2, 3, 4, 5];
+      const medPool = [10, 11, 15, 20, 25, 30];
+      const highPool = [40, 44, 50, 60];
+
+      // Shuffle assignment
+      const newOdds = {};
+      newOdds[1] = lowPool[Math.floor(Math.random() * lowPool.length)];
+      newOdds[2] = medPool[Math.floor(Math.random() * medPool.length)];
+      newOdds[3] = medPool[Math.floor(Math.random() * medPool.length)];
+      newOdds[4] = lowPool[Math.floor(Math.random() * lowPool.length)];
+      newOdds[5] = lowPool[Math.floor(Math.random() * lowPool.length)];
+      newOdds[6] = highPool[Math.floor(Math.random() * highPool.length)];
+      newOdds[7] = highPool[Math.floor(Math.random() * highPool.length)];
+      newOdds[8] = medPool[Math.floor(Math.random() * medPool.length)];
+
+      if (!animate) {
+        state.odds = newOdds;
+        for (let num = 1; num <= 8; num++) {
+          const el = document.getElementById(`odds-digits-${num}`);
+          if (el) el.textContent = newOdds[num];
+        }
+        return;
+      }
+
+      // Animate 7-segment digital rolling effect
+      let rolls = 0;
+      const interval = setInterval(() => {
+        rolls++;
+        audio.playOddsTick();
+        for (let num = 1; num <= 8; num++) {
+          const el = document.getElementById(`odds-digits-${num}`);
+          if (el) el.textContent = Math.floor(Math.random() * 60) + 1;
+        }
+        if (rolls >= 10) {
+          clearInterval(interval);
+          state.odds = newOdds;
+          for (let num = 1; num <= 8; num++) {
+            const el = document.getElementById(`odds-digits-${num}`);
+            if (el) el.textContent = newOdds[num];
+          }
+        }
+      }, 60);
+    }
+
+    /* =========================================================================
+       BETTING INTERACTIONS & CHIP PLACEMENT
+    /* Save active round bets to survive refresh and sudden disconnects */
+    function saveActiveBets() {
+      try {
+        const p = state.players[state.activeSeat];
+        if (p && p.bets && Object.keys(p.bets).length > 0) {
+          localStorage.setItem('perya_active_bets', JSON.stringify({
+            bets: p.bets,
+            timestamp: Date.now()
+          }));
+        } else {
+          localStorage.removeItem('perya_active_bets');
+        }
+      } catch (e) {}
+    }
+
+    function selectChip(amount) {
+      state.selectedChip = amount;
+      document.querySelectorAll('.chip-btn').forEach(btn => {
+        btn.classList.remove('selected-chip');
+        if (btn.classList.contains(`chip-${amount}`)) {
+          btn.classList.add('selected-chip');
+        }
+      });
+      audio.playChip();
+    }
+
+    function placeBallBet(ballNum) {
+      if (state.phase !== 'betting') return;
+      const player = state.players[state.activeSeat];
+      const cost = state.selectedChip;
+
+      if (player.balance < cost) {
+        setAnnouncer('INSUFFICIENT BALANCE!');
+        return;
+      }
+
+      player.balance -= cost;
+      player.bets[ballNum] = (player.bets[ballNum] || 0) + cost;
+
+      if (player.isUser) {
+        state.balance = player.balance;
+        updateBalanceDisplay();
+      }
+
+      audio.playChip();
+      updatePlayerBetsUI();
+      saveActiveBets();
+      renderSeats();
+      syncRoomHeartbeat();
+    }
+
+    function placeGroupBet(group) {
+      if (state.phase !== 'betting') return;
+      let targets = [];
+      if (group === 'warm') targets = [1, 3, 5, 7];
+      else if (group === 'cool') targets = [2, 4, 6, 8];
+      else if (group === 'low') targets = [1, 2, 3, 4];
+      else if (group === 'high') targets = [5, 6, 7, 8];
+      else if (group === 'odd') targets = [1, 3, 5, 7];
+      else if (group === 'even') targets = [2, 4, 6, 8];
+
+      const player = state.players[state.activeSeat];
+      const costPerBall = Math.max(10, Math.floor(state.selectedChip / targets.length));
+      const totalCost = costPerBall * targets.length;
+
+      if (player.balance < totalCost) {
+        setAnnouncer('INSUFFICIENT BALANCE FOR GROUP BET!');
+        return;
+      }
+
+      player.balance -= totalCost;
+      targets.forEach(b => {
+        player.bets[b] = (player.bets[b] || 0) + costPerBall;
+      });
+
+      if (player.isUser) {
+        state.balance = player.balance;
+        updateBalanceDisplay();
+      }
+
+      audio.playChip();
+      updatePlayerBetsUI();
+      saveActiveBets();
+      renderSeats();
+      syncRoomHeartbeat();
+    }
+
+    function clearAllBets() {
+      if (state.phase !== 'betting') return;
+      const player = state.players[state.activeSeat];
+      let refund = 0;
+      Object.keys(player.bets).forEach(k => {
+        refund += player.bets[k];
+      });
+      player.balance += refund;
+      player.bets = {};
+
+      if (player.isUser) {
+        state.balance = player.balance;
+        updateBalanceDisplay();
+      }
+
+      audio.playChip();
+      updatePlayerBetsUI();
+      saveActiveBets();
+      renderSeats();
+      syncRoomHeartbeat();
+    }
+
+    function doubleAllBets() {
+      if (state.phase !== 'betting') return;
+      const player = state.players[state.activeSeat];
+      let totalCurrent = 0;
+      Object.keys(player.bets).forEach(k => {
+        totalCurrent += player.bets[k];
+      });
+
+      if (totalCurrent === 0) return;
+      if (player.balance < totalCurrent) {
+        setAnnouncer('NOT ENOUGH BALANCE TO DOUBLE!');
+        return;
+      }
+
+      player.balance -= totalCurrent;
+      Object.keys(player.bets).forEach(k => {
+        player.bets[k] *= 2;
+      });
+
+      if (player.isUser) {
+        state.balance = player.balance;
+        updateBalanceDisplay();
+      }
+
+      audio.playChip();
+      updatePlayerBetsUI();
+      saveActiveBets();
+      renderSeats();
+      syncRoomHeartbeat();
+    }
+
+    function repeatLastBet() {
+      if (state.phase !== 'betting') return;
+      if (!state.lastBets || Object.keys(state.lastBets).length === 0) return;
+
+      const player = state.players[state.activeSeat];
+      let cost = 0;
+      Object.keys(state.lastBets).forEach(k => cost += state.lastBets[k]);
+
+      if (player.balance < cost) {
+        setAnnouncer('NOT ENOUGH BALANCE TO REBET!');
+        return;
+      }
+
+      clearAllBets();
+      player.balance -= cost;
+      player.bets = { ...state.lastBets };
+
+      if (player.isUser) {
+        state.balance = player.balance;
+        updateBalanceDisplay();
+      }
+
+      audio.playChip();
+      updatePlayerBetsUI();
+      renderSeats();
+      syncRoomHeartbeat();
+    }
+
+    function updatePlayerBetsUI() {
+      const player = state.players[state.activeSeat];
+      for (let num = 1; num <= 8; num++) {
+        const pill = document.getElementById(`wager-pill-${num}`);
+        const slot = document.getElementById(`bet-slot-${num}`);
+        const wager = player.bets[num] || 0;
+
+        pill.textContent = wager > 0 ? wager : '0';
+        if (wager > 0) {
+          slot.classList.add('has-wager');
+        } else {
+          slot.classList.remove('has-wager');
+        }
+      }
+    }
+
+    function updateBalanceDisplay() {
+      document.getElementById('player-balance').textContent = state.balance.toLocaleString();
+      try {
+        localStorage.setItem('perya_billiard_roulette_balance', state.balance.toString());
+      } catch (e) {}
+    }
+
+    /* Switch Active Seat (Allows claiming or switching seats) */
+    function switchPlayerSeat(seatIdx) {
+      if (state.phase !== 'betting') return;
+      state.activeSeat = seatIdx;
+      
+      // Update local player assigned seat
+      for (let i = 0; i < 4; i++) {
+        if (i === seatIdx) {
+          state.players[i].ref = state.userRef;
+          state.players[i].name = state.userName;
+          state.players[i].isUser = true;
+          state.players[i].balance = state.balance;
+        } else if (state.players[i].ref === state.userRef) {
+          state.players[i].ref = null;
+          state.players[i].name = 'Empty Seat';
+          state.players[i].isUser = false;
+          state.players[i].bets = {};
+        }
+      }
+
+      renderSeats();
+      updatePlayerBetsUI();
+      syncRoomHeartbeat();
+    }
+
+    /* Render Seats with Real JTrash Usernames and Active Bets */
+    function renderSeats() {
+      state.players.forEach((p, idx) => {
+        const seatIdx = idx + 1;
+        const cardEl = document.getElementById(`seat-card-${seatIdx}`);
+        const nameEl = document.getElementById(`seat-${seatIdx}-name`);
+        const statusEl = document.getElementById(`seat-${seatIdx}-status`);
+        const betEl = document.getElementById(`seat-${seatIdx}-bet`);
+
+        // Check if this seat is occupied by the local user
+        const isLocalUser = (idx === state.activeSeat);
+        if (isLocalUser) {
+          cardEl.classList.add('active-user');
+        } else {
+          cardEl.classList.remove('active-user');
+        }
+
+        // Set display name based on JTrash username
+        if (p.ref && p.name && p.name !== 'Empty Seat') {
+          nameEl.textContent = p.name;
+        } else {
+          nameEl.textContent = isLocalUser ? state.userName : 'Open Seat';
+        }
+
+        let totalBet = 0;
+        if (p.bets) {
+          Object.keys(p.bets).forEach(k => totalBet += (p.bets[k] || 0));
+        }
+
+        betEl.textContent = `${totalBet.toLocaleString()} 🪙`;
+
+        if (!p.ref && !isLocalUser) {
+          statusEl.textContent = 'Empty';
+        } else if (state.phase === 'betting') {
+          statusEl.textContent = totalBet > 0 ? 'Bet Placed' : 'Waiting...';
+        } else if (state.phase === 'spinning') {
+          statusEl.textContent = 'Spinning';
+        } else {
+          statusEl.textContent = 'Resolved';
+        }
+      });
+
+      updateMirrorBadges();
+    }
+
+    /* Update Tabletop Dual Terminal Opponent Mirror */
+    function updateMirrorBadges() {
+      const container = document.getElementById('opp-balls-preview');
+      if (!container) return;
+      container.innerHTML = '';
+
+      let hasOpponents = false;
+      state.players.forEach((p, idx) => {
+        if (idx !== state.activeSeat && p.ref && p.name && p.name !== 'Empty Seat' && p.bets) {
+          const balls = Object.keys(p.bets).filter(k => p.bets[k] > 0);
+          if (balls.length > 0) {
+            hasOpponents = true;
+            const badge = document.createElement('span');
+            badge.className = 'opp-mini-badge';
+            badge.textContent = `${p.name}: B${balls[0]} (${p.bets[balls[0]]}🪙)`;
+            container.appendChild(badge);
+          }
+        }
+      });
+
+      if (!hasOpponents) {
+        container.innerHTML = '<span class="opp-mini-badge" style="color: #64748b;">Waiting for bets...</span>';
+      }
+    }
+
+    /* Real-Time Live Room Sync & JTrash Heartbeat */
+    let lastRoomSyncTime = 0;
+    async function syncRoomHeartbeat() {
+      try {
+        const payload = {
+          ref: state.userRef,
+          name: state.userName,
+          avatar: state.players[state.activeSeat]?.avatar || '👑',
+          seat: state.activeSeat,
+          bets: state.players[state.activeSeat]?.bets || {},
+          balance: state.balance
+        };
+
+        const res = await fetch('/roulette/api.php?action=join_or_heartbeat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data && data.seats && Array.isArray(data.seats)) {
+          // Reconcile other players' seats from room state
+          data.seats.forEach((serverSeat, idx) => {
+            if (idx === state.activeSeat) {
+              // Local user's seat
+              state.players[idx].ref = state.userRef;
+              state.players[idx].name = state.userName;
+              state.players[idx].isUser = true;
+            } else if (serverSeat && serverSeat.ref) {
+              // Other joined JTrash player
+              state.players[idx].ref = serverSeat.ref;
+              state.players[idx].name = serverSeat.name;
+              state.players[idx].avatar = serverSeat.avatar || '🎮';
+              state.players[idx].isUser = false;
+              state.players[idx].balance = serverSeat.balance || 0;
+              state.players[idx].bets = serverSeat.bets || {};
+            } else {
+              // Empty seat: only clear if it wasn't a local seat
+              state.players[idx].ref = null;
+              state.players[idx].name = 'Empty Seat';
+              state.players[idx].isUser = false;
+              state.players[idx].bets = {};
+            }
+          });
+          renderSeats();
+        }
+      } catch (err) {}
+    }
+
+    // Poll room seats every 2.5 seconds
+    setInterval(() => {
+      syncRoomHeartbeat();
+    }, 2500);
+
+    /* =========================================================================
+       GAME CYCLE: 30s BETTING PHASE -> 15s SPINNING PHASE -> 6s PAYOUT
+       ========================================================================= */
+
+    function updateTimerUI() {
+      const formatted = state.timeLeft.toFixed(1);
+      const digitsEl = document.getElementById('timer-digits');
+      if (digitsEl) digitsEl.textContent = formatted;
+      const headerDigitsEl = document.getElementById('header-timer-digits');
+      if (headerDigitsEl) headerDigitsEl.textContent = `${formatted}s`;
+
+      const headerBadge = document.getElementById('header-timer-badge');
+      if (headerBadge) {
+        headerBadge.className = `header-timer-badge ${state.phase}`;
+      }
+    }
+
+    function startBettingPhase() {
+      state.phase = 'betting';
+      state.timeLeft = 30.0;
+      state.winningTiles = [];
+      updateTimerUI();
+
+      // Reset indicators
+      resetBonusIndicators();
+      clearWinnerHighlights();
+
+      // UI updates
+      const badge = document.getElementById('phase-badge');
+      badge.className = 'phase-badge-title betting';
+      document.getElementById('phase-text').textContent = 'BETTING PHASE (30s)';
+      setAnnouncer('PLACE YOUR BETS ON BALLS 1-8 OR COLOR GROUPS!');
+
+      // Randomize odds with 7-segment digital scramble
+      randomizeOdds(true);
+
+      // Sync room heartbeat
+      syncRoomHeartbeat();
+
+      // 30-Second Countdown Timer Loop
+      const timerInterval = setInterval(() => {
+        if (state.phase !== 'betting') {
+          clearInterval(timerInterval);
+          return;
+        }
+
+        state.timeLeft = Math.max(0, +(state.timeLeft - 0.1).toFixed(1));
+        updateTimerUI();
+
+        // Sound cues in the final 5 seconds
+        if (state.timeLeft <= 5.0 && state.timeLeft > 0 && Math.round(state.timeLeft * 10) % 10 === 0) {
+          audio.playBeep(false);
+          setAnnouncer(`NO MORE BETS IN ${Math.ceil(state.timeLeft)}s!`);
+        }
+
+        if (state.timeLeft <= 0) {
+          clearInterval(timerInterval);
+          audio.playBeep(true);
+          startSpinningPhase();
+        }
+      }, 100);
+    }
+
+    /* 15-SECOND SPINNING PHASE (WITH SUSPENSE DECELERATION & ZERO TELEPORTING) */
+    function startSpinningPhase() {
+      state.phase = 'spinning';
+      state.timeLeft = 15.0;
+      document.body.classList.add('is-spinning');
+      updateTimerUI();
+
+      // Save user bets for rebet
+      state.lastBets = { ...state.players[state.activeSeat].bets };
+
+      // Update UI
+      const badge = document.getElementById('phase-badge');
+      badge.className = 'phase-badge-title spinning';
+      document.getElementById('phase-text').textContent = 'SPINNING RUNNER (15s)';
+      setAnnouncer('ROULETTE RUNNER IN MOTION... GOOD LUCK!');
+      renderSeats();
+
+      // Pick winning target tile ahead of time
+      const totalTiles = TRACK_LAYOUT.length; // 28
+      const finalTargetTile = Math.floor(Math.random() * totalTiles);
+
+      // Roll chance of special bonus features
+      const willReverse = Math.random() < 0.35; // 35% chance to reverse
+      const willExplode = Math.random() < 0.20; // 20% chance for all-lights explosion
+
+      let currentStep = state.activeRunnerIndex;
+      let direction = 1; // 1 = clockwise, -1 = counter-clockwise
+      let speedMs = 30; // High speed start (~30ms per step)
+      let elapsedMs = 0;
+      let runnerStepCount = 0;
+      
+      const N_DECEL = 20; // Fixed 20-step deceleration runway (~3.3 seconds)
+      let isDecelerating = false;
+      let decelStepsRemaining = N_DECEL;
+
+      let reverseTriggered = false;
+      let explosionTriggered = false;
+
+      // Countdown display during spin
+      const spinTimer = setInterval(() => {
+        state.timeLeft = Math.max(0, +(state.timeLeft - 0.1).toFixed(1));
+        updateTimerUI();
+        if (state.timeLeft <= 0) clearInterval(spinTimer);
+      }, 100);
+
+      function stepRunner() {
+        if (state.phase !== 'spinning') return;
+
+        // Move one tile strictly in the current direction
+        currentStep = (currentStep + direction + totalTiles) % totalTiles;
+        state.activeRunnerIndex = currentStep;
+        highlightTrackTile(currentStep);
+
+        // Throttle mechanical tick during high-speed spin to eliminate mobile audio buffer stutter
+        runnerStepCount++;
+        if (speedMs > 55 || (runnerStepCount % 2 === 0)) {
+          const pitchMultiplier = Math.max(0.6, Math.min(1.8, 100 / speedMs));
+          audio.playRelayTick(pitchMultiplier);
+        }
+
+        elapsedMs += speedMs;
+
+        // Check Bonus Event 1: Reverse Rotation (around 6-7 seconds)
+        if (willReverse && !reverseTriggered && !isDecelerating && elapsedMs >= 6500) {
+          reverseTriggered = true;
+          direction = -direction;
+          activateBonus('reverse');
+          audio.playReverseScreech();
+          setAnnouncer('◀ REVERSE ROTATION ACTIVATED! ▶');
+        }
+
+        // Check Bonus Event 2: Explosion / All Lights On (around 9-10 seconds)
+        if (willExplode && !explosionTriggered && !isDecelerating && elapsedMs >= 9500) {
+          explosionTriggered = true;
+          activateBonus('explosion');
+          audio.playExplosionSiren();
+          setAnnouncer('💥 ALL LIGHTS ON! MULTIPLE WINNERS!');
+        }
+
+        // Check if ready to enter deceleration runway (after ~11.5s)
+        if (!isDecelerating && elapsedMs >= 11500) {
+          const curDist = direction === 1 
+            ? (finalTargetTile - currentStep + totalTiles) % totalTiles 
+            : (currentStep - finalTargetTile + totalTiles) % totalTiles;
+          
+          const targetDist = ((N_DECEL % totalTiles) + totalTiles) % totalTiles;
+
+          if (curDist === targetDist) {
+            isDecelerating = true;
+            decelStepsRemaining = N_DECEL;
+          }
+        }
+
+        // If in deceleration mode, count down steps and increase delay smoothly
+        if (isDecelerating) {
+          decelStepsRemaining--;
+
+          if (decelStepsRemaining <= 0) {
+            // STOP! We have arrived precisely at finalTargetTile by natural stepping.
+            // currentStep is mathematically guaranteed to equal finalTargetTile!
+            const targetBall = TRACK_LAYOUT[currentStep];
+            const isNinthBall = (targetBall === 9);
+            finishSpin(currentStep, targetBall, isNinthBall, explosionTriggered);
+            return;
+          }
+
+          // Progressive deceleration curve: stretches delay from 35ms up to 650ms on the final step
+          const progress = 1 - (decelStepsRemaining / N_DECEL);
+          speedMs = Math.round(35 + Math.pow(progress, 2.2) * 550);
+        }
+
+        setTimeout(stepRunner, speedMs);
+      }
+
+      // Kick off runner loop
+      stepRunner();
+    }
+
+    /* Highlight single track tile with cached direct array access (O(1) vs O(28) DOM queries) */
+    function highlightTrackTile(index) {
+      if (state.lastHighlightedTile !== undefined && trackTileElements[state.lastHighlightedTile]) {
+        trackTileElements[state.lastHighlightedTile].classList.remove('active-runner');
+      }
+      if (trackTileElements[index]) {
+        trackTileElements[index].classList.add('active-runner');
+      }
+      state.lastHighlightedTile = index;
+    }
+
+    function activateBonus(type) {
+      if (type === 'reverse') {
+        const box = document.getElementById('bonus-box-reverse');
+        box.classList.add('active-reverse');
+      } else if (type === 'explosion') {
+        const box = document.getElementById('bonus-box-explosion');
+        box.classList.add('active-explosion');
+      } else if (type === '9th') {
+        const box = document.getElementById('bonus-box-9th');
+        box.classList.add('active-9th');
+      }
+    }
+
+    function resetBonusIndicators() {
+      document.getElementById('bonus-box-reverse').className = 'bonus-box';
+      document.getElementById('bonus-box-explosion').className = 'bonus-box';
+      document.getElementById('bonus-box-9th').className = 'bonus-box';
+    }
+
+    function clearWinnerHighlights() {
+      trackTileElements.forEach(t => { if (t) t.classList.remove('winner-pulse'); });
+      document.querySelectorAll('.ball-bet-slot').forEach(s => s.classList.remove('winner-pulse'));
+    }
+
+    /* =========================================================================
+       SPIN RESOLUTION & PAYOUT CELEBRATION
+       ========================================================================= */
+    function finishSpin(targetTile, targetBall, isNinthBall, wasExplosion) {
+      state.phase = 'payout';
+      state.timeLeft = 6.0;
+      updateTimerUI();
+
+      const payoutInterval = setInterval(() => {
+        state.timeLeft = Math.max(0, +(state.timeLeft - 0.1).toFixed(1));
+        updateTimerUI();
+        if (state.timeLeft <= 0) clearInterval(payoutInterval);
+      }, 100);
+
+      const badge = document.getElementById('phase-badge');
+      badge.className = 'phase-badge-title payout';
+      document.getElementById('phase-text').textContent = 'PAYOUT RESOLUTION';
+
+      // Pulse winning track tile
+      const winningTiles = [targetTile];
+      let winningBalls = [targetBall];
+
+      // Handle 9th Ball Mystery Feature
+      if (isNinthBall) {
+        activateBonus('9th');
+        audio.playNinthBallFanfare();
+
+        // 9th ball mystery event:
+        const roll = Math.random();
+        if (roll < 0.5) {
+          // MAX BONUS on a chosen ball!
+          const boostedBall = Math.floor(Math.random() * 8) + 1;
+          state.odds[boostedBall] = 100;
+          document.getElementById(`odds-digits-${boostedBall}`).textContent = '100';
+          winningBalls = [boostedBall];
+          setAnnouncer(`⭐ 9TH BALL HIT! MAX BONUS 100x ON BALL ${boostedBall}!`);
+        } else if (roll < 0.85) {
+          // MULTIPLE WINNERS (All odd or all even balls)
+          winningBalls = [1, 3, 5, 7];
+          setAnnouncer('⭐ 9TH BALL HIT! MULTIPLE WINNERS: ALL ODD BALLS WIN!');
+        } else {
+          // House takes (No Winner)
+          winningBalls = [];
+          setAnnouncer('⭐ 9TH BALL HIT! HOUSE WINS (NO WINNER)!');
+        }
+      } else if (wasExplosion) {
+        // Explosion picked 3 winning balls!
+        const b1 = targetBall;
+        const b2 = (targetBall % 8) + 1;
+        const b3 = ((targetBall + 3) % 8) + 1;
+        winningBalls = [b1, b2, b3];
+        setAnnouncer(`💥 EXPLOSION HIT! WINNING BALLS: ${winningBalls.join(', ')}!`);
+      } else {
+        const conf = BALL_CONFIG[targetBall];
+        setAnnouncer(`WINNER: ${conf.name.toUpperCase()} [${conf.color.toUpperCase()}] — ${state.odds[targetBall]}x PAYOUT!`);
+      }
+
+      // Highlight winning tile(s)
+      document.getElementById(`track-tile-${targetTile}`).classList.add('winner-pulse');
+
+      // Highlight player console winning slot(s)
+      winningBalls.forEach(b => {
+        const slot = document.getElementById(`bet-slot-${b}`);
+        if (slot) slot.classList.add('winner-pulse');
+      });
+
+      // Calculate Winnings for all 4 seats
+      let userWonCoins = 0;
+
+      state.players.forEach(p => {
+        let playerPayout = 0;
+        winningBalls.forEach(wb => {
+          const wager = p.bets[wb] || 0;
+          if (wager > 0) {
+            const mult = state.odds[wb] || 2;
+            playerPayout += wager * mult;
+          }
+        });
+
+        if (playerPayout > 0) {
+          p.balance += playerPayout;
+          if (p.isUser) userWonCoins = playerPayout;
+        }
+
+        // Reset round bets
+        p.bets = {};
+      });
+
+      if (userWonCoins > 0) {
+        state.balance = state.players[state.activeSeat].balance;
+        updateBalanceDisplay();
+        audio.playWinCascade();
+        setAnnouncer(`🎉 YOU WON ${userWonCoins.toLocaleString()} COINS! [${state.odds[targetBall] || 'BONUS'}x]`);
+      } else {
+        audio.playRelayTick(0.5);
+      }
+
+      document.body.classList.remove('is-spinning');
+
+      // Clear active bets from storage now that round resolved
+      try {
+        localStorage.removeItem('perya_active_bets');
+      } catch (e) {}
+
+      // Add to history
+      if (targetBall !== 9) {
+        state.history.unshift(targetBall);
+        if (state.history.length > 10) state.history.pop();
+        renderHistory();
+      }
+
+      // Save last landed runner tile so fresh sessions resume from here
+      try {
+        localStorage.setItem('perya_billiard_roulette_last_tile', targetTile.toString());
+      } catch (e) {}
+
+      renderSeats();
+      updatePlayerBetsUI();
+
+      // After 6 seconds, restart betting phase for next round
+      setTimeout(() => {
+        startBettingPhase();
+      }, 6000);
+    }
+
+    function setAnnouncer(text) {
+      document.getElementById('center-announcer').textContent = text;
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('history-balls-list');
+      container.innerHTML = '';
+      state.history.forEach(ballNum => {
+        const conf = BALL_CONFIG[ballNum];
+        const el = document.createElement('div');
+        el.className = `mini-history-ball ${conf.cls}`;
+        el.textContent = ballNum;
+        container.appendChild(el);
+      });
+    }
+
+    // Auto-refund if user closes tab/leaves during 30s betting countdown; beacon leave to server
+    window.addEventListener('beforeunload', () => {
+      try {
+        if (state.phase === 'betting') {
+          const p = state.players[state.activeSeat];
+          let refund = 0;
+          if (p && p.bets) {
+            Object.keys(p.bets).forEach(k => { refund += (p.bets[k] || 0); });
+            if (refund > 0) {
+              state.balance += refund;
+              localStorage.setItem('perya_billiard_roulette_balance', state.balance.toString());
+              localStorage.removeItem('perya_active_bets');
+            }
+          }
+        }
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon('/roulette/api.php?action=leave', JSON.stringify({ ref: state.userRef }));
+        }
+      } catch (e) {}
+    });
+
+    // Launch on DOM ready
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

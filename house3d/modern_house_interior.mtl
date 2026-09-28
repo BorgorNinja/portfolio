@@ -1,0 +1,331 @@
+# Realistic Materials for Detailed House 3D Model
+# Compatible with Blender 3.x / 4.x Principled BSDF
+
+newmtl Stucco_WarmCream
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.9200 0.9000 0.8600
+  Ks 0.1000 0.1000 0.1000
+  Ns 15.0
+  d 1.00
+  illum 2
+
+newmtl Concrete_Slab
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.7200 0.7200 0.7200
+  Ks 0.1500 0.1500 0.1500
+  Ns 20.0
+  d 1.00
+  illum 2
+
+newmtl Foundation_Stone
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.4500 0.4400 0.4200
+  Ks 0.0800 0.0800 0.0800
+  Ns 10.0
+  d 1.00
+  illum 2
+
+newmtl Roof_DarkSlate
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.1800 0.2000 0.2200
+  Ks 0.2500 0.2500 0.2500
+  Ns 40.0
+  d 1.00
+  illum 2
+
+newmtl Wood_Accent_Siding
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.5800 0.3800 0.2200
+  Ks 0.2000 0.2000 0.2000
+  Ns 25.0
+  d 1.00
+  illum 2
+
+newmtl Window_Frame_Anthracite
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.1500 0.1600 0.1800
+  Ks 0.4000 0.4000 0.4000
+  Ns 60.0
+  d 1.00
+  illum 2
+
+newmtl Glass_Architectural
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.6500 0.8200 0.9000
+  Ks 0.9000 0.9000 0.9500
+  Ns 100.0
+  d 0.35
+  illum 2
+
+newmtl Door_Mahogany
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.4200 0.2000 0.1200
+  Ks 0.3500 0.3000 0.2500
+  Ns 45.0
+  d 1.00
+  illum 2
+
+newmtl Door_Hardware_Brass
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.8500 0.7200 0.3500
+  Ks 0.8000 0.7500 0.4000
+  Ns 80.0
+  d 1.00
+  illum 2
+
+newmtl Interior_Drywall_OffWhite
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.9400 0.9300 0.9100
+  Ks 0.0500 0.0500 0.0500
+  Ns 10.0
+  d 1.00
+  illum 2
+
+newmtl Interior_Accent_SlateBlue
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.2800 0.3600 0.4400
+  Ks 0.1000 0.1000 0.1000
+  Ns 15.0
+  d 1.00
+  illum 2
+
+newmtl Hardwood_Floor_Oak
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.6800 0.4800 0.2800
+  Ks 0.3500 0.3000 0.2000
+  Ns 45.0
+  d 1.00
+  illum 2
+
+newmtl Ceramic_Tile_LightGrey
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.8600 0.8700 0.8800
+  Ks 0.6000 0.6000 0.6000
+  Ns 70.0
+  d 1.00
+  illum 2
+
+newmtl Bathroom_Tile_Teal
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.2200 0.5200 0.5500
+  Ks 0.7000 0.7000 0.7000
+  Ns 80.0
+  d 1.00
+  illum 2
+
+newmtl Baseboard_Trim_White
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.9800 0.9800 0.9800
+  Ks 0.2000 0.2000 0.2000
+  Ns 30.0
+  d 1.00
+  illum 2
+
+newmtl Ceiling_MatteWhite
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.9700 0.9700 0.9700
+  Ks 0.0200 0.0200 0.0200
+  Ns 5.0
+  d 1.00
+  illum 2
+
+newmtl Sofa_Fabric_Navy
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.1400 0.2200 0.3200
+  Ks 0.1200 0.1200 0.1500
+  Ns 15.0
+  d 1.00
+  illum 2
+
+newmtl Sofa_Cushion_Oatmeal
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.8500 0.8200 0.7600
+  Ks 0.1000 0.1000 0.1000
+  Ns 10.0
+  d 1.00
+  illum 2
+
+newmtl CoffeeTable_Walnut
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.3800 0.2400 0.1500
+  Ks 0.3000 0.2500 0.2000
+  Ns 35.0
+  d 1.00
+  illum 2
+
+newmtl Metal_BlackMatte
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.1000 0.1000 0.1100
+  Ks 0.3000 0.3000 0.3000
+  Ns 50.0
+  d 1.00
+  illum 2
+
+newmtl TV_GlossyScreen
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.0400 0.0400 0.0500
+  Ks 0.9500 0.9500 0.9500
+  Ns 95.0
+  d 1.00
+  illum 2
+
+newmtl TV_Console_Charcoal
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.2200 0.2300 0.2500
+  Ks 0.2000 0.2000 0.2000
+  Ns 30.0
+  d 1.00
+  illum 2
+
+newmtl LivingRoom_AreaRug
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.8000 0.7700 0.7000
+  Ks 0.0500 0.0500 0.0500
+  Ns 5.0
+  d 1.00
+  illum 2
+
+newmtl Lamp_Shade_Linen
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.9500 0.9200 0.8400
+  Ks 0.1000 0.1000 0.1000
+  Ns 15.0
+  d 1.00
+  illum 2
+
+newmtl Kitchen_Cabinet_MatteForest
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.1800 0.2800 0.2400
+  Ks 0.2000 0.2000 0.2000
+  Ns 30.0
+  d 1.00
+  illum 2
+
+newmtl Countertop_WhiteQuartz
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.9300 0.9400 0.9500
+  Ks 0.8000 0.8000 0.8500
+  Ns 90.0
+  d 1.00
+  illum 2
+
+newmtl Appliance_StainlessSteel
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.7800 0.8000 0.8200
+  Ks 0.8500 0.8500 0.8800
+  Ns 85.0
+  d 1.00
+  illum 2
+
+newmtl Sink_Chrome
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.8800 0.8900 0.9100
+  Ks 0.9500 0.9500 0.9500
+  Ns 95.0
+  d 1.00
+  illum 2
+
+newmtl Cooktop_CeramicGlass
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.0800 0.0800 0.0900
+  Ks 0.9000 0.9000 0.9000
+  Ns 90.0
+  d 1.00
+  illum 2
+
+newmtl Dining_Table_NaturalAsh
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.7500 0.6200 0.4500
+  Ks 0.2500 0.2500 0.2000
+  Ns 30.0
+  d 1.00
+  illum 2
+
+newmtl Dining_Chair_LeatherTan
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.6000 0.4000 0.2200
+  Ks 0.3000 0.2500 0.2000
+  Ns 25.0
+  d 1.00
+  illum 2
+
+newmtl Bed_Frame_DarkWood
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.3200 0.2000 0.1400
+  Ks 0.2500 0.2000 0.1500
+  Ns 35.0
+  d 1.00
+  illum 2
+
+newmtl Bed_MattressLinen_White
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.9500 0.9500 0.9600
+  Ks 0.0800 0.0800 0.0800
+  Ns 10.0
+  d 1.00
+  illum 2
+
+newmtl Bed_Duvet_Terracotta
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.6800 0.3500 0.2400
+  Ks 0.1000 0.1000 0.1000
+  Ns 10.0
+  d 1.00
+  illum 2
+
+newmtl Bed_Pillow_Beige
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.9000 0.8800 0.8400
+  Ks 0.0800 0.0800 0.0800
+  Ns 10.0
+  d 1.00
+  illum 2
+
+newmtl Nightstand_DarkWood
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.3200 0.2000 0.1400
+  Ks 0.2500 0.2000 0.1500
+  Ns 35.0
+  d 1.00
+  illum 2
+
+newmtl Wardrobe_CleanWhite
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.9200 0.9200 0.9300
+  Ks 0.2000 0.2000 0.2000
+  Ns 30.0
+  d 1.00
+  illum 2
+
+newmtl Bathroom_PorcelainWhite
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.9600 0.9700 0.9800
+  Ks 0.8500 0.8500 0.8500
+  Ns 90.0
+  d 1.00
+  illum 2
+
+newmtl Mirror_Reflective
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.8500 0.9000 0.9500
+  Ks 0.9800 0.9800 0.9800
+  Ns 100.0
+  d 1.00
+  illum 2
+
+newmtl Vanity_Cabinet_Teak
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.5000 0.3200 0.1800
+  Ks 0.2500 0.2000 0.1500
+  Ns 35.0
+  d 1.00
+  illum 2
+
+newmtl Shower_GlassClear
+  Ka 0.1000 0.1000 0.1000
+  Kd 0.7500 0.8500 0.9000
+  Ks 0.9500 0.9500 0.9500
+  Ns 100.0
+  d 0.25
+  illum 2
+

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/GLTFLoader.js"></script>
+</head>
+<body>
+<script>
+  const loader = new THREE.GLTFLoader();
+  loader.load('Hand_Nails_low_R.gltf', (gltf) => {
+    const root = gltf.scene;
+    const bones = {};
+    root.traverse(n => { if (n.isBone) bones[n.name] = n; });
+    
+    for (const finger of ['Index', 'Middle', 'Ring', 'Little', 'Thumb']) {
+      const tipName = finger === 'Thumb' ? 'Thumb_Tip_R' : finger + '_Tip_R';
+      const proxName = finger === 'Thumb' ? 'Thumb_Metacarpal_R' : finger + '_Proximal_R';
+      
+      function getTip() {
+        root.updateMatrixWorld(true);
+        const p = new THREE.Vector3();
+        bones[tipName].getWorldPosition(p);
+        return p;
+      }
+      const b0 = getTip();
+      
+      const res = {};
+      for (const axis of ['x', 'y', 'z']) {
+        bones[proxName].rotation.set(0, 0, 0);
+        bones[proxName].rotation[axis] = -1.5;
+        const p = getTip();
+        res[axis] = (p.y - b0.y).toFixed(3);
+      }
+      bones[proxName].rotation.set(0, 0, 0);
+      console.log(finger + ' delta Y (-1.5) -> X:' + res.x + ' Y:' + res.y + ' Z:' + res.z);
+    }
+  });
+</script>
+</body>
+</html>

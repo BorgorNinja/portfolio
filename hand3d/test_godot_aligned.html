@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>body { margin: 0; background: #0d0f12; }</style>
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/GLTFLoader.js"></script>
+</head>
+<body>
+<script>
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0d0f12);
+  
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
+  camera.position.set(0, 0.05, 0.42);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(800, 800);
+  document.body.appendChild(renderer.domElement);
+
+  // Soft studio light setup
+  const amb = new THREE.AmbientLight(0xffffff, 0.8);
+  scene.add(amb);
+  const keyLight = new THREE.DirectionalLight(0xfff1e0, 1.8);
+  keyLight.position.set(1.5, 3, 2.5);
+  scene.add(keyLight);
+  const fillLight = new THREE.DirectionalLight(0x7dd3fc, 0.4);
+  fillLight.position.set(-2, 1, 1.5);
+  scene.add(fillLight);
+  const rimLight = new THREE.DirectionalLight(0x38bdf8, 1.2);
+  rimLight.position.set(0, 3, -2);
+  scene.add(rimLight);
+
+  const texLoader = new THREE.TextureLoader();
+  const diff = texLoader.load('caucasian_realistic_baseColor.png');
+  const norm = texLoader.load('hands_normal.png');
+
+  const quats = {"Thumb_Metacarpal_R": [0.329638, -0.274268, 0.172362, 0.886796], "Thumb_Proximal_R": [-0.354278, -0.017212, 0.275, 0.893625], "Thumb_Distal_R": [-0.421075, 0.118121, 0.243319, 0.865759], "Index_Metacarpal_R": [-0.001285, 0.011608, 0.016826, 0.99979], "Index_Proximal_R": [0.024201, 0.046171, 0.651623, 0.75675], "Index_Intermediate_R": [-0.002144, 0.02012, 0.689721, 0.723792], "Index_Distal_R": [-0.036982, -0.034581, 0.793887, 0.605953], "Middle_Metacarpal_R": [-0.035754, 0.0004, -0.006368, 0.99934], "Middle_Proximal_R": [0.021822, -0.009188, 0.268818, 0.9629], "Ring_Metacarpal_R": [-0.070266, -0.010191, 0.024331, 0.99718], "Ring_Proximal_R": [0.082144, 0.00479, 0.610545, 0.787696], "Ring_Intermediate_R": [0.056462, 0.046941, 0.622987, 0.778779], "Ring_Distal_R": [0.08124, 0.022469, 0.834617, 0.544343], "Little_Metacarpal_R": [-0.091737, -0.020303, 0.010183, 0.995524], "Little_Proximal_R": [0.103134, 0.027252, 0.608737, 0.786168], "Little_Intermediate_R": [0.098543, 0.051523, 0.65627, 0.746287], "Little_Distal_R": [0.126804, 0.053291, 0.791773, 0.595128], "Middle_Intermediate_R": [0.039455, -0.004929, 0.137827, 0.989658], "Middle_Distal_R": [-0.013932, 0.000142, 0.168612, 0.985584]};
+
+  const loader = new THREE.GLTFLoader();
+  loader.load('Hand_Nails_low_R.gltf', (gltf) => {
+    const root = gltf.scene;
+    
+    root.traverse(n => {
+      if (n.isMesh) {
+        n.material = new THREE.MeshStandardMaterial({
+          map: diff,
+          normalMap: norm,
+          roughness: 0.55,
+          metalness: 0.05
+        });
+      }
+    });
+
+    const bones = {};
+    root.traverse(n => { if (n.isBone) bones[n.name] = n; });
+
+    for (const [name, q] of Object.entries(quats)) {
+      if (bones[name]) {
+        bones[name].quaternion.set(q[0], q[1], q[2], q[3]);
+      }
+    }
+
+    const group = new THREE.Group();
+    group.add(root);
+    scene.add(group);
+
+    // Rotate so middle finger points straight up, and back of hand faces camera with slight 3D perspective
+    // In godot_pose.png, it was (-0.15, 0.4, 0)
+    // To rotate clockwise ~45 deg, add -0.7 to Z
+    // To show back of hand, adjust Y
+    group.rotation.set(-0.2, 0.9, -0.65);
+
+    const box = new THREE.Box3().setFromObject(group);
+    const center = box.getCenter(new THREE.Vector3());
+    group.position.sub(center);
+    
+    camera.lookAt(0, 0, 0);
+    renderer.render(scene, camera);
+    window.__TEST_DONE__ = true;
+  });
+</script>
+</body>
+</html>

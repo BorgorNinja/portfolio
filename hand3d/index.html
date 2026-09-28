@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Hand Viewer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #141416; color: #fff; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    #canvas-container { width: 100vw; height: 100vh; display: block; }
+    #overlay {
+      position: absolute; top: 16px; left: 16px;
+      background: rgba(20, 20, 24, 0.75); backdrop-filter: blur(8px);
+      padding: 10px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
+      font-size: 13px; letter-spacing: 0.5px;
+    }
+  </style>
+  <script src="./vendor/three.min.js"></script>
+  <script src="./vendor/OrbitControls.js"></script>
+  <script src="./vendor/GLTFLoader.js"></script>
+</head>
+<body>
+  <div id="overlay">3D Hand &bull; Middle Finger Pose &bull; Drag to rotate</div>
+  <div id="canvas-container"></div>
+
+  <script>
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x18181b);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0.42, 0.05, 0.05);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.target.set(0, 0.02, 0);
+
+    const ambLight = new THREE.AmbientLight(0xffffff, 0.95);
+    scene.add(ambLight);
+
+    const keyLight = new THREE.DirectionalLight(0xfff5ea, 1.5);
+    keyLight.position.set(3, 3, 2);
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0xcce2ff, 0.85);
+    fillLight.position.set(-2, -1, -2);
+    scene.add(fillLight);
+
+    const rimLight = new THREE.DirectionalLight(0xffffff, 0.9);
+    rimLight.position.set(0, 3, 2);
+    scene.add(rimLight);
+
+    const texLoader = new THREE.TextureLoader();
+    const diffuseTex = texLoader.load('./caucasian_realistic_baseColor.png');
+    const normalTex = texLoader.load('./hands_normal.png');
+
+    const loader = new THREE.GLTFLoader();
+    loader.load('./Hand_Nails_low_R.gltf', (gltf) => {
+      const model = gltf.scene;
+
+      model.traverse((child) => {
+        if (child.isMesh && child.material) {
+          child.material.map = diffuseTex;
+          child.material.normalMap = normalTex;
+          child.material.roughness = 0.6;
+          child.material.metalness = 0.05;
+          child.material.needsUpdate = true;
+        }
+      });
+
+      const bones = {};
+      model.traverse((child) => {
+        if (child.isBone) {
+          bones[child.name] = child;
+        }
+      });
+
+      function curlFinger(prefix, angle) {
+        ['Proximal', 'Intermediate', 'Distal'].forEach((seg) => {
+          const b = bones[`${prefix}_${seg}_R`];
+          if (b) {
+            b.rotation.z = -angle;
+          }
+        });
+      }
+
+      // Middle finger extended straight
+      // Index, ring, pinky curled into fist
+      curlFinger('Index', 1.55);
+      curlFinger('Ring', 1.55);
+      curlFinger('Little', 1.55);
+
+      // Thumb fold across index knuckle
+      if (bones['Thumb_Metacarpal_R']) bones['Thumb_Metacarpal_R'].rotation.set(0.3, 0.3, -0.6);
+      if (bones['Thumb_Proximal_R']) bones['Thumb_Proximal_R'].rotation.set(0.2, 0.2, -0.8);
+      if (bones['Thumb_Distal_R']) bones['Thumb_Distal_R'].rotation.set(0.1, 0.1, -0.8);
+
+      const pivot = new THREE.Group();
+      pivot.add(model);
+
+      // Rotate around X by 90 degrees (+Math.PI / 2) so finger pointing along +Z turns straight UP into +Y
+      pivot.rotation.set(Math.PI / 2, 0, 0);
+
+      // Center model
+      const box = new THREE.Box3().setFromObject(pivot);
+      const center = box.getCenter(new THREE.Vector3());
+      pivot.position.sub(center);
+
+      scene.add(pivot);
+      window.__HAND_LOADED__ = true;
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>

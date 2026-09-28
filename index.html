@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Rochelle De Santos — Software Engineer & Systems Architect</title>
   <meta name="description" content="Portfolio of Rochelle De Santos (borgorninja). Software engineer specializing in Python asyncio, backend systems, and event-driven automation.">
+  <meta name="msvalidate.01" content="C439F5CBA75084EE12DBDBA10E7FE144">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
@@ -796,6 +797,9 @@
         <li><button class="nav-tab-btn" id="tab-projects" onclick="switchPage('projects')">Featured Systems</button></li>
         <li><button class="nav-tab-btn" id="tab-stack" onclick="switchPage('stack')">Technical Stack</button></li>
         <li><button class="nav-tab-btn" id="tab-synth" onclick="switchPage('synth')">Audio Playground</button></li>
+        <li><a href="/arcade/" class="nav-tab-btn" style="color: #34d399; text-decoration: none;" title="Borgor Arcadia Game Lobby">🎮 Arcade</a></li>
+        <li><a href="/slots/" class="nav-tab-btn" style="color: #fde047; text-decoration: none;" title="Gates of Borgor Scatter Slot">🎰 Slots</a></li>
+        <li><a href="/jtrash/" class="nav-tab-btn" style="color: #38bdf8; text-decoration: none;" title="JTrash E-Wallet">🗑️ JTrash</a></li>
         <li><button class="nav-tab-btn" id="tab-contact" onclick="switchPage('contact')">Contact</button></li>
       </ul>
 
@@ -818,6 +822,15 @@
         <button class="mobile-tab-btn" id="m-tab-synth" onclick="selectMobilePage('synth')">
           <span>🎹 Audio Playground</span> <span>→</span>
         </button>
+        <a href="/arcade/" class="mobile-tab-btn" style="color: #34d399; text-decoration: none;">
+          <span>🎮 Borgor Arcadia</span> <span>→</span>
+        </a>
+        <a href="/slots/" class="mobile-tab-btn" style="color: #fde047; text-decoration: none;">
+          <span>🎰 Gates of Borgor</span> <span>→</span>
+        </a>
+        <a href="/jtrash/" class="mobile-tab-btn" style="color: #38bdf8; text-decoration: none;">
+          <span>🗑️ JTrash E-Wallet</span> <span>→</span>
+        </a>
         <button class="mobile-tab-btn" id="m-tab-contact" onclick="selectMobilePage('contact')">
           <span>📬 Contact</span> <span>→</span>
         </button>
@@ -973,6 +986,84 @@
           </div>
           <div class="proj-actions">
             <a href="https://playleak.duckdns.org" target="_blank" class="action-btn" onclick="playChime(520)">🔗 Live Platform</a>
+          </div>
+        </div>
+
+        <!-- Gates of Borgor Scatter Slot Engine -->
+        <div class="proj-card" style="border-color: rgba(245, 176, 65, 0.3); background: linear-gradient(145deg, rgba(22, 25, 38, 0.95), rgba(35, 25, 15, 0.4));">
+          <div class="proj-top">
+            <span class="proj-badge" style="background: rgba(245, 158, 11, 0.15); color: #fde047; border: 1px solid rgba(245, 158, 11, 0.3);">🎰 Interactive Scatter Engine</span>
+            <span style="font-size: 1.3rem;">🍔</span>
+          </div>
+          <h3 class="proj-title">Gates of Borgor — Scatter Slot Arena</h3>
+          <p class="proj-desc">
+            A 100% free, client-side procedural scatter slot simulator. Features cascading tumble mechanics, random multiplier bomb orbs (up to 500x), retriggerable free spins, and procedural Web Audio synthesis.
+          </p>
+          <ul class="proj-highlights">
+            <li>Engineered 6x5 scatter-pays grid with recursive tumbling reel physics and gravity cascades.</li>
+            <li>Built zero-asset Web Audio API casino synthesizer generating procedural drop, chime, and fanfare audio.</li>
+            <li>Designed vector SVG symbol engine with dynamic ambient particle effects and zero real-money stakes.</li>
+          </ul>
+          <div class="proj-tags">
+            <span class="proj-tag">Vanilla JavaScript</span>
+            <span class="proj-tag">HTML5 Canvas FX</span>
+            <span class="proj-tag">Web Audio API</span>
+            <span class="proj-tag">SVG Graphic Arts</span>
+            <span class="proj-tag">Interactive Demo</span>
+          </div>
+          <div class="proj-actions">
+            <a href="/slots/" class="action-btn" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.15)); border-color: rgba(245, 158, 11, 0.5); color: #fde047;" onclick="playChime(600)">🎰 Launch Game</a>
+          </div>
+        </div>
+
+        <!-- Project 4: JTrash E-Wallet -->
+        <div class="project-card">
+          <div class="proj-badge" style="background: rgba(0, 92, 230, 0.15); border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">
+            <span>🗑️ Parody E-Wallet</span>
+          </div>
+          <h3 class="proj-title">JTrash — Ang Pambansang Basura Wallet</h3>
+          <p class="proj-desc">
+            A satirical Philippine e-wallet web app integrated with Gates of Borgor slot coins. Features instant coin deposits, dumpster bank transfers, 999.9% APY JSave high-yield vault, meme crypto trading, and Web Audio chimes with zero real money.
+          </p>
+          <ul class="proj-highlights">
+            <li>Built two-way local state bridge syncing slot machine winnings with e-wallet reserves in real time.</li>
+            <li>Designed high-yield savings engine with simulated compound micro-interest ticks and GCash UI parodies.</li>
+            <li>Implemented procedural Web Audio notification synthesizers and printable satire transaction slips.</li>
+          </ul>
+          <div class="proj-tags">
+            <span class="proj-tag">Fintech Parody</span>
+            <span class="proj-tag">LocalStorage Bridge</span>
+            <span class="proj-tag">Web Audio API</span>
+            <span class="proj-tag">Mobile Responsive</span>
+            <span class="proj-tag">Satire</span>
+          </div>
+          <div class="proj-actions">
+            <a href="/jtrash/" class="action-btn" style="background: linear-gradient(135deg, rgba(0, 92, 230, 0.25), rgba(0, 115, 230, 0.15)); border-color: rgba(56, 189, 248, 0.5); color: #38bdf8;" onclick="playChime(640)">🗑️ Open JTrash</a>
+          </div>
+        </div>
+
+        <!-- Project 5: Borgor Arcadia Lounge -->
+        <div class="project-card">
+          <div class="proj-badge" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); color: #34d399;">
+            <span>🎮 Cyber Game Center</span>
+          </div>
+          <h3 class="proj-title">Borgor Arcadia — Cyber Game Lounge & 1v1 Match Hub</h3>
+          <p class="proj-desc">
+            A 3D interactive arcade dashboard and lobby. Features live mouse-tracking 3D isometric game previews, Gates of Borgor scatter slots, Verlet-physics Cyber Pinball, and Neon 8-Ball Pool with friend match challenges via JTrash Ref numbers.
+          </p>
+          <ul class="proj-highlights">
+            <li>Interactive 3D perspective card dashboard with live real-time canvas simulations on hover.</li>
+            <li>Complete Cyber Pinball machine with spring plunger, active bumpers, and flipper angular momentum.</li>
+            <li>Full 8-Ball billiards simulator with elastic ball collisions, cue guide line, and synchronized 1v1 match challenges.</li>
+          </ul>
+          <div class="proj-tags">
+            <span class="proj-tag">3D Interactive Canvas</span>
+            <span class="proj-tag">2D Physics Engine</span>
+            <span class="proj-tag">Multiplayer Match API</span>
+            <span class="proj-tag">Pinball & Billiards</span>
+          </div>
+          <div class="proj-actions">
+            <a href="/arcade/" class="action-btn" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.15)); border-color: rgba(52, 211, 153, 0.5); color: #34d399;" onclick="playChime(700)">🎮 Enter Arcadia</a>
           </div>
         </div>
 

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>body { margin: 0; background: #0f1115; }</style>
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/GLTFLoader.js"></script>
+</head>
+<body>
+<script>
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0d0f12);
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+  camera.position.set(0, 0.05, 0.35);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(800, 800);
+  document.body.appendChild(renderer.domElement);
+
+  // Key light shining on the back of the hand and knuckles
+  const amb = new THREE.AmbientLight(0xffffff, 0.7);
+  scene.add(amb);
+  const keyLight = new THREE.DirectionalLight(0xffeedd, 1.6);
+  keyLight.position.set(2, 3, 3);
+  scene.add(keyLight);
+  const fillLight = new THREE.DirectionalLight(0x8bc34a, 0.4);
+  fillLight.position.set(-2, 1, 2);
+  scene.add(fillLight);
+  const rimLight = new THREE.DirectionalLight(0x38bdf8, 1.2);
+  rimLight.position.set(0, 2, -3);
+  scene.add(rimLight);
+
+  const texLoader = new THREE.TextureLoader();
+  const diff = texLoader.load('caucasian_realistic_baseColor.png');
+  const norm = texLoader.load('hands_normal.png');
+
+  const loader = new THREE.GLTFLoader();
+  loader.load('Hand_Nails_low_R.gltf', (gltf) => {
+    const root = gltf.scene;
+    
+    root.traverse(n => {
+      if (n.isMesh) {
+        n.material = new THREE.MeshStandardMaterial({
+          map: diff,
+          normalMap: norm,
+          roughness: 0.55,
+          metalness: 0.05
+        });
+      }
+    });
+
+    const bones = {};
+    root.traverse(n => { if (n.isBone) bones[n.name] = n; });
+
+    // Curl Index finger tightly into palm
+    bones['Index_Proximal_R'].rotation.x = -1.45;
+    bones['Index_Intermediate_R'].rotation.x = -1.45;
+    bones['Index_Distal_R'].rotation.x = -1.1;
+
+    // MIDDLE FINGER STAYS FULLY EXTENDED (standing tall and proud!)
+    // Reset or natural extension
+    bones['Middle_Proximal_R'].rotation.x = 0;
+    bones['Middle_Intermediate_R'].rotation.x = 0;
+    bones['Middle_Distal_R'].rotation.x = 0;
+
+    // Curl Ring finger tightly into palm
+    bones['Ring_Proximal_R'].rotation.x = -1.5;
+    bones['Ring_Intermediate_R'].rotation.x = -1.5;
+    bones['Ring_Distal_R'].rotation.x = -1.1;
+
+    // Curl Pinky finger tightly into palm
+    bones['Little_Proximal_R'].rotation.x = -1.5;
+    bones['Little_Intermediate_R'].rotation.x = -1.5;
+    bones['Little_Distal_R'].rotation.x = -1.1;
+
+    // Fold Thumb across the curled index/middle knuckles
+    bones['Thumb_Metacarpal_R'].rotation.y = 0.6;
+    bones['Thumb_Metacarpal_R'].rotation.x = -0.4;
+    bones['Thumb_Proximal_R'].rotation.x = -0.6;
+    bones['Thumb_Distal_R'].rotation.x = -0.8;
+
+    const group = new THREE.Group();
+    group.add(root);
+    scene.add(group);
+
+    // Orientation:
+    // In rest pose, fingers point along -Z, palm normal is -Y.
+    // To make the hand stand upright with fingers pointing UP (+Y) and the dorsal/back of hand facing camera (+Z):
+    // Rotate root so -Z maps to +Y and +Y maps to +Z:
+    // That is rotation around X of +90 deg (+Math.PI / 2)!
+    root.rotation.set(Math.PI / 2, 0, 0);
+
+    // Give a dynamic 3D perspective angle so knuckles and gesture are crystal clear:
+    group.rotation.set(-0.15, 0.35, 0.05);
+
+    const box = new THREE.Box3().setFromObject(group);
+    const center = box.getCenter(new THREE.Vector3());
+    group.position.sub(center);
+    
+    renderer.render(scene, camera);
+    window.__TEST_DONE__ = true;
+  });
+</script>
+</body>
+</html>

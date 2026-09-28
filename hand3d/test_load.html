@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/GLTFLoader.js"></script>
+</head>
+<body>
+<script>
+  const loader = new THREE.GLTFLoader();
+  loader.load('Hand_Nails_low_R.gltf', (gltf) => {
+    const bones = {};
+    gltf.scene.traverse(node => {
+      if (node.isBone) bones[node.name] = node;
+    });
+    // Print local rotation of Index_Proximal_R and its world direction
+    const b = bones['Index_Proximal_R'];
+    console.log('Index_Proximal_R rot:', b.rotation.x, b.rotation.y, b.rotation.z);
+  });
+</script>
+</body>
+</html>

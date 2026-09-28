@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>body { margin: 0; background: #0f1115; }</style>
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/GLTFLoader.js"></script>
+</head>
+<body>
+<script>
+  const loader = new THREE.GLTFLoader();
+  loader.load('Hand_Nails_low_R.gltf', (gltf) => {
+    const root = gltf.scene;
+    const bones = {};
+    root.traverse(n => { if (n.isBone) bones[n.name] = n; });
+    
+    const b = bones['Index_Proximal_R'];
+    console.log('Initial quat:', b.quaternion.x, b.quaternion.y, b.quaternion.z, b.quaternion.w);
+    
+    // Rotate using quaternion: rotate around local Z
+    const q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 1.5);
+    b.quaternion.multiply(q);
+    console.log('Modified quat:', b.quaternion.x, b.quaternion.y, b.quaternion.z, b.quaternion.w);
+  });
+</script>
+</body>
+</html>

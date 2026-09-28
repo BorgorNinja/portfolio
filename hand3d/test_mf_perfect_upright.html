@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>body { margin: 0; background: #0d0f12; }</style>
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/GLTFLoader.js"></script>
+</head>
+<body>
+<script>
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0d0f12);
+  
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
+  camera.position.set(0, 0.05, 0.38);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(800, 800);
+  document.body.appendChild(renderer.domElement);
+
+  // Studio lighting
+  const amb = new THREE.AmbientLight(0xffffff, 0.85);
+  scene.add(amb);
+  const keyLight = new THREE.DirectionalLight(0xfff1e0, 1.8);
+  keyLight.position.set(2, 3, 3);
+  scene.add(keyLight);
+  const fillLight = new THREE.DirectionalLight(0x7dd3fc, 0.5);
+  fillLight.position.set(-2, 1, 2);
+  scene.add(fillLight);
+  const rimLight = new THREE.DirectionalLight(0x38bdf8, 1.2);
+  rimLight.position.set(0, 3, -2);
+  scene.add(rimLight);
+
+  const texLoader = new THREE.TextureLoader();
+  const diff = texLoader.load('caucasian_realistic_baseColor.png');
+  const norm = texLoader.load('hands_normal.png');
+
+  const loader = new THREE.GLTFLoader();
+  loader.load('Hand_Nails_low_R.gltf', (gltf) => {
+    const root = gltf.scene;
+    
+    root.traverse(n => {
+      if (n.isMesh) {
+        n.material = new THREE.MeshStandardMaterial({
+          map: diff,
+          normalMap: norm,
+          roughness: 0.55,
+          metalness: 0.05
+        });
+      }
+    });
+
+    const bones = {};
+    root.traverse(n => { if (n.isBone) bones[n.name] = n; });
+
+    function curlFinger(name, angle) {
+      if (bones[name + '_Proximal_R']) bones[name + '_Proximal_R'].rotation.x = angle;
+      if (bones[name + '_Intermediate_R']) bones[name + '_Intermediate_R'].rotation.x = angle;
+      if (bones[name + '_Distal_R']) bones[name + '_Distal_R'].rotation.x = angle * 0.8;
+    }
+
+    // Curl Index, Ring, Little tightly into fist
+    curlFinger('Index', -1.55);
+    curlFinger('Ring', -1.55);
+    curlFinger('Little', -1.55);
+
+    // Middle finger stands proud and straight up!
+    bones['Middle_Proximal_R'].rotation.x = 0;
+    bones['Middle_Intermediate_R'].rotation.x = 0;
+    bones['Middle_Distal_R'].rotation.x = 0;
+
+    // Thumb folds over the curled fingers
+    bones['Thumb_Metacarpal_R'].rotation.set(-0.35, 0.65, -0.4);
+    bones['Thumb_Proximal_R'].rotation.set(-0.75, 0, 0);
+    bones['Thumb_Distal_R'].rotation.set(-0.85, 0, 0);
+
+    const group = new THREE.Group();
+    group.add(root);
+    scene.add(group);
+
+    // Fingers point UP:
+    root.rotation.set(Math.PI / 2, 0, 0);
+    // Face dorsal / knuckles toward camera with slight angle
+    group.rotation.set(-0.1, Math.PI - 0.35, 0);
+
+    const box = new THREE.Box3().setFromObject(group);
+    const center = box.getCenter(new THREE.Vector3());
+    group.position.sub(center);
+    
+    camera.lookAt(0, 0, 0);
+    renderer.render(scene, camera);
+    window.__TEST_DONE__ = true;
+  });
+</script>
+</body>
+</html>

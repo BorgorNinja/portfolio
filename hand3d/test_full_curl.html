@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/GLTFLoader.js"></script>
+</head>
+<body>
+<script>
+  const loader = new THREE.GLTFLoader();
+  loader.load('Hand_Nails_low_R.gltf', (gltf) => {
+    const root = gltf.scene;
+    const bones = {};
+    root.traverse(n => { if (n.isBone) bones[n.name] = n; });
+    
+    function curlFinger(prefix, angle) {
+      if (bones[prefix + '_Proximal_R']) bones[prefix + '_Proximal_R'].rotation.x = angle;
+      if (bones[prefix + '_Intermediate_R']) bones[prefix + '_Intermediate_R'].rotation.x = angle;
+      if (bones[prefix + '_Distal_R']) bones[prefix + '_Distal_R'].rotation.x = angle * 0.8;
+    }
+
+    root.updateMatrixWorld(true);
+    const p0 = new THREE.Vector3();
+    bones['Ring_Tip_R'].getWorldPosition(p0);
+
+    curlFinger('Ring', -1.5);
+    root.updateMatrixWorld(true);
+    const p1 = new THREE.Vector3();
+    bones['Ring_Tip_R'].getWorldPosition(p1);
+
+    console.log('Ring tip before:', p0.x.toFixed(3), p0.y.toFixed(3), p0.z.toFixed(3));
+    console.log('Ring tip after curl:', p1.x.toFixed(3), p1.y.toFixed(3), p1.z.toFixed(3));
+  });
+</script>
+</body>
+</html>
