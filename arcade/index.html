@@ -601,9 +601,9 @@
     <!-- Games Grid with 3D Live Render Previews -->
         <!-- Category Filter Bar -->
     <div class="lobby-filter-bar">
-      <button class="filter-pill active" onclick="filterGames('all', this)">✨ All Games (8)</button>
+      <button class="filter-pill active" onclick="filterGames('all', this)">✨ All Games (9)</button>
       <button class="filter-pill" onclick="filterGames('slots', this)">🎰 Slots Arena (4)</button>
-      <button class="filter-pill" onclick="filterGames('arcade', this)">🕹️ Arcade & Table (3)</button>
+      <button class="filter-pill" onclick="filterGames('arcade', this)">🕹️ Arcade & Table (4)</button>
       <button class="filter-pill" onclick="filterGames('banking', this)">🗑️ E-Wallet (1)</button>
     </div>
 
@@ -860,6 +860,42 @@
           <div class="card-actions" onclick="event.stopPropagation()">
             <a href="/roulette/" class="btn-play-primary" style="background: linear-gradient(135deg, #d97706, #b45309); border-color: #fde68a;">
               <span>🎱 Play Billiard Roulette</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game: Cyber Aqua Fish Race -->
+      <div class="game-card" id="card-fishrace" data-category="arcade" style="--glow-color: rgba(6, 182, 212, 0.4); --border-hover: #06b6d4;" onclick="location.href='/fishrace/'">
+        <div class="preview-viewport">
+          <canvas class="preview-canvas" id="canvas-preview-fishrace" width="300" height="190"></canvas>
+          <div class="live-badge">
+            <span class="live-pulse-dot" style="background: #06b6d4; box-shadow: 0 0 8px #06b6d4;"></span>
+            <span>4-PLAYER MULTI</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div>
+            <div class="game-title-row">
+              <span class="game-name">Cyber Aqua Fish Race</span>
+              <span class="game-genre" style="color: #06b6d4;">Live Betting Derby</span>
+            </div>
+            <p class="game-blurb">
+              Top-down 8-lane cyber aquatic derby. 30s betting timer, 15s procedural swimming sprint with sinusoidal spine physics, dynamic odds, and JTrash room sync.
+            </p>
+          </div>
+
+          <div class="game-tags">
+            <span class="tag-badge">8 Cyber Species</span>
+            <span class="tag-badge">30s Betting</span>
+            <span class="tag-badge">Sine Undulation</span>
+            <span class="tag-badge">JTrash Sync</span>
+          </div>
+
+          <div class="card-actions" onclick="event.stopPropagation()">
+            <a href="/fishrace/" class="btn-play-primary" style="background: linear-gradient(135deg, #0891b2, #0e7490); border-color: #67e8f9;">
+              <span>🐟 Bet on Fish</span>
             </a>
           </div>
         </div>
@@ -1452,7 +1488,107 @@
       ctxRoulette.restore();
     }
 
-    // 4. JTRASH E-WALLET: Rotating 3D Holographic Debit Card & Shimmer
+    // 4. CYBER AQUA FISH RACE: Top-Down Water Track with Sine Swimming Fish
+    const cvFishRace = document.getElementById('canvas-preview-fishrace');
+    const ctxFishRace = cvFishRace ? cvFishRace.getContext('2d') : null;
+    let fishRaceTime = 0;
+    const previewFish = [
+      { y: 38, x: 60, speed: 1.8, color: '#f43f5e' },
+      { y: 76, x: 130, speed: 2.2, color: '#fbbf24' },
+      { y: 114, x: 90, speed: 1.6, color: '#10b981' },
+      { y: 152, x: 150, speed: 2.0, color: '#06b6d4' }
+    ];
+
+    function renderFishRace3D() {
+      if (!ctxFishRace) return;
+      ctxFishRace.clearRect(0, 0, 300, 190);
+      fishRaceTime += 0.04;
+
+      ctxFishRace.save();
+      // Aquatic background gradient
+      const bg = ctxFishRace.createLinearGradient(0, 0, 300, 190);
+      bg.addColorStop(0, '#031726');
+      bg.addColorStop(1, '#06253b');
+      ctxFishRace.fillStyle = bg;
+      ctxFishRace.fillRect(0, 0, 300, 190);
+
+      // Lane dividers
+      ctxFishRace.strokeStyle = 'rgba(6, 182, 212, 0.2)';
+      ctxFishRace.lineWidth = 1;
+      for (let l = 1; l <= 4; l++) {
+        const ly = l * 38;
+        ctxFishRace.beginPath();
+        ctxFishRace.setLineDash([4, 4]);
+        ctxFishRace.moveTo(10, ly);
+        ctxFishRace.lineTo(290, ly);
+        ctxFishRace.stroke();
+      }
+      ctxFishRace.setLineDash([]);
+
+      // Finish line
+      const finishX = 265;
+      for (let y = 10; y < 180; y += 10) {
+        ctxFishRace.fillStyle = ((Math.floor(y / 10)) % 2 === 0) ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)';
+        ctxFishRace.fillRect(finishX, y, 6, 10);
+      }
+
+      // Draw preview swimming fish
+      previewFish.forEach((f, i) => {
+        f.x += f.speed;
+        if (f.x > 280) f.x = 20;
+
+        const undul = Math.sin(fishRaceTime * 8 + i * 2) * 4;
+        const fy = f.y;
+        const fx = f.x;
+
+        // Bubble wake
+        ctxFishRace.fillStyle = 'rgba(165, 243, 252, 0.35)';
+        ctxFishRace.beginPath();
+        ctxFishRace.arc(fx - 18, fy + Math.sin(fishRaceTime * 4) * 2, 2, 0, Math.PI * 2);
+        ctxFishRace.arc(fx - 26, fy - Math.cos(fishRaceTime * 4) * 2, 1.5, 0, Math.PI * 2);
+        ctxFishRace.fill();
+
+        // Fish Body
+        ctxFishRace.save();
+        ctxFishRace.translate(fx, fy);
+        ctxFishRace.fillStyle = f.color;
+        ctxFishRace.shadowColor = f.color;
+        ctxFishRace.shadowBlur = 8;
+
+        // Torpedo body
+        ctxFishRace.beginPath();
+        ctxFishRace.ellipse(0, 0, 14, 5.5, 0, 0, Math.PI * 2);
+        ctxFishRace.fill();
+
+        // Tail with undulation
+        ctxFishRace.beginPath();
+        ctxFishRace.moveTo(-10, 0);
+        ctxFishRace.lineTo(-20, undul - 6);
+        ctxFishRace.lineTo(-17, undul);
+        ctxFishRace.lineTo(-20, undul + 6);
+        ctxFishRace.closePath();
+        ctxFishRace.fillStyle = f.color;
+        ctxFishRace.fill();
+
+        // Eye
+        ctxFishRace.shadowBlur = 0;
+        ctxFishRace.fillStyle = '#ffffff';
+        ctxFishRace.beginPath();
+        ctxFishRace.arc(8, -2, 1.5, 0, Math.PI * 2);
+        ctxFishRace.fill();
+
+        ctxFishRace.restore();
+      });
+
+      // HUD overlay text
+      ctxFishRace.fillStyle = '#06b6d4';
+      ctxFishRace.font = 'bold 9px "Share Tech Mono", monospace';
+      ctxFishRace.fillText('CYBER DERBY • 8 LANES', 15, 20);
+
+      ctxFishRace.restore();
+    }
+
+    // 5. JTRASH E-WALLET: Rotating 3D Holographic Debit Card & Shimmer
     const cvJTrash = document.getElementById('canvas-preview-jtrash');
     const ctxJTrash = cvJTrash.getContext('2d');
     let jTime = 0;
@@ -1517,6 +1653,7 @@
       renderPinball3D();
       renderPool3D();
       renderRoulette3D();
+      renderFishRace3D();
       renderJTrash3D();
       requestAnimationFrame(animate);
     }

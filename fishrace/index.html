@@ -1,0 +1,2314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Cyber Aqua Fish Race — 4-Player Top-Down Aquatic Derby</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --water-deep: #081d36;
+      --water-mid: #0d3859;
+      --water-bright: #0ea5e9;
+      --gold-accent: #f59e0b;
+      --gold-bright: #fde047;
+      --neon-cyan: #38bdf8;
+      --led-red: #ff2222;
+      --led-red-glow: rgba(255, 34, 34, 0.7);
+      --font-display: 'Orbitron', monospace, sans-serif;
+      --font-led: 'Share Tech Mono', monospace;
+      --font-ui: 'Space Grotesk', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 50% 10%, #0c2d48 0%, transparent 60%),
+        radial-gradient(circle at 80% 80%, #061826 0%, transparent 50%),
+        linear-gradient(180deg, #020617 0%, #010409 100%);
+      color: #f8fafc;
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow-x: hidden;
+      padding-bottom: 24px;
+    }
+
+    /* Top Sticky Navigation Bar */
+    header {
+      width: 100%;
+      max-width: 1100px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+      background: rgba(4, 12, 24, 0.92);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-back-btn {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: #0f2238;
+      border: 1px solid #1e3a5f;
+      transition: all 0.2s ease;
+    }
+    .brand-back-btn:hover {
+      color: #fff;
+      background: #173456;
+      border-color: var(--neon-cyan);
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      color: #38bdf8;
+      text-shadow: 0 0 14px rgba(56, 189, 248, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-stats {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-timer-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #081726;
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-family: var(--font-led);
+      font-size: 14px;
+      font-weight: 700;
+      color: #38bdf8;
+      text-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+      letter-spacing: 1px;
+    }
+    .header-timer-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #38bdf8;
+      box-shadow: 0 0 6px #38bdf8;
+      animation: timerBlink 1s infinite alternate;
+    }
+    @keyframes timerBlink {
+      0% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+    .header-timer-badge.racing {
+      background: #241405;
+      border-color: rgba(245, 158, 11, 0.6);
+      color: #f59e0b;
+      text-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+    }
+    .header-timer-badge.racing .header-timer-dot {
+      background: #f59e0b;
+      box-shadow: 0 0 6px #f59e0b;
+    }
+    .header-timer-badge.payout {
+      background: #061c0e;
+      border-color: rgba(74, 222, 128, 0.6);
+      color: #4ade80;
+      text-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+    }
+    .header-timer-badge.payout .header-timer-dot {
+      background: #4ade80;
+      box-shadow: 0 0 6px #4ade80;
+    }
+
+    .balance-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #0f2238;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: #fde047;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);
+    }
+
+    .btn-sound-toggle {
+      background: #0f2238;
+      border: 1px solid #1e3a5f;
+      color: #cbd5e1;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.2s ease;
+    }
+    .btn-sound-toggle:hover {
+      border-color: var(--neon-cyan);
+      color: #38bdf8;
+    }
+
+    /* Main Container */
+    main {
+      width: 100%;
+      max-width: 1100px;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Multi-Player Seat Ribbon */
+    .seats-ribbon {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .seat-card {
+      background: linear-gradient(180deg, #0b1c30 0%, #06101d 100%);
+      border: 1px solid #1e3a5f;
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .seat-card.active-user {
+      border-color: #38bdf8;
+      background: linear-gradient(180deg, #132b49 0%, #091729 100%);
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.25);
+    }
+    .seat-card.active-user::after {
+      content: 'YOU';
+      position: absolute;
+      top: -8px;
+      right: 10px;
+      font-size: 9px;
+      font-weight: 900;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: #38bdf8;
+      color: #000;
+      letter-spacing: 0.5px;
+    }
+
+    .seat-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .seat-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #173252;
+      border: 1px solid #2e5584;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+    .seat-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: #e2e8f0;
+      max-width: 90px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .seat-status {
+      font-size: 10px;
+      color: #94a3b8;
+    }
+    .seat-bet-val {
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 700;
+      color: #38bdf8;
+      text-align: right;
+    }
+
+    /* AQUATIC RACE TRACK STADIUM CONTAINER */
+    .stadium-wrapper {
+      width: 100%;
+      background: #040d18;
+      border-radius: 14px;
+      padding: 12px;
+      position: relative;
+      box-shadow: 
+        0 12px 35px rgba(0, 0, 0, 0.9),
+        inset 0 0 0 2px #102947,
+        inset 0 0 0 6px #071526,
+        inset 0 0 25px rgba(0, 0, 0, 0.9);
+      border: 3px solid #0284c7;
+    }
+
+    /* Stadium Top Marquee & Status Display */
+    .stadium-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      background: #061424;
+      border: 1px solid #1a395f;
+      border-radius: 8px;
+      padding: 8px 14px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .phase-badge-title {
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .phase-badge-title.betting { color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
+    .phase-badge-title.racing { color: #f59e0b; text-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
+    .phase-badge-title.payout { color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.5); }
+
+    .phase-indicator-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      background: currentColor;
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    .stadium-timer-box {
+      background: #140505;
+      border: 1.5px solid #ef4444;
+      border-radius: 6px;
+      padding: 4px 12px;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.9), 0 0 12px rgba(239, 68, 68, 0.35);
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+    .stadium-timer-digits {
+      font-family: var(--font-led);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--led-red);
+      text-shadow: 0 0 10px var(--led-red-glow), 0 0 20px rgba(255, 34, 34, 0.5);
+      letter-spacing: 2px;
+    }
+    .stadium-timer-unit {
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 900;
+      color: #f87171;
+    }
+
+    .race-announcer-strip {
+      width: 100%;
+      background: #020914;
+      border: 1px solid #142a45;
+      border-radius: 6px;
+      padding: 6px 12px;
+      margin-bottom: 10px;
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 800;
+      color: #fde047;
+      text-shadow: 0 0 10px rgba(253, 224, 71, 0.5);
+      letter-spacing: 0.8px;
+    }
+
+    /* THE TOP-DOWN AQUATIC CANVAS TRACK */
+    .track-canvas-container {
+      width: 100%;
+      height: 380px;
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid #1e4775;
+      box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.9);
+      background: #041224;
+    }
+
+    #race-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Photo Finish Flash Overlay */
+    .photo-finish-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.85);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.1s ease;
+      z-index: 20;
+    }
+    .photo-finish-overlay.flash {
+      opacity: 1;
+    }
+
+    /* Live Leaderboard Ticker Ribbon */
+    .live-leader-ticker {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(2, 6, 17, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      padding: 4px 10px;
+      border-radius: 6px;
+      backdrop-filter: blur(8px);
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 800;
+      color: #e2e8f0;
+      z-index: 10;
+    }
+
+    /* PLAYER BETTING CONSOLE */
+    .player-betting-console {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #071526;
+      border: 2px solid #16365c;
+      border-radius: 10px;
+      padding: 8px 12px;
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.85);
+    }
+
+    /* 8-Fish Betting Deck */
+    .fish-betting-deck {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      width: 100%;
+    }
+
+    .fish-bet-card {
+      background: linear-gradient(180deg, #0d233e 0%, #071424 100%);
+      border: 2px solid #1c3c64;
+      border-radius: 8px;
+      padding: 6px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      touch-action: manipulation;
+    }
+    .fish-bet-card:hover {
+      border-color: #38bdf8;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(56, 189, 248, 0.25);
+    }
+    .fish-bet-card:active {
+      transform: translateY(1px);
+    }
+    .fish-bet-card.has-wager {
+      border-color: #38bdf8;
+      background: linear-gradient(180deg, #133256 0%, #091b30 100%);
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.4);
+    }
+    .fish-bet-card.winner-pulse {
+      animation: winStrobe 0.4s infinite alternate;
+      border-color: #fde047 !important;
+      z-index: 10;
+    }
+
+    @keyframes winStrobe {
+      0% {
+        border-color: #fde047;
+        background: #3b2a05;
+        box-shadow: 0 0 25px #f59e0b, inset 0 0 15px #fde047;
+        transform: scale(1.05);
+      }
+      100% {
+        border-color: #ffffff;
+        background: #0f2e52;
+        box-shadow: 0 0 35px #38bdf8, 0 0 50px #38bdf8;
+        transform: scale(1.08);
+      }
+    }
+
+    .fish-lane-badge {
+      position: absolute;
+      top: 5px;
+      left: 6px;
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 900;
+      color: #94a3b8;
+    }
+
+    .card-wager-pill {
+      position: absolute;
+      top: 4px;
+      right: 6px;
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 900;
+      color: #38bdf8;
+      background: #081728;
+      border: 1px solid #1c3d64;
+      padding: 1px 6px;
+      border-radius: 10px;
+      min-width: 30px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    .fish-bet-card.has-wager .card-wager-pill {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #38bdf8;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+    }
+
+    .mini-fish-preview-box {
+      width: 54px;
+      height: 40px;
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mini-fish-canvas {
+      width: 54px;
+      height: 40px;
+    }
+
+    .fish-name-label {
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 800;
+      color: #f1f5f9;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .fish-odds-box {
+      width: 100%;
+      background: #050a12;
+      border: 1px solid #162b45;
+      border-radius: 4px;
+      padding: 2px 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+    }
+    .fish-odds-digits {
+      font-family: var(--font-led);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--led-red);
+      text-shadow: 0 0 8px var(--led-red-glow);
+      letter-spacing: 1px;
+    }
+    .fish-odds-unit {
+      font-family: var(--font-display);
+      font-size: 9px;
+      font-weight: 900;
+      color: #f87171;
+    }
+
+    /* Group Bets Row (Warm/Cool, Top/Bottom, Odd/Even) */
+    .group-bets-row {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      width: 100%;
+    }
+    .btn-group-bet {
+      background: #0d1e34;
+      border: 1px solid #1e3a5f;
+      border-radius: 6px;
+      padding: 6px 3px;
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 800;
+      color: #94a3b8;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      transition: all 0.2s ease;
+      touch-action: manipulation;
+    }
+    .btn-group-bet:hover {
+      border-color: #38bdf8;
+      color: #fff;
+      background: #173254;
+    }
+    .group-subtext {
+      font-size: 8px;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    /* Betting Toolbar: Chips & Controls */
+    .betting-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .chips-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .chip-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px dashed #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.6);
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      touch-action: manipulation;
+    }
+    .chip-btn:hover {
+      transform: scale(1.12);
+    }
+    .chip-btn.selected-chip {
+      transform: scale(1.2);
+      border-style: solid;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.9), 0 4px 10px rgba(0,0,0,0.8);
+      z-index: 5;
+    }
+
+    .chip-10   { background: radial-gradient(circle, #38bdf8 0%, #0284c7 100%); color: #fff; }
+    .chip-50   { background: radial-gradient(circle, #f87171 0%, #dc2626 100%); color: #fff; }
+    .chip-100  { background: radial-gradient(circle, #4ade80 0%, #16a34a 100%); color: #fff; }
+    .chip-500  { background: radial-gradient(circle, #c084fc 0%, #9333ea 100%); color: #fff; }
+    .chip-1000 { background: radial-gradient(circle, #fde047 0%, #d97706 100%); color: #000; }
+
+    .action-btns-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .action-btn {
+      background: #0f243c;
+      border: 1px solid #20456e;
+      color: #cbd5e1;
+      font-family: var(--font-display);
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 7px 11px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      touch-action: manipulation;
+    }
+    .action-btn:hover {
+      background: #18375c;
+      border-color: #38bdf8;
+      color: #fff;
+    }
+    .action-btn.btn-clear { color: #f87171; }
+    .action-btn.btn-double { color: #38bdf8; }
+
+    /* Recent Winners Ribbon */
+    .history-ribbon {
+      width: 100%;
+      background: #061220;
+      border: 1px solid #162f4e;
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .history-title {
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 800;
+      color: #94a3b8;
+      letter-spacing: 0.8px;
+      white-space: nowrap;
+    }
+    .history-fish-list {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+    }
+    .mini-history-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-family: var(--font-display);
+      font-size: 9.5px;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Mobile Responsive Optimizations */
+    @media (max-width: 768px) {
+      .seats-ribbon {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .fish-betting-deck {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+      }
+      .track-canvas-container {
+        height: 320px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      header {
+        padding: 8px 10px;
+      }
+      .brand-title {
+        font-size: 12.5px;
+      }
+      .balance-badge {
+        font-size: 12px;
+        padding: 4px 10px;
+      }
+      .stadium-wrapper {
+        padding: 6px;
+        border-width: 2px;
+      }
+      .track-canvas-container {
+        height: 270px;
+      }
+      .stadium-top-bar {
+        padding: 4px 8px;
+      }
+      .phase-badge-title {
+        font-size: 11px;
+      }
+      .stadium-timer-box {
+        padding: 2px 8px;
+      }
+      .stadium-timer-digits {
+        font-size: 20px;
+      }
+      .race-announcer-strip {
+        font-size: 10px;
+        padding: 4px 8px;
+      }
+      .fish-betting-deck {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 5px;
+      }
+      .fish-bet-card {
+        padding: 4px 3px;
+        min-height: 86px;
+      }
+      .fish-name-label {
+        font-size: 9.5px;
+      }
+      .mini-fish-preview-box {
+        width: 44px;
+        height: 32px;
+        margin-top: 12px;
+      }
+      .mini-fish-canvas {
+        width: 44px;
+        height: 32px;
+      }
+      .fish-odds-digits {
+        font-size: 13px;
+      }
+      .group-bets-row {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+      }
+      .btn-group-bet {
+        padding: 5px 2px;
+        font-size: 9px;
+      }
+      .group-subtext {
+        font-size: 7px;
+      }
+      .chip-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 9px;
+      }
+      .action-btn {
+        padding: 6px 8px;
+        font-size: 9.5px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top App Navigation -->
+  <header>
+    <div class="brand-group">
+      <a href="/arcade/" class="brand-back-btn">‹ Arcade Lobby</a>
+      <div class="brand-title">
+        <span>🐠</span> CYBER AQUA FISH RACE
+      </div>
+    </div>
+
+    <div class="nav-stats">
+      <div class="header-timer-badge betting" id="header-timer-badge">
+        <span class="header-timer-dot"></span>
+        <span id="header-timer-digits">30.0s</span>
+      </div>
+      <div class="balance-badge">
+        <span>🪙</span>
+        <span id="player-balance">10,000</span>
+      </div>
+      <button class="btn-sound-toggle" id="btn-sound" title="Toggle Sound" onclick="toggleMute()">🔊</button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Multi-Player Seat Ribbon (Up to 4 Players) -->
+    <div class="seats-ribbon">
+      <div class="seat-card active-user" id="seat-card-1" onclick="switchPlayerSeat(0)">
+        <div class="seat-meta">
+          <div class="seat-avatar">👑</div>
+          <div>
+            <div class="seat-name" id="seat-1-name">mambutan</div>
+            <div class="seat-status" id="seat-1-status">Betting</div>
+          </div>
+        </div>
+        <div class="seat-bet-val" id="seat-1-bet">0 🪙</div>
+      </div>
+
+      <div class="seat-card" id="seat-card-2" onclick="switchPlayerSeat(1)">
+        <div class="seat-meta">
+          <div class="seat-avatar">🎮</div>
+          <div>
+            <div class="seat-name" id="seat-2-name">uncomfy</div>
+            <div class="seat-status" id="seat-2-status">Ready</div>
+          </div>
+        </div>
+        <div class="seat-bet-val" id="seat-2-bet">0 🪙</div>
+      </div>
+
+      <div class="seat-card" id="seat-card-3" onclick="switchPlayerSeat(2)">
+        <div class="seat-meta">
+          <div class="seat-avatar">🤖</div>
+          <div>
+            <div class="seat-name" id="seat-3-name">BrosieBot</div>
+            <div class="seat-status" id="seat-3-status">Ready</div>
+          </div>
+        </div>
+        <div class="seat-bet-val" id="seat-3-bet">0 🪙</div>
+      </div>
+
+      <div class="seat-card" id="seat-card-4" onclick="switchPlayerSeat(3)">
+        <div class="seat-meta">
+          <div class="seat-avatar">⚡</div>
+          <div>
+            <div class="seat-name" id="seat-4-name">Player 4</div>
+            <div class="seat-status" id="seat-4-status">Ready</div>
+          </div>
+        </div>
+        <div class="seat-bet-val" id="seat-4-bet">0 🪙</div>
+      </div>
+    </div>
+
+    <!-- AQUATIC STADIUM & TRACK -->
+    <div class="stadium-wrapper">
+
+      <div class="stadium-top-bar">
+        <div class="phase-badge-title betting" id="phase-badge">
+          <span class="phase-indicator-dot"></span>
+          <span id="phase-text">BETTING PHASE (30s)</span>
+        </div>
+
+        <div class="stadium-timer-box">
+          <span class="stadium-timer-digits" id="timer-digits">30.0</span>
+          <span class="stadium-timer-unit">SEC</span>
+        </div>
+      </div>
+
+      <div class="race-announcer-strip" id="race-announcer">
+        PICK YOUR WINNING FISH! LANES 1-8 OR COLOR GROUPS!
+      </div>
+
+      <div class="track-canvas-container" id="track-container">
+        <canvas id="race-canvas"></canvas>
+        <div class="photo-finish-overlay" id="finish-flash"></div>
+        <div class="live-leader-ticker" id="leader-ticker">
+          <span>LEADER:</span>
+          <span id="leader-name" style="color: #fde047;">—</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PLAYER BETTING CONSOLE -->
+    <div class="player-betting-console">
+
+      <!-- 8-Fish Betting Deck with Animated Previews & Odds -->
+      <div class="fish-betting-deck" id="fish-betting-deck">
+        <!-- Injected via JavaScript -->
+      </div>
+
+      <!-- Quick Group Bets -->
+      <div class="group-bets-row">
+        <button class="btn-group-bet" onclick="placeGroupBet('warm')">
+          <span>WARM</span>
+          <span class="group-subtext">Betta, Koi, Nemo, Sakura</span>
+        </button>
+        <button class="btn-group-bet" onclick="placeGroupBet('cool')">
+          <span>COOL</span>
+          <span class="group-subtext">Jade, Guppy, Tetra, Shark</span>
+        </button>
+        <button class="btn-group-bet" onclick="placeGroupBet('top')">
+          <span>LANES 1-4</span>
+          <span class="group-subtext">Upper Course</span>
+        </button>
+        <button class="btn-group-bet" onclick="placeGroupBet('bottom')">
+          <span>LANES 5-8</span>
+          <span class="group-subtext">Lower Course</span>
+        </button>
+        <button class="btn-group-bet" onclick="placeGroupBet('odd')">
+          <span>ODD LANES</span>
+          <span class="group-subtext">1, 3, 5, 7</span>
+        </button>
+        <button class="btn-group-bet" onclick="placeGroupBet('even')">
+          <span>EVEN LANES</span>
+          <span class="group-subtext">2, 4, 6, 8</span>
+        </button>
+      </div>
+
+      <!-- Chips and Actions Toolbar -->
+      <div class="betting-toolbar">
+        <div class="chips-group">
+          <button class="chip-btn chip-10 selected-chip" onclick="selectChip(10)">10</button>
+          <button class="chip-btn chip-50" onclick="selectChip(50)">50</button>
+          <button class="chip-btn chip-100" onclick="selectChip(100)">100</button>
+          <button class="chip-btn chip-500" onclick="selectChip(500)">500</button>
+          <button class="chip-btn chip-1000" onclick="selectChip(1000)">1K</button>
+        </div>
+
+        <div class="action-btns-group">
+          <button class="action-btn btn-double" onclick="doubleAllBets()">2x Double</button>
+          <button class="action-btn" onclick="repeatLastBet()">↺ Rebet</button>
+          <button class="action-btn btn-clear" onclick="clearAllBets()">✕ Clear</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Recent History Ribbon -->
+    <div class="history-ribbon">
+      <div class="history-title">RECENT DERBY WINNERS:</div>
+      <div class="history-fish-list" id="history-fish-list">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    /* =========================================================================
+       CYBER AQUA FISH RACE ENGINE
+       Authentic 8-lane top-down aquatic racing derby with procedural spine wags,
+       dynamic race surges, 30s betting, 15s race phase, and JTrash room sync.
+       ========================================================================= */
+
+    // 8 Handcrafted Fish Competitors with Distinct Traits & Colors
+    const FISH_ROSTER = [
+      {
+        id: 1,
+        name: 'Crimson Betta',
+        species: 'Betta Splendens',
+        color: '#ef4444',
+        accentColor: '#fca5a5',
+        finColor: '#b91c1c',
+        tailStyle: 'veil', // flowing veil tail
+        baseOdds: 4,
+        size: 34,
+        surgeStyle: 'burst'
+      },
+      {
+        id: 2,
+        name: 'Golden Koi',
+        species: 'Cyprinus Rubrofuscus',
+        color: '#f59e0b',
+        accentColor: '#fef08a',
+        finColor: '#d97706',
+        tailStyle: 'koi',
+        baseOdds: 3,
+        size: 36,
+        surgeStyle: 'steady'
+      },
+      {
+        id: 3,
+        name: 'Jade Arowana',
+        species: 'Scleropages Formosus',
+        color: '#10b981',
+        accentColor: '#a7f3d0',
+        finColor: '#047857',
+        tailStyle: 'dragon',
+        baseOdds: 8,
+        size: 38,
+        surgeStyle: 'glide'
+      },
+      {
+        id: 4,
+        name: 'Cosmic Guppy',
+        species: 'Poecilia Reticulata',
+        color: '#a855f7',
+        accentColor: '#f0abfc',
+        finColor: '#7e22ce',
+        tailStyle: 'fan',
+        baseOdds: 12,
+        size: 28,
+        surgeStyle: 'flutter'
+      },
+      {
+        id: 5,
+        name: 'Electric Tetra',
+        species: 'Paracheirodon Innesi',
+        color: '#06b6d4',
+        accentColor: '#67e8f9',
+        finColor: '#0e7490',
+        tailStyle: 'dart',
+        baseOdds: 6,
+        size: 30,
+        surgeStyle: 'dash'
+      },
+      {
+        id: 6,
+        name: 'Nemo Clownfish',
+        species: 'Amphiprion Ocellaris',
+        color: '#f97316',
+        accentColor: '#ffffff', // white stripes
+        finColor: '#c2410c',
+        tailStyle: 'clown',
+        baseOdds: 5,
+        size: 32,
+        surgeStyle: 'weave'
+      },
+      {
+        id: 7,
+        name: 'Sakura Discus',
+        species: 'Symphysodon Aequifasciatus',
+        color: '#ec4899',
+        accentColor: '#fbcfe8',
+        finColor: '#be185d',
+        tailStyle: 'disk',
+        baseOdds: 15,
+        size: 35,
+        surgeStyle: 'sprint'
+      },
+      {
+        id: 8,
+        name: 'Obsidian Shark',
+        species: 'Epalzeorhynchos Bicolor',
+        color: '#334155',
+        accentColor: '#94a3b8',
+        finColor: '#dc2626', // red fin tip
+        tailStyle: 'shark',
+        baseOdds: 20,
+        size: 37,
+        surgeStyle: 'power'
+      }
+    ];
+
+    // Helper to read persistent cookie
+    function getPersistentCookie(name) {
+      const nameEQ = name + '=';
+      const ca = document.cookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length));
+      }
+      return null;
+    }
+
+    const localUserRef = getPersistentCookie('jtrash_user_ref') || localStorage.getItem('jtrash_user_ref') || '0969-888-1234';
+    const localUserName = getPersistentCookie('jtrash_username') || localStorage.getItem('jtrash_username') || 'Lucky Spinner';
+
+    // Game State
+    const state = {
+      phase: 'betting', // 'betting' (30s) -> 'racing' (15s) -> 'payout' (6s)
+      timeLeft: 30.0,
+      activeSeat: 0,
+      userRef: localUserRef,
+      userName: localUserName,
+      selectedChip: 10,
+      balance: 10000,
+      lastBets: {},
+      players: [
+        { id: 1, ref: localUserRef, name: localUserName, avatar: '👑', isUser: true, bets: {}, balance: 10000 },
+        { id: 2, ref: null, name: 'Empty Seat', avatar: '🎮', isUser: false, bets: {}, balance: 0 },
+        { id: 3, ref: null, name: 'Empty Seat', avatar: '🤖', isUser: false, bets: {}, balance: 0 },
+        { id: 4, ref: null, name: 'Empty Seat', avatar: '⚡', isUser: false, bets: {}, balance: 0 }
+      ],
+      odds: { 1: 4, 2: 3, 3: 8, 4: 12, 5: 6, 6: 5, 7: 15, 8: 20 },
+      history: [2, 1, 6, 5, 3, 2, 8, 4],
+      raceProgress: 0, // 0.0 to 1.0
+      winner: null
+    };
+
+    /* =========================================================================
+       AUDIO SYNTHESIZER (Web Audio API)
+       ========================================================================= */
+    class AquaticAudio {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      // Starter horn / nautical whistle
+      playStarterHorn() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.linearRampToValueAtTime(440, now + 0.3);
+
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.65);
+      }
+
+      // Bubble pop / water splash
+      playSplash() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600 + Math.random() * 300, now);
+        osc.frequency.exponentialRampToValueAtTime(150, now + 0.08);
+
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.09);
+      }
+
+      // Chip clink
+      playChip() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(2200, now);
+        osc.frequency.exponentialRampToValueAtTime(600, now + 0.05);
+
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.06);
+      }
+
+      // Countdown Warning Beep
+      playBeep(isFinal = false) {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(isFinal ? 1200 : 750, now);
+        gain.gain.setValueAtTime(isFinal ? 0.3 : 0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + (isFinal ? 0.3 : 0.08));
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + (isFinal ? 0.35 : 0.1));
+      }
+
+      // Victory Fanfare & Coin Cascade
+      playVictory() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const notes = [440, 554.37, 659.25, 880];
+        notes.forEach((freq, idx) => {
+          const now = this.ctx.currentTime + idx * 0.09;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        });
+
+        // Coin cascade
+        for (let i = 0; i < 5; i++) {
+          const now = this.ctx.currentTime + 0.4 + i * 0.07;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1000 + i * 140, now);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.14);
+        }
+      }
+    }
+
+    const audio = new AquaticAudio();
+
+    function toggleMute() {
+      audio.muted = !audio.muted;
+      document.getElementById('btn-sound').textContent = audio.muted ? '🔇' : '🔊';
+    }
+
+    /* =========================================================================
+       PROCEDURAL TOP-DOWN FISH RENDERER
+       Draws anatomical fish with undulating spine segments and flowing fins
+       ========================================================================= */
+
+    function drawTopDownFish(ctx, x, y, angle, fish, time, isLeader = false) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+
+      const s = fish.size / 34; // scale multiplier
+      const wagFreq = 8;
+      const wagAmp = 0.22;
+      const tailWag = Math.sin(time * wagFreq) * wagAmp;
+
+      // Draw Pectoral Fins (Left & Right)
+      ctx.save();
+      ctx.fillStyle = fish.finColor || fish.color;
+      ctx.globalAlpha = 0.85;
+
+      // Left fin
+      const finFlap = Math.sin(time * 6) * 0.15;
+      ctx.beginPath();
+      ctx.ellipse(-2 * s, -11 * s, 10 * s, 4 * s, -0.6 + finFlap, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Right fin
+      ctx.beginPath();
+      ctx.ellipse(-2 * s, 11 * s, 10 * s, 4 * s, 0.6 - finFlap, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Fish Body Spine (Segmented for natural curving)
+      ctx.save();
+
+      // Main Torso Gradient
+      const grad = ctx.createRadialGradient(6 * s, -2 * s, 2 * s, 0, 0, 16 * s);
+      grad.addColorStop(0, fish.accentColor || '#ffffff');
+      grad.addColorStop(0.4, fish.color);
+      grad.addColorStop(1, fish.finColor || fish.color);
+      ctx.fillStyle = grad;
+
+      // Smooth contoured fish body path
+      ctx.beginPath();
+      ctx.moveTo(18 * s, 0); // Nose
+      // Top curve to tail base
+      ctx.bezierCurveTo(10 * s, -9 * s, -4 * s, -8 * s, -12 * s + tailWag * 4, -3 * s);
+      // Caudal peduncle
+      ctx.lineTo(-16 * s + tailWag * 8, 0);
+      // Bottom curve back to nose
+      ctx.lineTo(-12 * s + tailWag * 4, 3 * s);
+      ctx.bezierCurveTo(-4 * s, 8 * s, 10 * s, 9 * s, 18 * s, 0);
+      ctx.closePath();
+      ctx.fill();
+
+      // Clownfish distinct white stripe accents
+      if (fish.tailStyle === 'clown') {
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.ellipse(4 * s, 0, 2.5 * s, 7 * s, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(-6 * s, 0, 2 * s, 5.5 * s, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Neon Tetra iridescent lateral stripe
+      if (fish.tailStyle === 'dart') {
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2.5 * s;
+        ctx.shadowColor = '#38bdf8';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.moveTo(12 * s, 0);
+        ctx.lineTo(-10 * s, 0);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      }
+
+      // Eyes (Left & Right)
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(12 * s, -5 * s, 2.2 * s, 0, Math.PI * 2);
+      ctx.arc(12 * s, 5 * s, 2.2 * s, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.arc(12.5 * s, -5 * s, 1.2 * s, 0, Math.PI * 2);
+      ctx.arc(12.5 * s, 5 * s, 1.2 * s, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Flowing Caudal Tail Fin
+      ctx.save();
+      ctx.translate(-15 * s, 0);
+      ctx.rotate(tailWag * 1.5);
+      ctx.fillStyle = fish.finColor || fish.color;
+      ctx.globalAlpha = 0.9;
+
+      ctx.beginPath();
+      if (fish.tailStyle === 'veil') {
+        // Long flowing veil tail (Betta)
+        ctx.moveTo(0, 0);
+        ctx.bezierCurveTo(-12 * s, -14 * s, -22 * s, -10 * s, -26 * s, -4 * s);
+        ctx.bezierCurveTo(-28 * s, 0, -22 * s, 10 * s, -12 * s, 14 * s);
+        ctx.closePath();
+      } else if (fish.tailStyle === 'fan') {
+        // Fan tail (Guppy)
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-18 * s, -12 * s);
+        ctx.quadraticCurveTo(-24 * s, 0, -18 * s, 12 * s);
+        ctx.closePath();
+      } else {
+        // Forked / streamline caudal fin (Koi, Shark, etc.)
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-14 * s, -10 * s);
+        ctx.lineTo(-9 * s, 0);
+        ctx.lineTo(-14 * s, 10 * s);
+        ctx.closePath();
+      }
+      ctx.fill();
+      ctx.restore();
+
+      // Leader Golden Crown / Aura
+      if (isLeader) {
+        ctx.strokeStyle = '#fde047';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#fde047';
+        ctx.shadowBlur = 12;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      }
+
+      ctx.restore();
+      ctx.restore();
+    }
+
+    /* =========================================================================
+       RACE TRACK CANVAS SIMULATOR
+       ========================================================================= */
+    const canvas = document.getElementById('race-canvas');
+    const ctx = canvas ? canvas.getContext('2d') : null;
+    let trackWidth = 800;
+    let trackHeight = 380;
+
+    // 8 Competitor Live Race Instances
+    const raceCompetitors = FISH_ROSTER.map((f, i) => ({
+      fish: f,
+      lane: i + 1,
+      x: 60, // Start line X
+      y: 0,
+      targetY: 0,
+      speed: 1.0,
+      currentSpeed: 1.0,
+      distance: 0, // 0 to 100
+      stamina: 1.0,
+      surgeTimer: 0,
+      surgeActive: false,
+      bubbles: []
+    }));
+
+    // Ambient floating water particles
+    const waterParticles = [];
+    for (let i = 0; i < 40; i++) {
+      waterParticles.push({
+        x: Math.random() * 1000,
+        y: Math.random() * 400,
+        radius: Math.random() * 2 + 0.8,
+        speedX: Math.random() * 0.4 + 0.2,
+        opacity: Math.random() * 0.4 + 0.1
+      });
+    }
+
+    function resizeTrackCanvas() {
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      trackWidth = rect.width;
+      trackHeight = rect.height;
+
+      // Assign lane Y centers
+      const laneH = trackHeight / 8;
+      raceCompetitors.forEach((c, idx) => {
+        c.y = laneH * idx + laneH / 2;
+        c.targetY = c.y;
+      });
+    }
+
+    let raceAnimFrame = null;
+    let raceStartTime = 0;
+    const RACE_DURATION_MS = 15000; // 15 seconds race
+
+    function initRacePositions() {
+      const startX = 65;
+      raceCompetitors.forEach((c, idx) => {
+        c.x = startX;
+        c.distance = 0;
+        c.speed = 1.0;
+        c.currentSpeed = 1.0;
+        c.stamina = 0.8 + Math.random() * 0.4;
+        c.surgeTimer = Math.random() * 4 + 3; // Surge after 3-7s
+        c.surgeActive = false;
+        c.bubbles = [];
+      });
+    }
+
+    function renderRaceLoop(timestamp) {
+      if (!ctx) return;
+      const timeSec = timestamp / 1000;
+
+      // Clear Canvas
+      ctx.clearRect(0, 0, trackWidth, trackHeight);
+
+      // 1. Water Background with Caustics & Shimmer
+      const waterGrad = ctx.createLinearGradient(0, 0, trackWidth, trackHeight);
+      waterGrad.addColorStop(0, '#06192e');
+      waterGrad.addColorStop(0.5, '#092542');
+      waterGrad.addColorStop(1, '#051629');
+      ctx.fillStyle = waterGrad;
+      ctx.fillRect(0, 0, trackWidth, trackHeight);
+
+      // Caustic light waves
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.035)';
+      for (let w = 0; w < 5; w++) {
+        ctx.beginPath();
+        const waveY = (w * 80 + Math.sin(timeSec + w) * 20) % trackHeight;
+        ctx.arc(trackWidth / 2 + Math.cos(timeSec * 0.5 + w) * 100, waveY, 180, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 2. Swim Lanes & Distance Buoys
+      const laneH = trackHeight / 8;
+      const startLineX = 65;
+      const finishLineX = trackWidth - 65;
+
+      for (let i = 0; i < 8; i++) {
+        const laneY = i * laneH;
+
+        // Lane divider dashed rope
+        if (i > 0) {
+          ctx.strokeStyle = 'rgba(56, 189, 248, 0.15)';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([6, 6]);
+          ctx.beginPath();
+          ctx.moveTo(0, laneY);
+          ctx.lineTo(trackWidth, laneY);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+
+        // Lane Number Badge at Left Start
+        ctx.fillStyle = 'rgba(148, 163, 184, 0.35)';
+        ctx.font = '700 11px Orbitron, monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`L${i + 1}`, 22, laneY + laneH / 2);
+      }
+
+      // Start Gate Line
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(startLineX, 0);
+      ctx.lineTo(startLineX, trackHeight);
+      ctx.stroke();
+
+      // Checkered Finish Gate Line
+      ctx.save();
+      const checkerSize = 8;
+      const cols = 2;
+      const rows = Math.ceil(trackHeight / checkerSize);
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          ctx.fillStyle = ((r + c) % 2 === 0) ? '#fde047' : '#000000';
+          ctx.fillRect(finishLineX + c * checkerSize, r * checkerSize, checkerSize, checkerSize);
+        }
+      }
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(finishLineX, 0, cols * checkerSize, trackHeight);
+      ctx.restore();
+
+      // Distance Markers (25m, 50m, 75m)
+      [0.25, 0.5, 0.75].forEach(pct => {
+        const markX = startLineX + (finishLineX - startLineX) * pct;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(markX, 0);
+        ctx.lineTo(markX, trackHeight);
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(148, 163, 184, 0.4)';
+        ctx.font = '9px Orbitron, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${Math.round(pct * 100)}m`, markX, 12);
+      });
+
+      // 3. Ambient Water Particles (Rising Bubbles)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+      waterParticles.forEach(p => {
+        p.x += p.speedX;
+        if (p.x > trackWidth) p.x = 0;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y + Math.sin(timeSec + p.x) * 3, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // 4. Update & Draw Competitors
+      if (state.phase === 'racing') {
+        const elapsed = Date.now() - raceStartTime;
+        state.raceProgress = Math.min(1.0, elapsed / RACE_DURATION_MS);
+
+        // Find current leader
+        let maxDist = -1;
+        let currentLeader = null;
+
+        raceCompetitors.forEach(c => {
+          // Dynamic Speed Physics
+          const baseSpeed = (finishLineX - startLineX) / (RACE_DURATION_MS / 1000);
+          
+          // Random surging / stamina variation
+          const randVariation = Math.sin(timeSec * 3 + c.lane * 1.5) * 12;
+          
+          // Check special surge event
+          c.surgeTimer -= 0.016;
+          if (c.surgeTimer <= 0 && !c.surgeActive && c.distance < 75) {
+            c.surgeActive = true;
+            c.surgeTimer = 2.5; // Surge duration
+            audio.playSplash();
+          }
+
+          let surgeBoost = 0;
+          if (c.surgeActive) {
+            surgeBoost = 22;
+            c.surgeTimer -= 0.016;
+            if (c.surgeTimer <= 0) c.surgeActive = false;
+          }
+
+          // Advance fish position
+          c.speed = baseSpeed + randVariation + surgeBoost;
+          c.x += c.speed * 0.016;
+
+          // Clamp to finish line
+          if (c.x >= finishLineX) {
+            c.x = finishLineX;
+            if (!state.winner) {
+              state.winner = c.fish;
+              triggerPhotoFinish(c.fish);
+            }
+          }
+
+          c.distance = Math.min(100, Math.round(((c.x - startLineX) / (finishLineX - startLineX)) * 100));
+
+          if (c.distance > maxDist) {
+            maxDist = c.distance;
+            currentLeader = c;
+          }
+
+          // Generate bubble wake behind fish
+          if (Math.random() < 0.35) {
+            c.bubbles.push({
+              x: c.x - 18,
+              y: c.y + (Math.random() * 6 - 3),
+              radius: Math.random() * 2 + 1,
+              alpha: 0.6
+            });
+          }
+        });
+
+        // Update live leader display
+        if (currentLeader) {
+          document.getElementById('leader-name').textContent = `L${currentLeader.lane} ${currentLeader.fish.name.toUpperCase()}`;
+        }
+      }
+
+      // Draw Fish Wake Bubbles
+      raceCompetitors.forEach(c => {
+        for (let b = c.bubbles.length - 1; b >= 0; b--) {
+          const bub = c.bubbles[b];
+          bub.x -= 0.8;
+          bub.radius += 0.04;
+          bub.alpha -= 0.02;
+          if (bub.alpha <= 0) {
+            c.bubbles.splice(b, 1);
+            continue;
+          }
+          ctx.fillStyle = `rgba(255, 255, 255, ${bub.alpha})`;
+          ctx.beginPath();
+          ctx.arc(bub.x, bub.y, bub.radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      // Draw Each Fish
+      raceCompetitors.forEach(c => {
+        const isCurrentLeader = (state.winner ? state.winner.id === c.fish.id : false);
+        drawTopDownFish(ctx, c.x, c.y, 0, c.fish, timeSec * (c.speed / 20), isCurrentLeader);
+      });
+
+      raceAnimFrame = requestAnimationFrame(renderRaceLoop);
+    }
+
+    /* Trigger Dramatic Photo Finish */
+    function triggerPhotoFinish(winnerFish) {
+      audio.playStarterHorn();
+      const flashEl = document.getElementById('finish-flash');
+      flashEl.classList.add('flash');
+      setTimeout(() => flashEl.classList.remove('flash'), 150);
+
+      // Finish race resolution
+      finishRace(winnerFish);
+    }
+
+    /* =========================================================================
+       INITIALIZATION & BETTING DECK CREATION
+       ========================================================================= */
+    function init() {
+      try {
+        const cookieUser = getPersistentCookie('jtrash_username');
+        const storageUser = localStorage.getItem('jtrash_username');
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlUser = urlParams.get('user') || urlParams.get('name');
+        const resolvedName = urlUser || cookieUser || storageUser;
+        if (resolvedName && resolvedName.trim()) {
+          state.userName = resolvedName.trim();
+        }
+
+        const cookieRef = getPersistentCookie('jtrash_user_ref');
+        const storageRef = localStorage.getItem('jtrash_user_ref');
+        const urlRef = urlParams.get('ref');
+        const resolvedRef = urlRef || cookieRef || storageRef;
+        if (resolvedRef && resolvedRef.trim()) {
+          state.userRef = resolvedRef.trim();
+        }
+
+        // Shared arcade wallet balance
+        const savedSlot = localStorage.getItem('borgor_slots_balance') || getPersistentCookie('borgor_slots_balance');
+        const savedFish = localStorage.getItem('perya_fish_race_balance');
+        const chosenBal = savedFish || savedSlot;
+        if (chosenBal && !isNaN(parseInt(chosenBal, 10))) {
+          state.balance = parseInt(chosenBal, 10);
+        }
+
+        state.players[state.activeSeat].ref = state.userRef;
+        state.players[state.activeSeat].name = state.userName;
+        state.players[state.activeSeat].balance = state.balance;
+
+        // Restore active bets if player refreshed during active round (< 50s)
+        const savedBetsRaw = localStorage.getItem('perya_fish_active_bets');
+        if (savedBetsRaw) {
+          try {
+            const parsed = JSON.parse(savedBetsRaw);
+            if (parsed && parsed.bets && (Date.now() - (parsed.timestamp || 0) < 50000)) {
+              state.players[state.activeSeat].bets = parsed.bets;
+            } else {
+              localStorage.removeItem('perya_fish_active_bets');
+            }
+          } catch (e) {}
+        }
+      } catch (e) {}
+
+      updateBalanceDisplay();
+      buildFishBettingDeck();
+      updatePlayerBetsUI();
+      renderHistory();
+      renderSeats();
+      randomizeOdds(false);
+
+      resizeTrackCanvas();
+      window.addEventListener('resize', resizeTrackCanvas);
+
+      // Join room and pull other JTrash players
+      syncRoomHeartbeat();
+
+      // Start main game loop (30s betting timer)
+      startBettingPhase();
+
+      // Start Canvas Render Loop
+      raceAnimFrame = requestAnimationFrame(renderRaceLoop);
+    }
+
+    /* Build 8-Fish Interactive Betting Deck */
+    function buildFishBettingDeck() {
+      const deck = document.getElementById('fish-betting-deck');
+      deck.innerHTML = '';
+
+      FISH_ROSTER.forEach(f => {
+        const card = document.createElement('div');
+        card.className = 'fish-bet-card';
+        card.id = `fish-card-${f.id}`;
+        card.onclick = () => placeFishBet(f.id);
+
+        card.innerHTML = `
+          <span class="fish-lane-badge">L${f.id}</span>
+          <div class="card-wager-pill" id="wager-pill-${f.id}">0</div>
+          <div class="mini-fish-preview-box">
+            <canvas class="mini-fish-canvas" id="mini-fish-cv-${f.id}" width="54" height="40"></canvas>
+          </div>
+          <div class="fish-name-label" style="color: ${f.color};">${f.name}</div>
+          <div class="fish-odds-box">
+            <span class="fish-odds-digits" id="odds-digits-${f.id}">${state.odds[f.id]}</span>
+            <span class="fish-odds-unit">x</span>
+          </div>
+        `;
+        deck.appendChild(card);
+      });
+
+      // Animate Mini Fish Preview Canvases
+      startMiniFishPreviews();
+    }
+
+    function startMiniFishPreviews() {
+      function renderMiniPreviews(ts) {
+        FISH_ROSTER.forEach(f => {
+          const cv = document.getElementById(`mini-fish-cv-${f.id}`);
+          if (!cv) return;
+          const mCtx = cv.getContext('2d');
+          mCtx.clearRect(0, 0, 54, 40);
+          drawTopDownFish(mCtx, 27, 20, 0, f, ts / 300);
+        });
+        requestAnimationFrame(renderMiniPreviews);
+      }
+      requestAnimationFrame(renderMiniPreviews);
+    }
+
+    /* Randomize 7-Segment Odds for Each Fish */
+    function randomizeOdds(animate = true) {
+      const lowPool = [2.5, 3.0, 3.5, 4.0];
+      const medPool = [5.0, 6.0, 8.0, 10.0, 12.0];
+      const highPool = [15.0, 20.0, 30.0, 45.0];
+
+      const newOdds = {};
+      newOdds[1] = lowPool[Math.floor(Math.random() * lowPool.length)];
+      newOdds[2] = lowPool[Math.floor(Math.random() * lowPool.length)];
+      newOdds[3] = medPool[Math.floor(Math.random() * medPool.length)];
+      newOdds[4] = medPool[Math.floor(Math.random() * medPool.length)];
+      newOdds[5] = medPool[Math.floor(Math.random() * medPool.length)];
+      newOdds[6] = medPool[Math.floor(Math.random() * medPool.length)];
+      newOdds[7] = highPool[Math.floor(Math.random() * highPool.length)];
+      newOdds[8] = highPool[Math.floor(Math.random() * highPool.length)];
+
+      state.odds = newOdds;
+
+      for (let id = 1; id <= 8; id++) {
+        const el = document.getElementById(`odds-digits-${id}`);
+        if (el) el.textContent = newOdds[id];
+      }
+    }
+
+    /* =========================================================================
+       BETTING INTERACTIONS & CHIP PLACEMENT
+       ========================================================================= */
+    function saveActiveBets() {
+      try {
+        const p = state.players[state.activeSeat];
+        if (p && p.bets && Object.keys(p.bets).length > 0) {
+          localStorage.setItem('perya_fish_active_bets', JSON.stringify({
+            bets: p.bets,
+            timestamp: Date.now()
+          }));
+        } else {
+          localStorage.removeItem('perya_fish_active_bets');
+        }
+      } catch (e) {}
+    }
+
+    function selectChip(amount) {
+      state.selectedChip = amount;
+      document.querySelectorAll('.chip-btn').forEach(btn => {
+        btn.classList.remove('selected-chip');
+        if (btn.classList.contains(`chip-${amount}`)) {
+          btn.classList.add('selected-chip');
+        }
+      });
+      audio.playChip();
+    }
+
+    function placeFishBet(fishId) {
+      if (state.phase !== 'betting') return;
+      const player = state.players[state.activeSeat];
+      const cost = state.selectedChip;
+
+      if (player.balance < cost) {
+        setAnnouncer('INSUFFICIENT BALANCE!');
+        return;
+      }
+
+      player.balance -= cost;
+      player.bets[fishId] = (player.bets[fishId] || 0) + cost;
+
+      if (player.isUser) {
+        state.balance = player.balance;
+        updateBalanceDisplay();
+      }
+
+      audio.playChip();
+      updatePlayerBetsUI();
+      saveActiveBets();
+      renderSeats();
+      syncRoomHeartbeat();
+    }
+
+    function placeGroupBet(group) {
+      if (state.phase !== 'betting') return;
+      let targets = [];
+      if (group === 'warm') targets = [1, 2, 6, 7];
+      else if (group === 'cool') targets = [3, 4, 5, 8];
+      else if (group === 'top') targets = [1, 2, 3, 4];
+      else if (group === 'bottom') targets = [5, 6, 7, 8];
+      else if (group === 'odd') targets = [1, 3, 5, 7];
+      else if (group === 'even') targets = [2, 4, 6, 8];
+
+      const player = state.players[state.activeSeat];
+      const costPerFish = Math.max(10, Math.floor(state.selectedChip / targets.length));
+      const totalCost = costPerFish * targets.length;
+
+      if (player.balance < totalCost) {
+        setAnnouncer('INSUFFICIENT BALANCE FOR GROUP BET!');
+        return;
+      }
+
+      player.balance -= totalCost;
+      targets.forEach(fId => {
+        player.bets[fId] = (player.bets[fId] || 0) + costPerFish;
+      });
+
+      if (player.isUser) {
+        state.balance = player.balance;
+        updateBalanceDisplay();
+      }
+
+      audio.playChip();
+      updatePlayerBetsUI();
+      saveActiveBets();
+      renderSeats();
+      syncRoomHeartbeat();
+    }
+
+    function clearAllBets() {
+      if (state.phase !== 'betting') return;
+      const player = state.players[state.activeSeat];
+      let refund = 0;
+      Object.keys(player.bets).forEach(k => {
+        refund += player.bets[k];
+      });
+      player.balance += refund;
+      player.bets = {};
+
+      if (player.isUser) {
+        state.balance = player.balance;
+        updateBalanceDisplay();
+      }
+
+      audio.playChip();
+      updatePlayerBetsUI();
+      saveActiveBets();
+      renderSeats();
+      syncRoomHeartbeat();
+    }
+
+    function doubleAllBets() {
+      if (state.phase !== 'betting') return;
+      const player = state.players[state.activeSeat];
+      let totalCurrent = 0;
+      Object.keys(player.bets).forEach(k => {
+        totalCurrent += player.bets[k];
+      });
+
+      if (totalCurrent === 0) return;
+      if (player.balance < totalCurrent) {
+        setAnnouncer('NOT ENOUGH BALANCE TO DOUBLE!');
+        return;
+      }
+
+      player.balance -= totalCurrent;
+      Object.keys(player.bets).forEach(k => {
+        player.bets[k] *= 2;
+      });
+
+      if (player.isUser) {
+        state.balance = player.balance;
+        updateBalanceDisplay();
+      }
+
+      audio.playChip();
+      updatePlayerBetsUI();
+      saveActiveBets();
+      renderSeats();
+      syncRoomHeartbeat();
+    }
+
+    function repeatLastBet() {
+      if (state.phase !== 'betting') return;
+      if (!state.lastBets || Object.keys(state.lastBets).length === 0) return;
+
+      const player = state.players[state.activeSeat];
+      let cost = 0;
+      Object.keys(state.lastBets).forEach(k => cost += state.lastBets[k]);
+
+      if (player.balance < cost) {
+        setAnnouncer('NOT ENOUGH BALANCE TO REBET!');
+        return;
+      }
+
+      clearAllBets();
+      player.balance -= cost;
+      player.bets = { ...state.lastBets };
+
+      if (player.isUser) {
+        state.balance = player.balance;
+        updateBalanceDisplay();
+      }
+
+      audio.playChip();
+      updatePlayerBetsUI();
+      saveActiveBets();
+      renderSeats();
+      syncRoomHeartbeat();
+    }
+
+    function updatePlayerBetsUI() {
+      const player = state.players[state.activeSeat];
+      for (let id = 1; id <= 8; id++) {
+        const pill = document.getElementById(`wager-pill-${id}`);
+        const card = document.getElementById(`fish-card-${id}`);
+        const wager = player.bets[id] || 0;
+
+        if (pill) pill.textContent = wager > 0 ? wager : '0';
+        if (card) {
+          if (wager > 0) card.classList.add('has-wager');
+          else card.classList.remove('has-wager');
+        }
+      }
+    }
+
+    function updateBalanceDisplay() {
+      document.getElementById('player-balance').textContent = state.balance.toLocaleString();
+      try {
+        localStorage.setItem('perya_fish_race_balance', state.balance.toString());
+      } catch (e) {}
+    }
+
+    function switchPlayerSeat(seatIdx) {
+      if (seatIdx < 0 || seatIdx > 3) return;
+      if (state.players[seatIdx].ref && !state.players[seatIdx].isUser) {
+        setAnnouncer('SEAT OCCUPIED BY ANOTHER SWIMMER!');
+        return;
+      }
+
+      const prevSeat = state.activeSeat;
+      state.players[prevSeat].isUser = false;
+      state.players[prevSeat].ref = null;
+      state.players[prevSeat].name = 'Empty Seat';
+      state.players[prevSeat].bets = {};
+
+      state.activeSeat = seatIdx;
+      state.players[seatIdx].isUser = true;
+      state.players[seatIdx].ref = state.userRef;
+      state.players[seatIdx].name = state.userName;
+      state.players[seatIdx].balance = state.balance;
+
+      renderSeats();
+      updatePlayerBetsUI();
+      syncRoomHeartbeat();
+    }
+
+    function renderSeats() {
+      state.players.forEach((p, idx) => {
+        const seatIdx = idx + 1;
+        const cardEl = document.getElementById(`seat-card-${seatIdx}`);
+        const nameEl = document.getElementById(`seat-${seatIdx}-name`);
+        const statusEl = document.getElementById(`seat-${seatIdx}-status`);
+        const betEl = document.getElementById(`seat-${seatIdx}-bet`);
+
+        const isLocalUser = (idx === state.activeSeat);
+        if (isLocalUser) cardEl.classList.add('active-user');
+        else cardEl.classList.remove('active-user');
+
+        if (p.ref && p.name && p.name !== 'Empty Seat') {
+          nameEl.textContent = p.name;
+        } else {
+          nameEl.textContent = isLocalUser ? state.userName : 'Open Seat';
+        }
+
+        let totalBet = 0;
+        if (p.bets) {
+          Object.keys(p.bets).forEach(k => totalBet += (p.bets[k] || 0));
+        }
+
+        betEl.textContent = `${totalBet.toLocaleString()} 🪙`;
+
+        if (!p.ref && !isLocalUser) {
+          statusEl.textContent = 'Empty';
+        } else if (state.phase === 'betting') {
+          statusEl.textContent = totalBet > 0 ? 'Bet Placed' : 'Waiting...';
+        } else if (state.phase === 'racing') {
+          statusEl.textContent = 'Racing!';
+        } else {
+          statusEl.textContent = 'Resolved';
+        }
+      });
+    }
+
+    /* Live Room Sync & Heartbeat */
+    async function syncRoomHeartbeat() {
+      try {
+        const payload = {
+          ref: state.userRef,
+          name: state.userName,
+          avatar: state.players[state.activeSeat]?.avatar || '👑',
+          seat: state.activeSeat,
+          bets: state.players[state.activeSeat]?.bets || {},
+          balance: state.balance
+        };
+
+        const res = await fetch('/fishrace/api.php?action=join_or_heartbeat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data && data.seats && Array.isArray(data.seats)) {
+          data.seats.forEach((serverSeat, idx) => {
+            if (idx === state.activeSeat) {
+              state.players[idx].ref = state.userRef;
+              state.players[idx].name = state.userName;
+              state.players[idx].isUser = true;
+            } else if (serverSeat && serverSeat.ref) {
+              state.players[idx].ref = serverSeat.ref;
+              state.players[idx].name = serverSeat.name;
+              state.players[idx].avatar = serverSeat.avatar || '🐟';
+              state.players[idx].isUser = false;
+              state.players[idx].balance = serverSeat.balance || 0;
+              state.players[idx].bets = serverSeat.bets || {};
+            } else {
+              state.players[idx].ref = null;
+              state.players[idx].name = 'Empty Seat';
+              state.players[idx].isUser = false;
+              state.players[idx].bets = {};
+            }
+          });
+          renderSeats();
+        }
+      } catch (err) {}
+    }
+
+    setInterval(syncRoomHeartbeat, 2500);
+
+    /* =========================================================================
+       GAME CYCLE: 30s BETTING -> 15s FISH RACE -> 6s PAYOUT
+       ========================================================================= */
+
+    function updateTimerUI() {
+      const formatted = state.timeLeft.toFixed(1);
+      const digitsEl = document.getElementById('timer-digits');
+      if (digitsEl) digitsEl.textContent = formatted;
+      const headerDigitsEl = document.getElementById('header-timer-digits');
+      if (headerDigitsEl) headerDigitsEl.textContent = `${formatted}s`;
+
+      const headerBadge = document.getElementById('header-timer-badge');
+      if (headerBadge) {
+        headerBadge.className = `header-timer-badge ${state.phase}`;
+      }
+    }
+
+    function startBettingPhase() {
+      state.phase = 'betting';
+      state.timeLeft = 30.0;
+      state.winner = null;
+      updateTimerUI();
+
+      // Clear winner pulses
+      document.querySelectorAll('.fish-bet-card').forEach(c => c.classList.remove('winner-pulse'));
+
+      const badge = document.getElementById('phase-badge');
+      badge.className = 'phase-badge-title betting';
+      document.getElementById('phase-text').textContent = 'BETTING PHASE (30s)';
+      setAnnouncer('PICK YOUR WINNING FISH! LANES 1-8 OR COLOR GROUPS!');
+
+      randomizeOdds(true);
+      initRacePositions();
+      syncRoomHeartbeat();
+
+      const timerInterval = setInterval(() => {
+        if (state.phase !== 'betting') {
+          clearInterval(timerInterval);
+          return;
+        }
+
+        state.timeLeft = Math.max(0, +(state.timeLeft - 0.1).toFixed(1));
+        updateTimerUI();
+
+        if (state.timeLeft <= 5.0 && state.timeLeft > 0 && Math.round(state.timeLeft * 10) % 10 === 0) {
+          audio.playBeep(false);
+          setAnnouncer(`GATES CLOSING IN ${Math.ceil(state.timeLeft)}s!`);
+        }
+
+        if (state.timeLeft <= 0) {
+          clearInterval(timerInterval);
+          audio.playBeep(true);
+          startRacePhase();
+        }
+      }, 100);
+    }
+
+    function startRacePhase() {
+      state.phase = 'racing';
+      state.timeLeft = 15.0;
+      updateTimerUI();
+
+      state.lastBets = { ...state.players[state.activeSeat].bets };
+
+      const badge = document.getElementById('phase-badge');
+      badge.className = 'phase-badge-title racing';
+      document.getElementById('phase-text').textContent = 'RACE IN PROGRESS (15s)';
+      setAnnouncer("THE GATES ARE OPEN! THEY'RE OFF IN THE AQUA DERBY!");
+      renderSeats();
+
+      raceStartTime = Date.now();
+      audio.playStarterHorn();
+
+      const raceTimer = setInterval(() => {
+        state.timeLeft = Math.max(0, +(state.timeLeft - 0.1).toFixed(1));
+        updateTimerUI();
+        if (state.timeLeft <= 0 || state.phase !== 'racing') clearInterval(raceTimer);
+      }, 100);
+    }
+
+    function finishRace(winnerFish) {
+      if (state.phase === 'payout') return;
+      state.phase = 'payout';
+      state.timeLeft = 6.0;
+      updateTimerUI();
+
+      const payoutInterval = setInterval(() => {
+        state.timeLeft = Math.max(0, +(state.timeLeft - 0.1).toFixed(1));
+        updateTimerUI();
+        if (state.timeLeft <= 0) clearInterval(payoutInterval);
+      }, 100);
+
+      const badge = document.getElementById('phase-badge');
+      badge.className = 'phase-badge-title payout';
+      document.getElementById('phase-text').textContent = 'PHOTO FINISH / PAYOUT';
+
+      setAnnouncer(`🏆 WINNER: LANE ${winnerFish.id} ${winnerFish.name.toUpperCase()}! [${state.odds[winnerFish.id]}x]`);
+
+      // Pulse winning fish card
+      const card = document.getElementById(`fish-card-${winnerFish.id}`);
+      if (card) card.classList.add('winner-pulse');
+
+      // Calculate Winnings
+      let userWonCoins = 0;
+      state.players.forEach(p => {
+        const wager = p.bets[winnerFish.id] || 0;
+        if (wager > 0) {
+          const mult = state.odds[winnerFish.id] || 2;
+          const payout = wager * mult;
+          p.balance += payout;
+          if (p.isUser) userWonCoins = payout;
+        }
+        p.bets = {};
+      });
+
+      if (userWonCoins > 0) {
+        state.balance = state.players[state.activeSeat].balance;
+        updateBalanceDisplay();
+        audio.playVictory();
+        setAnnouncer(`🎉 YOU WON ${userWonCoins.toLocaleString()} COINS ON ${winnerFish.name.toUpperCase()}!`);
+      } else {
+        audio.playSplash();
+      }
+
+      // Add to history
+      state.history.unshift(winnerFish.id);
+      if (state.history.length > 10) state.history.pop();
+      renderHistory();
+
+      try {
+        localStorage.removeItem('perya_fish_active_bets');
+      } catch (e) {}
+
+      renderSeats();
+      updatePlayerBetsUI();
+
+      // Restart next betting phase after 6s
+      setTimeout(startBettingPhase, 6000);
+    }
+
+    function setAnnouncer(text) {
+      document.getElementById('race-announcer').textContent = text;
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('history-fish-list');
+      container.innerHTML = '';
+      state.history.forEach(fId => {
+        const f = FISH_ROSTER.find(item => item.id === fId);
+        if (!f) return;
+        const el = document.createElement('div');
+        el.className = 'mini-history-badge';
+        el.style.backgroundColor = f.finColor || f.color;
+        el.textContent = `L${f.id} ${f.name}`;
+        container.appendChild(el);
+      });
+    }
+
+    // Auto-refund if user closes tab/leaves during 30s betting countdown
+    window.addEventListener('beforeunload', () => {
+      try {
+        if (state.phase === 'betting') {
+          const p = state.players[state.activeSeat];
+          let refund = 0;
+          if (p && p.bets) {
+            Object.keys(p.bets).forEach(k => { refund += (p.bets[k] || 0); });
+            if (refund > 0) {
+              state.balance += refund;
+              localStorage.setItem('perya_fish_race_balance', state.balance.toString());
+              localStorage.removeItem('perya_fish_active_bets');
+            }
+          }
+        }
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon('/fishrace/api.php?action=leave', JSON.stringify({ ref: state.userRef }));
+        }
+      } catch (e) {}
+    });
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
