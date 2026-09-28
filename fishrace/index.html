@@ -2552,8 +2552,8 @@
 
       // 9. Procedural 3D Obstacles across the Track (Urchins, Coral Spires, Geysers)
       raceObstacles = [];
-      const obsTypes = ['urchin', 'spire', 'vent', 'urchin', 'spire', 'vent', 'urchin', 'spire'];
-      for (let i = 0; i < 8; i++) {
+      const obsTypes = ['urchin', 'spire', 'vent', 'urchin', 'spire', 'vent', 'urchin', 'spire', 'vent', 'urchin'];
+      for (let i = 0; i < 10; i++) {
         const oGroup = new THREE.Group();
         const type = obsTypes[i];
 
@@ -2680,6 +2680,19 @@
     }
     window.setCameraMode = setCameraMode;
 
+    function applyServerObstacles(obsList) {
+      if (!obsList || !Array.isArray(obsList)) return;
+      obsList.forEach((obsData, idx) => {
+        if (raceObstacles[idx]) {
+          raceObstacles[idx].x = obsData.x;
+          raceObstacles[idx].z = obsData.z;
+          raceObstacles[idx].y = obsData.y;
+          raceObstacles[idx].type = obsData.type;
+          raceObstacles[idx].group.position.set(obsData.x, obsData.y, obsData.z);
+        }
+      });
+    }
+
     /* Reset / Init Race Positions & Randomize Obstacles for New Round */
     function initRacePositions() {
       raceCompetitors.forEach(c => {
@@ -2700,15 +2713,29 @@
         }
       });
 
-      // Randomize 3D Obstacles across the lanes
-      raceObstacles.forEach((obs, idx) => {
-        obs.x = -65 + idx * 18 + (Math.random() * 6 - 3);
-        const lanePick = (idx % 8);
-        const laneCenterZ = (lanePick - 3.5) * 8.5;
-        obs.z = laneCenterZ + (Math.random() * 3.5 - 1.75);
-        obs.y = (obs.type === 'urchin' ? (Math.random() * 3 - 1.5) : 0);
-        obs.group.position.set(obs.x, (obs.type === 'urchin' ? obs.y : 0), obs.z);
-      });
+      // Synchronize 3D Obstacles across the stage
+      if (state.serverObstacles && Array.isArray(state.serverObstacles) && state.serverObstacles.length > 0) {
+        applyServerObstacles(state.serverObstacles);
+      } else {
+        // Procedural scatter across stage with collision avoidance
+        const placed = [];
+        raceObstacles.forEach((obs, idx) => {
+          let attempts = 0;
+          let ox = 0, oz = 0;
+          while (attempts < 35) {
+            ox = -60 + Math.random() * 125;
+            oz = (Math.random() - 0.5) * 54;
+            const clash = placed.some(p => Math.abs(p.x - ox) < 14 && Math.abs(p.z - oz) < 5);
+            if (!clash) break;
+            attempts++;
+          }
+          placed.push({ x: ox, z: oz });
+          obs.x = ox;
+          obs.z = oz;
+          obs.y = (obs.type === 'urchin' ? (Math.random() * 3 - 1.5) : 0);
+          obs.group.position.set(obs.x, obs.y, obs.z);
+        });
+      }
 
       // Raise start laser gates
       startLaserGates.forEach(g => {
@@ -2793,7 +2820,12 @@
             if (c.surgeTimer <= 0) c.surgeActive = false;
           }
 
-          c.speed = baseSpeed + randVariation + surgeBoost;
+          let serverWinBoost = 0;
+          if (state.serverWinnerId && c.fish.id === state.serverWinnerId && state.raceProgress > 0.65) {
+            serverWinBoost = 0.95;
+          }
+
+          c.speed = baseSpeed + randVariation + surgeBoost + serverWinBoost;
           c.x += c.speed * delta;
 
           // DYNAMIC OBSTACLE SENSING & PATHFINDING
@@ -2818,8 +2850,9 @@
           if (c.x >= TRACK_FINISH_X) {
             c.x = TRACK_FINISH_X;
             if (!state.winner) {
-              state.winner = c.fish;
-              triggerPhotoFinish(c.fish);
+              const targetId = state.serverWinnerId || c.fish.id;
+              const winFish = FISH_ROSTER.find(f => f.id === targetId) || c.fish;
+              triggerPhotoFinish(winFish);
             }
           }
 
@@ -3063,11 +3096,18 @@
       initThreeScene();
       window.addEventListener('resize', onWindowResize3D);
 
-      // Join room and pull other JTrash players
+      // Start master high-frequency clock ticker (100ms)
+      setInterval(masterTimerTick, 100);
+
+      // Connect to server room and immediately sync game clock & state
       syncRoomHeartbeat();
 
-      // Start main game loop (30s betting timer)
-      startBettingPhase();
+      // Fallback: if server heartbeat takes time, default to betting
+      setTimeout(() => {
+        if (!state.phase) {
+          applyBettingPhase(30.0);
+        }
+      }, 400);
 
       // Start 3D Render Loop
       raceAnimFrame = requestAnimationFrame(renderRaceLoop);
@@ -3555,7 +3595,7 @@
       updateBettingControls();
     }
 
-    /* Live Room Sync & Heartbeat */
+    /* Live Room Sync & Heartbeat (Server-Side Game State Machine) */
     async function syncRoomHeartbeat() {
       try {
         const payload = {
@@ -3582,7 +3622,6 @@
               state.players[idx].isUser = true;
               state.players[idx].balance = state.balance;
             } else if (serverSeat && serverSeat.ref) {
-              // Check if server still has our ref in another seat (ghost from before switch)
               if (serverSeat.ref === state.userRef && idx !== state.activeSeat) {
                 state.players[idx].ref = null;
                 state.players[idx].name = 'Open Seat';
@@ -3609,17 +3648,59 @@
           });
           renderSeats();
         }
+
+        // Server-Side Synchronized Clock & Race State
+        if (data && data.game) {
+          const g = data.game;
+
+          if (g.odds) {
+            state.odds = g.odds;
+            for (let id = 1; id <= 8; id++) {
+              const el = document.getElementById(`odds-digits-${id}`);
+              if (el && g.odds[id]) el.textContent = g.odds[id];
+            }
+          }
+
+          if (g.obstacles && Array.isArray(g.obstacles)) {
+            state.serverObstacles = g.obstacles;
+            applyServerObstacles(g.obstacles);
+          }
+
+          if (g.winner_id) {
+            state.serverWinnerId = g.winner_id;
+          }
+
+          const phaseChanged = (state.phase !== g.phase);
+          const roundChanged = (state.currentRoundId !== g.round_id);
+
+          if (phaseChanged || roundChanged) {
+            state.currentRoundId = g.round_id;
+            if (g.phase === 'betting') {
+              applyBettingPhase(g.time_left);
+            } else if (g.phase === 'racing') {
+              applyRacePhase(g.time_left, g.elapsed, g.winner_id);
+            } else if (g.phase === 'payout') {
+              applyPayoutPhase(g.time_left, g.winner_id);
+            }
+          } else {
+            // Drift correction
+            if (Math.abs(state.timeLeft - g.time_left) > 1.2) {
+              state.timeLeft = g.time_left;
+              updateTimerUI();
+            }
+          }
+        }
       } catch (err) {}
     }
 
-    setInterval(syncRoomHeartbeat, 2500);
+    setInterval(syncRoomHeartbeat, 2000);
 
     /* =========================================================================
-       GAME CYCLE: 30s BETTING -> 15s FISH RACE -> 6s PAYOUT
+       GAME CYCLE: SERVER-SYNCHRONIZED (30s BETTING -> 30s RACE -> 12s PAYOUT)
        ========================================================================= */
 
     function updateTimerUI() {
-      const formatted = state.timeLeft.toFixed(1);
+      const formatted = (state.timeLeft || 0).toFixed(1);
       const digitsEl = document.getElementById('timer-digits');
       if (digitsEl) digitsEl.textContent = formatted;
       const headerDigitsEl = document.getElementById('header-timer-digits');
@@ -3631,9 +3712,23 @@
       }
     }
 
-    function startBettingPhase() {
+    function masterTimerTick() {
+      if (typeof state.timeLeft === 'number' && state.timeLeft > 0) {
+        state.timeLeft = Math.max(0, +(state.timeLeft - 0.1).toFixed(1));
+        updateTimerUI();
+
+        if (state.phase === 'betting') {
+          if (state.timeLeft <= 5.0 && state.timeLeft > 0 && Math.round(state.timeLeft * 10) % 10 === 0) {
+            audio.playBeep(false);
+            setAnnouncer(`GATES CLOSING IN ${Math.ceil(state.timeLeft)}s!`);
+          }
+        }
+      }
+    }
+
+    function applyBettingPhase(timeLeft) {
       state.phase = 'betting';
-      state.timeLeft = 30.0;
+      state.timeLeft = typeof timeLeft === 'number' ? timeLeft : 30.0;
       state.winner = null;
       updateTimerUI();
 
@@ -3641,79 +3736,80 @@
       document.querySelectorAll('.fish-bet-card').forEach(c => c.classList.remove('winner-pulse'));
 
       const badge = document.getElementById('phase-badge');
-      badge.className = 'phase-badge-title betting';
-      document.getElementById('phase-text').textContent = 'BETTING PHASE (30s)';
+      if (badge) badge.className = 'phase-badge-title betting';
+      const textEl = document.getElementById('phase-text');
+      if (textEl) textEl.textContent = 'BETTING PHASE (30s)';
       setAnnouncer('PICK YOUR WINNING FISH! LANES 1-8 OR COLOR GROUPS!');
       updateBettingControls();
 
-      randomizeOdds(true);
       initRacePositions();
-      syncRoomHeartbeat();
-
-      const timerInterval = setInterval(() => {
-        if (state.phase !== 'betting') {
-          clearInterval(timerInterval);
-          return;
-        }
-
-        state.timeLeft = Math.max(0, +(state.timeLeft - 0.1).toFixed(1));
-        updateTimerUI();
-
-        if (state.timeLeft <= 5.0 && state.timeLeft > 0 && Math.round(state.timeLeft * 10) % 10 === 0) {
-          audio.playBeep(false);
-          setAnnouncer(`GATES CLOSING IN ${Math.ceil(state.timeLeft)}s!`);
-        }
-
-        if (state.timeLeft <= 0) {
-          clearInterval(timerInterval);
-          audio.playBeep(true);
-          startRacePhase();
-        }
-      }, 100);
     }
 
-    function startRacePhase() {
+    function applyRacePhase(timeLeft, elapsed, winnerId) {
       state.phase = 'racing';
-      state.timeLeft = 30.0;
+      state.timeLeft = typeof timeLeft === 'number' ? timeLeft : 30.0;
+      if (winnerId) state.serverWinnerId = winnerId;
       updateTimerUI();
 
       state.lastBets = (state.activeSeat !== -1 && state.players[state.activeSeat]) ? { ...(state.players[state.activeSeat].bets || {}) } : {};
 
       const badge = document.getElementById('phase-badge');
-      badge.className = 'phase-badge-title racing';
-      document.getElementById('phase-text').textContent = 'RACE IN PROGRESS (30s)';
+      if (badge) badge.className = 'phase-badge-title racing';
+      const textEl = document.getElementById('phase-text');
+      if (textEl) textEl.textContent = 'RACE IN PROGRESS (30s)';
       setAnnouncer("THE GATES ARE OPEN! THEY'RE OFF IN THE AQUA DERBY!");
       renderSeats();
       updateBettingControls();
 
-      raceStartTime = Date.now();
-      audio.playStarterHorn();
+      const actualElapsed = (typeof elapsed === 'number' && elapsed >= 0) ? elapsed : (30.0 - state.timeLeft);
+      raceStartTime = Date.now() - (actualElapsed * 1000);
 
-      const raceTimer = setInterval(() => {
-        state.timeLeft = Math.max(0, +(state.timeLeft - 0.1).toFixed(1));
-        updateTimerUI();
-        if (state.timeLeft <= 0 || state.phase !== 'racing') clearInterval(raceTimer);
-      }, 100);
+      // If refreshed or joined mid-race, position fish at current elapsed progress
+      if (actualElapsed > 0.5) {
+        const progress = Math.min(0.96, actualElapsed / 30.0);
+        raceCompetitors.forEach(c => {
+          c.x = TRACK_START_X + (TRACK_DISTANCE * progress);
+          c.distance = Math.min(100, Math.round(((c.x - TRACK_START_X) / TRACK_DISTANCE) * 100));
+          if (c.meshData) {
+            c.meshData.group.position.x = c.x;
+          }
+        });
+        startLaserGates.forEach(g => { g.position.y = -12; });
+      } else {
+        audio.playStarterHorn();
+      }
     }
 
-    function finishRace(winnerFish) {
+    function applyPayoutPhase(timeLeft, winnerId) {
+      const targetId = winnerId || state.serverWinnerId || 1;
+      const winnerFish = FISH_ROSTER.find(item => item.id === targetId) || FISH_ROSTER[0];
+      finishRace(winnerFish, timeLeft);
+    }
+
+    function startBettingPhase() {
+      applyBettingPhase(30.0);
+    }
+
+    function startRacePhase() {
+      applyRacePhase(30.0, 0, state.serverWinnerId);
+    }
+
+    function finishRace(winnerFish, timeLeftOverride) {
       if (state.phase === 'payout') return;
       state.phase = 'payout';
-      state.timeLeft = 12.0;
+      state.timeLeft = typeof timeLeftOverride === 'number' ? timeLeftOverride : 12.0;
+      state.winner = winnerFish;
+      payoutStartTime = Date.now() - ((12.0 - state.timeLeft) * 1000);
       updateTimerUI();
       updateBettingControls();
 
-      const payoutInterval = setInterval(() => {
-        state.timeLeft = Math.max(0, +(state.timeLeft - 0.1).toFixed(1));
-        updateTimerUI();
-        if (state.timeLeft <= 0) clearInterval(payoutInterval);
-      }, 100);
-
       const badge = document.getElementById('phase-badge');
-      badge.className = 'phase-badge-title payout';
-      document.getElementById('phase-text').textContent = 'VICTORY CELEBRATION (12s)';
+      if (badge) badge.className = 'phase-badge-title payout';
+      const textEl = document.getElementById('phase-text');
+      if (textEl) textEl.textContent = 'VICTORY CELEBRATION (12s)';
 
-      setAnnouncer(`🏆 WINNER: LANE ${winnerFish.id} ${winnerFish.name.toUpperCase()}! [${state.odds[winnerFish.id]}x]`);
+      const mult = (state.odds && state.odds[winnerFish.id]) ? state.odds[winnerFish.id] : 3;
+      setAnnouncer(`🏆 WINNER: LANE ${winnerFish.id} ${winnerFish.name.toUpperCase()}! [${mult}x]`);
 
       // Pulse winning fish card
       const card = document.getElementById(`fish-card-${winnerFish.id}`);
@@ -3724,7 +3820,6 @@
       state.players.forEach(p => {
         const wager = p.bets[winnerFish.id] || 0;
         if (wager > 0) {
-          const mult = state.odds[winnerFish.id] || 2;
           const payout = wager * mult;
           p.balance += payout;
           if (p.isUser) userWonCoins = payout;
@@ -3744,9 +3839,11 @@
       }
 
       // Add to history
-      state.history.unshift(winnerFish.id);
-      if (state.history.length > 10) state.history.pop();
-      renderHistory();
+      if (!state.history.includes(winnerFish.id) || state.history[0] !== winnerFish.id) {
+        state.history.unshift(winnerFish.id);
+        if (state.history.length > 10) state.history.pop();
+        renderHistory();
+      }
 
       try {
         localStorage.removeItem('perya_fish_active_bets');
@@ -3754,9 +3851,6 @@
 
       renderSeats();
       updatePlayerBetsUI();
-
-      // Restart next betting phase after 12s celebratory showcase
-      setTimeout(startBettingPhase, 12000);
     }
 
     function setAnnouncer(text) {

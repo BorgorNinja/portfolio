@@ -1746,11 +1746,18 @@
       renderSeats();
       randomizeOdds(false);
 
-      // Join room and pull other JTrash players
+      // Start master high-frequency clock ticker (100ms)
+      setInterval(masterTimerTick, 100);
+
+      // Join room and immediately sync server game state
       syncRoomHeartbeat();
 
-      // Start main game loop (30s betting timer)
-      startBettingPhase();
+      // Fallback: if server heartbeat takes time, default to betting
+      setTimeout(() => {
+        if (!state.phase) {
+          applyBettingPhase(30.0);
+        }
+      }, 400);
     }
 
     // Pre-allocated array of 28 track DOM elements for zero querySelector latency
@@ -2313,7 +2320,7 @@
       }
     }
 
-    /* Real-Time Live Room Sync & JTrash Heartbeat */
+    /* Real-Time Live Room Sync & JTrash Heartbeat (Server-Side Game State Machine) */
     let lastRoomSyncTime = 0;
     async function syncRoomHeartbeat() {
       try {
@@ -2334,16 +2341,13 @@
 
         const data = await res.json();
         if (data && data.seats && Array.isArray(data.seats)) {
-          // Reconcile other players' seats from room state
           data.seats.forEach((serverSeat, idx) => {
             if (idx === state.activeSeat && state.activeSeat !== -1) {
-              // Local user's seat
               state.players[idx].ref = state.userRef;
               state.players[idx].name = state.userName;
               state.players[idx].isUser = true;
               state.players[idx].balance = state.balance;
             } else if (serverSeat && serverSeat.ref) {
-              // Check if server still has our ref in another seat (ghost from before switch)
               if (serverSeat.ref === state.userRef && idx !== state.activeSeat) {
                 state.players[idx].ref = null;
                 state.players[idx].name = 'Open Seat';
@@ -2352,7 +2356,6 @@
                 state.players[idx].bets = {};
                 state.players[idx].balance = 0;
               } else {
-                // Other joined JTrash player
                 state.players[idx].ref = serverSeat.ref;
                 state.players[idx].name = serverSeat.name;
                 state.players[idx].avatar = serverSeat.avatar || '🎮';
@@ -2361,7 +2364,6 @@
                 state.players[idx].bets = serverSeat.bets || {};
               }
             } else {
-              // Empty seat
               state.players[idx].ref = null;
               state.players[idx].name = 'Open Seat';
               state.players[idx].avatar = '💺';
@@ -2372,20 +2374,58 @@
           });
           renderSeats();
         }
+
+        // Server-Side Synchronized Clock & Outcome
+        if (data && data.game) {
+          const g = data.game;
+
+          if (g.odds) {
+            state.odds = g.odds;
+            for (let id = 1; id <= 8; id++) {
+              const el = document.getElementById(`odds-digits-${id}`);
+              if (el && g.odds[id]) el.textContent = g.odds[id];
+            }
+          }
+
+          if (typeof g.winning_tile === 'number') {
+            state.serverWinningTile = g.winning_tile;
+          }
+          if (typeof g.winner_ball === 'number') {
+            state.serverWinnerBall = g.winner_ball;
+          }
+
+          const phaseChanged = (state.phase !== g.phase);
+          const roundChanged = (state.currentRoundId !== g.round_id);
+
+          if (phaseChanged || roundChanged) {
+            state.currentRoundId = g.round_id;
+            if (g.phase === 'betting') {
+              applyBettingPhase(g.time_left);
+            } else if (g.phase === 'spinning') {
+              applySpinningPhase(g.time_left, g.winning_tile);
+            } else if (g.phase === 'payout') {
+              applyPayoutPhase(g.time_left, g.winning_tile, g.winner_ball);
+            }
+          } else {
+            // Drift correction
+            if (Math.abs(state.timeLeft - g.time_left) > 1.2) {
+              state.timeLeft = g.time_left;
+              updateTimerUI();
+            }
+          }
+        }
       } catch (err) {}
     }
 
-    // Poll room seats every 2.5 seconds
-    setInterval(() => {
-      syncRoomHeartbeat();
-    }, 2500);
+    // Poll room heartbeat every 2.0 seconds
+    setInterval(syncRoomHeartbeat, 2000);
 
     /* =========================================================================
-       GAME CYCLE: 30s BETTING PHASE -> 15s SPINNING PHASE -> 6s PAYOUT
+       GAME CYCLE: SERVER-SYNCHRONIZED (30s BETTING -> 15s SPINNING -> 6s PAYOUT)
        ========================================================================= */
 
     function updateTimerUI() {
-      const formatted = state.timeLeft.toFixed(1);
+      const formatted = (state.timeLeft || 0).toFixed(1);
       const digitsEl = document.getElementById('timer-digits');
       if (digitsEl) digitsEl.textContent = formatted;
       const headerDigitsEl = document.getElementById('header-timer-digits');
@@ -2397,57 +2437,57 @@
       }
     }
 
-    function startBettingPhase() {
-      state.phase = 'betting';
-      state.timeLeft = 30.0;
-      state.winningTiles = [];
-      updateTimerUI();
-
-      // Reset indicators
-      resetBonusIndicators();
-      clearWinnerHighlights();
-
-      // UI updates
-      const badge = document.getElementById('phase-badge');
-      badge.className = 'phase-badge-title betting';
-      document.getElementById('phase-text').textContent = 'BETTING PHASE (30s)';
-      setAnnouncer('PLACE YOUR BETS ON BALLS 1-8 OR COLOR GROUPS!');
-      updateBettingControls();
-
-      // Randomize odds with 7-segment digital scramble
-      randomizeOdds(true);
-
-      // Sync room heartbeat
-      syncRoomHeartbeat();
-
-      // 30-Second Countdown Timer Loop
-      const timerInterval = setInterval(() => {
-        if (state.phase !== 'betting') {
-          clearInterval(timerInterval);
-          return;
-        }
-
+    function masterTimerTick() {
+      if (typeof state.timeLeft === 'number' && state.timeLeft > 0) {
         state.timeLeft = Math.max(0, +(state.timeLeft - 0.1).toFixed(1));
         updateTimerUI();
 
-        // Sound cues in the final 5 seconds
-        if (state.timeLeft <= 5.0 && state.timeLeft > 0 && Math.round(state.timeLeft * 10) % 10 === 0) {
-          audio.playBeep(false);
-          setAnnouncer(`NO MORE BETS IN ${Math.ceil(state.timeLeft)}s!`);
+        if (state.phase === 'betting') {
+          if (state.timeLeft <= 5.0 && state.timeLeft > 0 && Math.round(state.timeLeft * 10) % 10 === 0) {
+            audio.playBeep(false);
+            setAnnouncer(`NO MORE BETS IN ${Math.ceil(state.timeLeft)}s!`);
+          }
         }
+      }
+    }
 
-        if (state.timeLeft <= 0) {
-          clearInterval(timerInterval);
-          audio.playBeep(true);
-          startSpinningPhase();
-        }
-      }, 100);
+    function applyBettingPhase(timeLeft) {
+      state.phase = 'betting';
+      state.timeLeft = typeof timeLeft === 'number' ? timeLeft : 30.0;
+      state.winningTiles = [];
+      document.body.classList.remove('is-spinning');
+      updateTimerUI();
+
+      resetBonusIndicators();
+      clearWinnerHighlights();
+
+      const badge = document.getElementById('phase-badge');
+      if (badge) badge.className = 'phase-badge-title betting';
+      const textEl = document.getElementById('phase-text');
+      if (textEl) textEl.textContent = 'BETTING PHASE (30s)';
+      setAnnouncer('PLACE YOUR BETS ON BALLS 1-8 OR COLOR GROUPS!');
+      updateBettingControls();
+    }
+
+    function applySpinningPhase(timeLeft, winningTileOverride) {
+      if (state.phase === 'spinning') return;
+      startSpinningPhase(winningTileOverride, timeLeft);
+    }
+
+    function applyPayoutPhase(timeLeft, winningTile, winnerBall) {
+      const tile = (typeof winningTile === 'number') ? winningTile : (state.serverWinningTile || 0);
+      const ball = (typeof winnerBall === 'number') ? winnerBall : TRACK_LAYOUT[tile];
+      finishSpin(tile, ball, ball === 9, false, timeLeft);
+    }
+
+    function startBettingPhase() {
+      applyBettingPhase(30.0);
     }
 
     /* 15-SECOND SPINNING PHASE (WITH SUSPENSE DECELERATION & ZERO TELEPORTING) */
-    function startSpinningPhase() {
+    function startSpinningPhase(winningTileOverride, timeLeftOverride) {
       state.phase = 'spinning';
-      state.timeLeft = 15.0;
+      state.timeLeft = typeof timeLeftOverride === 'number' ? timeLeftOverride : 15.0;
       document.body.classList.add('is-spinning');
       updateTimerUI();
 
@@ -2456,15 +2496,18 @@
 
       // Update UI & grey out betting controls
       const badge = document.getElementById('phase-badge');
-      badge.className = 'phase-badge-title spinning';
-      document.getElementById('phase-text').textContent = 'SPINNING RUNNER (15s)';
+      if (badge) badge.className = 'phase-badge-title spinning';
+      const textEl = document.getElementById('phase-text');
+      if (textEl) textEl.textContent = 'SPINNING RUNNER (15s)';
       setAnnouncer('ROULETTE RUNNER IN MOTION... GOOD LUCK!');
       renderSeats();
       updateBettingControls();
 
-      // Pick winning target tile ahead of time
+      // Target tile synchronized from server
       const totalTiles = TRACK_LAYOUT.length; // 28
-      const finalTargetTile = Math.floor(Math.random() * totalTiles);
+      const finalTargetTile = (typeof winningTileOverride === 'number')
+        ? winningTileOverride
+        : ((typeof state.serverWinningTile === 'number') ? state.serverWinningTile : Math.floor(Math.random() * totalTiles));
 
       // Roll chance of special bonus features
       const willReverse = Math.random() < 0.35; // 35% chance to reverse
@@ -2473,22 +2516,15 @@
       let currentStep = state.activeRunnerIndex;
       let direction = 1; // 1 = clockwise, -1 = counter-clockwise
       let speedMs = 30; // High speed start (~30ms per step)
-      let elapsedMs = 0;
+      let elapsedMs = Math.max(0, (15.0 - state.timeLeft) * 1000);
       let runnerStepCount = 0;
       
       const N_DECEL = 20; // Fixed 20-step deceleration runway (~3.3 seconds)
       let isDecelerating = false;
       let decelStepsRemaining = N_DECEL;
 
-      let reverseTriggered = false;
-      let explosionTriggered = false;
-
-      // Countdown display during spin
-      const spinTimer = setInterval(() => {
-        state.timeLeft = Math.max(0, +(state.timeLeft - 0.1).toFixed(1));
-        updateTimerUI();
-        if (state.timeLeft <= 0) clearInterval(spinTimer);
-      }, 100);
+      let reverseTriggered = (elapsedMs >= 6500);
+      let explosionTriggered = (elapsedMs >= 9500);
 
       function stepRunner() {
         if (state.phase !== 'spinning') return;
@@ -2543,8 +2579,6 @@
           decelStepsRemaining--;
 
           if (decelStepsRemaining <= 0) {
-            // STOP! We have arrived precisely at finalTargetTile by natural stepping.
-            // currentStep is mathematically guaranteed to equal finalTargetTile!
             const targetBall = TRACK_LAYOUT[currentStep];
             const isNinthBall = (targetBall === 9);
             finishSpin(currentStep, targetBall, isNinthBall, explosionTriggered);
@@ -2601,20 +2635,16 @@
     /* =========================================================================
        SPIN RESOLUTION & PAYOUT CELEBRATION
        ========================================================================= */
-    function finishSpin(targetTile, targetBall, isNinthBall, wasExplosion) {
+    function finishSpin(targetTile, targetBall, isNinthBall, wasExplosion, timeLeftOverride) {
+      if (state.phase === 'payout') return;
       state.phase = 'payout';
-      state.timeLeft = 6.0;
+      state.timeLeft = typeof timeLeftOverride === 'number' ? timeLeftOverride : 6.0;
       updateTimerUI();
 
-      const payoutInterval = setInterval(() => {
-        state.timeLeft = Math.max(0, +(state.timeLeft - 0.1).toFixed(1));
-        updateTimerUI();
-        if (state.timeLeft <= 0) clearInterval(payoutInterval);
-      }, 100);
-
       const badge = document.getElementById('phase-badge');
-      badge.className = 'phase-badge-title payout';
-      document.getElementById('phase-text').textContent = 'PAYOUT RESOLUTION';
+      if (badge) badge.className = 'phase-badge-title payout';
+      const textEl = document.getElementById('phase-text');
+      if (textEl) textEl.textContent = 'PAYOUT RESOLUTION';
 
       // Pulse winning track tile
       const winningTiles = [targetTile];
@@ -2706,9 +2736,11 @@
 
       // Add to history
       if (targetBall !== 9) {
-        state.history.unshift(targetBall);
-        if (state.history.length > 10) state.history.pop();
-        renderHistory();
+        if (!state.history.includes(targetBall) || state.history[0] !== targetBall) {
+          state.history.unshift(targetBall);
+          if (state.history.length > 10) state.history.pop();
+          renderHistory();
+        }
       }
 
       // Save last landed runner tile so fresh sessions resume from here
@@ -2719,10 +2751,12 @@
       renderSeats();
       updatePlayerBetsUI();
 
-      // After 6 seconds, restart betting phase for next round
+      // Transition when payout ends
       setTimeout(() => {
-        startBettingPhase();
-      }, 6000);
+        if (state.phase === 'payout') {
+          applyBettingPhase(30.0);
+        }
+      }, (state.timeLeft || 6.0) * 1000);
     }
 
     function setAnnouncer(text) {
