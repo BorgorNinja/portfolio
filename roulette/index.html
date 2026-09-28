@@ -1442,6 +1442,11 @@
     const state = {
       phase: 'betting', // 'betting' (30s) -> 'spinning' (15s) -> 'payout' (6s)
       timeLeft: 30.0,
+      currentRoundId: null,
+      roundSpunId: null,
+      roundResolvedId: null,
+      runnerTimer: null,
+      payoutTimeout: null,
       activeRunnerIndex: 0,
       activeSeat: -1, // -1 = Spectating by default. 0-3 = Claimed seat
       userRef: localUserRef,
@@ -2322,6 +2327,7 @@
 
     /* Real-Time Live Room Sync & JTrash Heartbeat (Server-Side Game State Machine) */
     let lastRoomSyncTime = 0;
+    let lastServerSyncTime = 0;
     async function syncRoomHeartbeat() {
       try {
         const payload = {
@@ -2377,6 +2383,7 @@
 
         // Server-Side Synchronized Clock & Outcome
         if (data && data.game) {
+          lastServerSyncTime = Date.now();
           const g = data.game;
 
           if (g.odds) {
@@ -2394,23 +2401,52 @@
             state.serverWinnerBall = g.winner_ball;
           }
 
-          const phaseChanged = (state.phase !== g.phase);
-          const roundChanged = (state.currentRoundId !== g.round_id);
+          const isNewRound = (state.currentRoundId !== g.round_id);
 
-          if (phaseChanged || roundChanged) {
+          if (isNewRound) {
             state.currentRoundId = g.round_id;
+            state.roundSpunId = null;
+            state.roundResolvedId = null;
+
             if (g.phase === 'betting') {
               applyBettingPhase(g.time_left);
             } else if (g.phase === 'spinning') {
-              applySpinningPhase(g.time_left, g.winning_tile);
+              applySpinningPhase(g.time_left, g.winning_tile, g.round_id);
             } else if (g.phase === 'payout') {
-              applyPayoutPhase(g.time_left, g.winning_tile, g.winner_ball);
+              applyPayoutPhase(g.time_left, g.winning_tile, g.winner_ball, g.round_id);
             }
           } else {
-            // Drift correction
-            if (Math.abs(state.timeLeft - g.time_left) > 1.2) {
-              state.timeLeft = g.time_left;
-              updateTimerUI();
+            // Same round ID
+            if (g.phase === 'spinning') {
+              // Only spin if we haven't already spun or resolved this round and are not in payout
+              if (state.roundSpunId !== g.round_id && state.roundResolvedId !== g.round_id && state.phase !== 'payout') {
+                applySpinningPhase(g.time_left, g.winning_tile, g.round_id);
+              }
+            } else if (g.phase === 'payout') {
+              // Server reached payout
+              if (state.roundResolvedId === g.round_id || state.phase === 'payout') {
+                // Already in payout / resolved, just sync timer drift
+                if (Math.abs(state.timeLeft - g.time_left) > 1.2) {
+                  state.timeLeft = g.time_left;
+                  updateTimerUI();
+                }
+              } else if (state.phase !== 'spinning') {
+                // Was not spinning, jump straight to payout
+                applyPayoutPhase(g.time_left, g.winning_tile, g.winner_ball, g.round_id);
+              }
+              // If state.phase === 'spinning', runner is decelerating smoothly and will hit finishSpin momentarily
+            } else if (g.phase === 'betting') {
+              if (state.phase !== 'betting') {
+                applyBettingPhase(g.time_left);
+              }
+            }
+
+            // Sync timer drift if client and server phases match
+            if (state.phase === g.phase) {
+              if (Math.abs(state.timeLeft - g.time_left) > 1.2) {
+                state.timeLeft = g.time_left;
+                updateTimerUI();
+              }
             }
           }
         }
@@ -2452,6 +2488,14 @@
     }
 
     function applyBettingPhase(timeLeft) {
+      if (state.runnerTimer) {
+        clearTimeout(state.runnerTimer);
+        state.runnerTimer = null;
+      }
+      if (state.payoutTimeout) {
+        clearTimeout(state.payoutTimeout);
+        state.payoutTimeout = null;
+      }
       state.phase = 'betting';
       state.timeLeft = typeof timeLeft === 'number' ? timeLeft : 30.0;
       state.winningTiles = [];
@@ -2469,12 +2513,20 @@
       updateBettingControls();
     }
 
-    function applySpinningPhase(timeLeft, winningTileOverride) {
+    function applySpinningPhase(timeLeft, winningTileOverride, roundId) {
       if (state.phase === 'spinning') return;
+      if (roundId && (state.roundSpunId === roundId || state.roundResolvedId === roundId)) {
+        return;
+      }
+      if (roundId) state.roundSpunId = roundId;
       startSpinningPhase(winningTileOverride, timeLeft);
     }
 
-    function applyPayoutPhase(timeLeft, winningTile, winnerBall) {
+    function applyPayoutPhase(timeLeft, winningTile, winnerBall, roundId) {
+      if (roundId) {
+        state.roundResolvedId = roundId;
+        state.roundSpunId = roundId;
+      }
       const tile = (typeof winningTile === 'number') ? winningTile : (state.serverWinningTile || 0);
       const ball = (typeof winnerBall === 'number') ? winnerBall : TRACK_LAYOUT[tile];
       finishSpin(tile, ball, ball === 9, false, timeLeft);
@@ -2486,6 +2538,10 @@
 
     /* 15-SECOND SPINNING PHASE (WITH SUSPENSE DECELERATION & ZERO TELEPORTING) */
     function startSpinningPhase(winningTileOverride, timeLeftOverride) {
+      if (state.runnerTimer) {
+        clearTimeout(state.runnerTimer);
+        state.runnerTimer = null;
+      }
       state.phase = 'spinning';
       state.timeLeft = typeof timeLeftOverride === 'number' ? timeLeftOverride : 15.0;
       document.body.classList.add('is-spinning');
@@ -2583,6 +2639,7 @@
           decelStepsRemaining--;
 
           if (decelStepsRemaining <= 0) {
+            state.runnerTimer = null;
             const targetBall = TRACK_LAYOUT[currentStep];
             const isNinthBall = (targetBall === 9);
             finishSpin(currentStep, targetBall, isNinthBall, explosionTriggered);
@@ -2594,11 +2651,11 @@
           speedMs = Math.round(35 + Math.pow(Math.max(0, progress), 2.0) * 480);
         }
 
-        setTimeout(stepRunner, speedMs);
+        state.runnerTimer = setTimeout(stepRunner, speedMs);
       }
 
       // Kick off runner loop
-      stepRunner();
+      state.runnerTimer = setTimeout(stepRunner, speedMs);
     }
 
     /* Highlight single track tile with cached direct array access (O(1) vs O(28) DOM queries) */
@@ -2640,8 +2697,14 @@
        SPIN RESOLUTION & PAYOUT CELEBRATION
        ========================================================================= */
     function finishSpin(targetTile, targetBall, isNinthBall, wasExplosion, timeLeftOverride) {
-      if (state.phase === 'payout') return;
+      if (state.phase === 'payout' && state.resolvedRoundId === state.currentRoundId) return;
+      if (state.runnerTimer) {
+        clearTimeout(state.runnerTimer);
+        state.runnerTimer = null;
+      }
       state.phase = 'payout';
+      state.resolvedRoundId = state.currentRoundId;
+      state.roundSpunId = state.currentRoundId;
       state.timeLeft = typeof timeLeftOverride === 'number' ? timeLeftOverride : 6.0;
       updateTimerUI();
 
@@ -2759,10 +2822,16 @@
       renderSeats();
       updatePlayerBetsUI();
 
-      // Transition when payout ends
-      setTimeout(() => {
+      // Transition when payout ends (fallback only if disconnected from server)
+      if (state.payoutTimeout) clearTimeout(state.payoutTimeout);
+      state.payoutTimeout = setTimeout(() => {
         if (state.phase === 'payout') {
-          applyBettingPhase(30.0);
+          const now = Date.now();
+          if (!lastServerSyncTime || (now - lastServerSyncTime > 8000)) {
+            applyBettingPhase(30.0);
+          } else {
+            setAnnouncer('PREPARING NEXT ROUND...');
+          }
         }
       }, (state.timeLeft || 6.0) * 1000);
     }
