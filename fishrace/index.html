@@ -2314,8 +2314,8 @@
 
       // Camera
       const isMobile = (window.innerWidth < 640);
-      threeCamera = new THREE.PerspectiveCamera(isMobile ? 62 : 50, width / height, 0.5, 450);
-      threeCamera.position.set(-85, 30, isMobile ? 60 : 48);
+      threeCamera = new THREE.PerspectiveCamera(isMobile ? 64 : 50, width / height, 0.5, 450);
+      threeCamera.position.set(isMobile ? -48 : -46, isMobile ? 14 : 16, isMobile ? 48 : 42);
 
       // Renderer
       threeRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
@@ -2335,7 +2335,7 @@
         threeControls.maxPolarAngle = Math.PI / 2 - 0.02;
         threeControls.minDistance = 8;
         threeControls.maxDistance = 140;
-        threeControls.target.set(-75, 0, 0);
+        threeControls.target.set(-88, 0, 0);
         threeControls.enabled = (cameraMode === 'orbit');
       }
 
