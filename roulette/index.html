@@ -2519,7 +2519,7 @@
       let elapsedMs = Math.max(0, (15.0 - state.timeLeft) * 1000);
       let runnerStepCount = 0;
       
-      const N_DECEL = 20; // Fixed 20-step deceleration runway (~3.3 seconds)
+      const N_DECEL = 16; // Fixed 16-step deceleration runway (~2.6 seconds)
       let isDecelerating = false;
       let decelStepsRemaining = N_DECEL;
 
@@ -2560,8 +2560,8 @@
           setAnnouncer('💥 ALL LIGHTS ON! MULTIPLE WINNERS!');
         }
 
-        // Check if ready to enter deceleration runway (after ~11.5s)
-        if (!isDecelerating && elapsedMs >= 11500) {
+        // Check if ready to enter deceleration runway (align after ~9.5s so decel lands at ~13.5s)
+        if (!isDecelerating && elapsedMs >= 9500) {
           const curDist = direction === 1 
             ? (finalTargetTile - currentStep + totalTiles) % totalTiles 
             : (currentStep - finalTargetTile + totalTiles) % totalTiles;
@@ -2571,6 +2571,10 @@
           if (curDist === targetDist) {
             isDecelerating = true;
             decelStepsRemaining = N_DECEL;
+          } else if (elapsedMs >= 11800) {
+            // Failsafe: if runway did not align by 11.8s, lock decel directly to remaining distance to finalTargetTile
+            isDecelerating = true;
+            decelStepsRemaining = curDist === 0 ? totalTiles : curDist;
           }
         }
 
@@ -2585,9 +2589,9 @@
             return;
           }
 
-          // Progressive deceleration curve: stretches delay from 35ms up to 650ms on the final step
+          // Progressive deceleration curve: stretches delay from 35ms up to 520ms on the final step
           const progress = 1 - (decelStepsRemaining / N_DECEL);
-          speedMs = Math.round(35 + Math.pow(progress, 2.2) * 550);
+          speedMs = Math.round(35 + Math.pow(Math.max(0, progress), 2.0) * 480);
         }
 
         setTimeout(stepRunner, speedMs);
@@ -2640,6 +2644,10 @@
       state.phase = 'payout';
       state.timeLeft = typeof timeLeftOverride === 'number' ? timeLeftOverride : 6.0;
       updateTimerUI();
+
+      // Ensure active runner cursor is ALWAYS locked onto the winning target tile!
+      state.activeRunnerIndex = targetTile;
+      highlightTrackTile(targetTile);
 
       const badge = document.getElementById('phase-badge');
       if (badge) badge.className = 'phase-badge-title payout';
