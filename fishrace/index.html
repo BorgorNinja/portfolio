@@ -2846,6 +2846,14 @@
           c.speed = (baseSpeed * pacingFactor) + wobble + surgeBoost;
           c.x += c.speed * delta;
 
+          // Keep fish naturally paced with elapsed time even under frame drops or background tab throttling
+          const expectedPackX = TRACK_START_X + (TRACK_DISTANCE * progress);
+          const laneSpread = Math.sin(c.lane * 1.6) * 3.5;
+          const minExpectedX = expectedPackX - 10 + laneSpread;
+          if (c.x < minExpectedX) {
+            c.x = minExpectedX;
+          }
+
           // DYNAMIC OBSTACLE SENSING & PATHFINDING
           let steerZ = 0;
           let steerY = 0;
@@ -2891,6 +2899,18 @@
             spawnFishBubble(c, c.surgeActive);
           }
         });
+
+        // Guaranteed finish: if time elapsed hits 28.5s and winner hasn't triggered, push winner across
+        if (progress >= 1.0 && !state.winner) {
+          const targetId = state.serverWinnerId || (currentLeader ? currentLeader.fish.id : 1);
+          const winFish = FISH_ROSTER.find(f => f.id === targetId) || FISH_ROSTER[0];
+          const winnerComp = raceCompetitors.find(item => item.fish.id === winFish.id);
+          if (winnerComp) {
+            winnerComp.x = TRACK_FINISH_X + 2.5;
+            if (winnerComp.meshData) winnerComp.meshData.group.position.x = winnerComp.x;
+          }
+          triggerPhotoFinish(winFish);
+        }
 
         // Update live leader display
         if (currentLeader) {
@@ -3846,6 +3866,11 @@
           updateTimerUI();
         }
         return;
+      }
+      const winComp = raceCompetitors.find(item => item.fish.id === winnerFish.id);
+      if (winComp) {
+        winComp.x = Math.max(winComp.x, TRACK_FINISH_X + 2.5);
+        if (winComp.meshData) winComp.meshData.group.position.x = winComp.x;
       }
       finishRace(winnerFish, timeLeft);
     }
