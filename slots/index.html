@@ -6284,119 +6284,52 @@
       renderShopUI();
     }
 
-    function download4KWallpaper(themeId) {
+    async function download4KWallpaper(themeId) {
       sound.playScatterTick();
-      const canvas = document.createElement('canvas');
-      canvas.width = 3840;
-      canvas.height = 2160;
-      const ctx = canvas.getContext('2d');
-      const w = 3840, h = 2160;
-
-      if (themeId === 'cyber') {
-        const bg = ctx.createLinearGradient(0, 0, 0, h);
-        bg.addColorStop(0, '#0a0017');
-        bg.addColorStop(0.55, '#1b023a');
-        bg.addColorStop(0.85, '#3b0764');
-        bg.addColorStop(1, '#05000a');
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, w, h);
-
-        ctx.strokeStyle = '#00ffff';
-        ctx.lineWidth = 4;
-        const horizon = h * 0.65;
-        for (let x = -w * 0.5; x <= w * 1.5; x += 160) {
-          ctx.beginPath();
-          ctx.moveTo(w / 2, horizon);
-          ctx.lineTo(x, h);
-          ctx.stroke();
-        }
-        for (let y = horizon + 30; y <= h; y += 45 * ((y - horizon) / 300 + 1)) {
-          ctx.beginPath();
-          ctx.moveTo(0, y);
-          ctx.lineTo(w, y);
-          ctx.stroke();
-        }
-
-        const sunGrad = ctx.createLinearGradient(0, horizon - 500, 0, horizon);
-        sunGrad.addColorStop(0, '#ff007f');
-        sunGrad.addColorStop(1, '#ffd000');
-        ctx.fillStyle = sunGrad;
-        ctx.beginPath();
-        ctx.arc(w / 2, horizon, 420, Math.PI, 0, false);
-        ctx.fill();
-
-      } else if (themeId === 'candy') {
-        const bg = ctx.createRadialGradient(w/2, h/2, 200, w/2, h/2, w*0.8);
-        bg.addColorStop(0, '#f472b6');
-        bg.addColorStop(0.4, '#db2777');
-        bg.addColorStop(0.8, '#831843');
-        bg.addColorStop(1, '#3b0724');
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, w, h);
-
-        for (let r = 300; r < 1800; r += 240) {
-          ctx.beginPath();
-          ctx.arc(w / 2, h / 2, r, 0, Math.PI * 2);
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-          ctx.lineWidth = 22;
-          ctx.stroke();
-        }
-
-      } else if (themeId === 'anubis') {
-        const bg = ctx.createLinearGradient(0, 0, w, h);
-        bg.addColorStop(0, '#0f0c05');
-        bg.addColorStop(0.5, '#241a08');
-        bg.addColorStop(1, '#050401');
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, w, h);
-
-        ctx.strokeStyle = '#f59e0b';
-        ctx.lineWidth = 10;
-        ctx.strokeRect(80, 80, w - 160, h - 160);
-        ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
-        ctx.lineWidth = 4;
-        ctx.strokeRect(110, 110, w - 220, h - 220);
-
-      } else {
-        const bg = ctx.createRadialGradient(w/2, h/2, 100, w/2, h/2, w*0.75);
-        bg.addColorStop(0, '#381a04');
-        bg.addColorStop(0.5, '#140801');
-        bg.addColorStop(1, '#040200');
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, w, h);
-
-        ctx.save();
-        ctx.translate(w/2, h/2);
-        for (let i = 0; i < 48; i++) {
-          ctx.rotate((Math.PI * 2) / 48);
-          ctx.beginPath();
-          ctx.moveTo(0, 0);
-          ctx.lineTo(w * 0.9, -35);
-          ctx.lineTo(w * 0.9, 35);
-          ctx.closePath();
-          ctx.fillStyle = (i % 2 === 0) ? 'rgba(245, 176, 65, 0.04)' : 'rgba(254, 240, 138, 0.015)';
-          ctx.fill();
-        }
-        ctx.restore();
+      let userId = localStorage.getItem('borgor_slots_user_id');
+      if (!userId) {
+        userId = 'usr_' + Math.random().toString(36).substring(2, 12);
+        localStorage.setItem('borgor_slots_user_id', userId);
       }
 
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-      ctx.font = 'bold 38px "Cinzel", serif, sans-serif';
-      ctx.textAlign = 'right';
-      ctx.fillText('BORGOR CASINO ARENA • 4K ULTRA-HD EDITION', w - 120, h - 100);
+      const activeBtn = (typeof event !== 'undefined' && event && event.target) ? event.target : null;
+      if (activeBtn) {
+        activeBtn.disabled = true;
+        activeBtn.textContent = 'Requesting Secure Token...';
+      }
 
-      canvas.toBlob(blob => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Borgor_Slots_${themeId.toUpperCase()}_4K_Wallpaper.png`;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-          a.remove();
-          URL.revokeObjectURL(url);
-        }, 1500);
-      }, 'image/png');
+      try {
+        const resp = await fetch('/slots/api.php?action=request_download_token&theme=' + encodeURIComponent(themeId) + '&user_id=' + encodeURIComponent(userId));
+        const data = await resp.json();
+        if (data.success && data.download_url) {
+          const a = document.createElement('a');
+          a.href = data.download_url;
+          a.download = 'Borgor_Casino_4K_' + themeId.toUpperCase() + '_Wallpaper.png';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => a.remove(), 1200);
+          if (activeBtn) {
+            activeBtn.textContent = '✅ Downloaded!';
+            setTimeout(() => {
+              activeBtn.disabled = false;
+              activeBtn.textContent = '📥 Download 4K';
+            }, 3000);
+          }
+        } else {
+          alert('Failed to generate download token: ' + (data.error || 'Unknown error'));
+          if (activeBtn) {
+            activeBtn.disabled = false;
+            activeBtn.textContent = '📥 Download 4K';
+          }
+        }
+      } catch (err) {
+        console.error('Secure download error:', err);
+        alert('Network error requesting secure temporary download link.');
+        if (activeBtn) {
+          activeBtn.disabled = false;
+          activeBtn.textContent = '📥 Download 4K';
+        }
+      }
     }
 
     /* =========================================================================
