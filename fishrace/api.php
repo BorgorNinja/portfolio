@@ -56,16 +56,103 @@ function generateRandomFishOdds() {
     return $odds;
 }
 
+function generateServerFishPaths($winnerId, $obstacles) {
+    $paths = [];
+    $trackStart = -90.0;
+    $trackFinish = 90.0;
+    $trackDist = 180.0;
+    $raceTime = 28.5; // Winner crosses at 28.5s
+
+    for ($lane = 1; $lane <= 8; $lane++) {
+        $baseZ = round(($lane - 4.5) * 8.5, 2);
+        $isWinner = ($lane == $winnerId);
+        $lanePath = [];
+
+        // Deterministic surge windows for this lane
+        $s1 = rand(40, 110) / 10.0; // 4s - 11s
+        $s2 = rand(130, 200) / 10.0; // 13s - 20s
+        $surge1Boost = rand(35, 55) / 10.0;
+        $surge2Boost = rand(30, 48) / 10.0;
+        $laneWobbleFreq = rand(13, 18) / 10.0;
+        $lanePhase = rand(0, 628) / 100.0;
+
+        for ($step = 0; $step <= 30; $step++) {
+            $t = floatval($step);
+            $progress = min(1.0, max(0.0, $t / $raceTime));
+            $baseX = $trackStart + ($trackDist * $progress);
+
+            // Natural wave
+            $w = sin($t * $laneWobbleFreq + $lanePhase) * 3.2;
+
+            // Surges
+            $surge = 0.0;
+            $d1 = abs($t - $s1);
+            if ($d1 < 2.0) {
+                $surge += cos($d1 / 2.0 * M_PI * 0.5) * $surge1Boost;
+            }
+            $d2 = abs($t - $s2);
+            if ($d2 < 2.0) {
+                $surge += cos($d2 / 2.0 * M_PI * 0.5) * $surge2Boost;
+            }
+
+            // Final stretch
+            $stretch = 0.0;
+            if ($t > 17.5) {
+                $sr = min(1.0, ($t - 17.5) / 11.0);
+                if ($isWinner) {
+                    $stretch = pow($sr, 1.5) * 8.0;
+                } else {
+                    $stretch = (rand(-45, -15) / 10.0) * $sr;
+                }
+            }
+
+            $x = $baseX + $w + $surge + $stretch;
+            if ($t < $raceTime) {
+                $x = min($trackFinish - ($isWinner ? 0.1 : 2.5), max($trackStart, $x));
+            } else {
+                if ($isWinner) {
+                    $x = max($trackFinish + 2.5, $trackFinish + ($t - $raceTime) * 1.5);
+                } else {
+                    $x = min($trackFinish + 5.0, $trackFinish - 1.5 + ($t - $raceTime) * 2.0);
+                }
+            }
+
+            // Obstacle avoidance in Z
+            $steerZ = 0.0;
+            if (is_array($obstacles)) {
+                foreach ($obstacles as $obs) {
+                    $dx = $obs['x'] - $x;
+                    $dz = $obs['z'] - $baseZ;
+                    if ($dx > -3.0 && $dx < 14.0 && abs($dz) < 6.5) {
+                        $side = ($dz >= 0) ? -1.0 : 1.0;
+                        $strength = (1.0 - (abs($dx) / 14.0)) * 4.6;
+                        $steerZ += $side * $strength;
+                    }
+                }
+            }
+            $steerZ = max(-4.8, min(4.8, $steerZ));
+            $z = $baseZ + $steerZ;
+
+            $lanePath[] = [round($x, 1), round($z, 1)];
+        }
+        $paths[$lane] = $lanePath;
+    }
+    return $paths;
+}
+
 function advanceFishGameState(&$room, $nowFloat) {
     $changed = false;
     if (!isset($room['game']) || !is_array($room['game'])) {
+        $winnerId = rand(1, 8);
+        $obstacles = generateRandomFishObstacles();
         $room['game'] = [
             'round_id' => 1,
             'phase' => 'betting',
             'phase_start_time' => $nowFloat,
             'phase_duration' => 30.0,
-            'winner_id' => null,
-            'obstacles' => generateRandomFishObstacles(),
+            'winner_id' => $winnerId,
+            'obstacles' => $obstacles,
+            'paths' => generateServerFishPaths($winnerId, $obstacles),
             'odds' => generateRandomFishOdds()
         ];
         return true;
@@ -76,11 +163,14 @@ function advanceFishGameState(&$room, $nowFloat) {
 
     // If server was idle for more than 5 minutes, reset cleanly to a fresh betting round
     if ($elapsed > 300 || $elapsed < -1.0) {
+        $winnerId = rand(1, 8);
+        $obstacles = generateRandomFishObstacles();
         $game['phase'] = 'betting';
         $game['phase_start_time'] = $nowFloat;
         $game['phase_duration'] = 30.0;
-        $game['winner_id'] = null;
-        $game['obstacles'] = generateRandomFishObstacles();
+        $game['winner_id'] = $winnerId;
+        $game['obstacles'] = $obstacles;
+        $game['paths'] = generateServerFishPaths($winnerId, $obstacles);
         $game['odds'] = generateRandomFishOdds();
         return true;
     }
@@ -95,7 +185,10 @@ function advanceFishGameState(&$room, $nowFloat) {
             $game['phase'] = 'racing';
             $game['phase_start_time'] += $dur;
             $game['phase_duration'] = 30.0;
-            $game['winner_id'] = rand(1, 8);
+            if (!isset($game['paths']) || empty($game['paths'])) {
+                $game['winner_id'] = rand(1, 8);
+                $game['paths'] = generateServerFishPaths($game['winner_id'], $game['obstacles'] ?? []);
+            }
             $changed = true;
         } else if ($currentPhase === 'racing') {
             $game['phase'] = 'payout';
@@ -107,8 +200,9 @@ function advanceFishGameState(&$room, $nowFloat) {
             $game['phase_start_time'] += $dur;
             $game['phase_duration'] = 30.0;
             $game['round_id'] = intval($game['round_id'] ?? 1) + 1;
-            $game['winner_id'] = null;
+            $game['winner_id'] = rand(1, 8);
             $game['obstacles'] = generateRandomFishObstacles();
+            $game['paths'] = generateServerFishPaths($game['winner_id'], $game['obstacles']);
             $game['odds'] = generateRandomFishOdds();
             for ($s = 0; $s < 4; $s++) {
                 if (isset($room['seats'][$s]) && $room['seats'][$s] !== null) {
@@ -206,6 +300,7 @@ $responseGame = [
     'duration' => floatval($room['game']['phase_duration'] ?? 30.0),
     'winner_id' => $room['game']['winner_id'] ?? null,
     'obstacles' => $room['game']['obstacles'] ?? [],
+    'paths' => $room['game']['paths'] ?? [],
     'odds' => $room['game']['odds'] ?? [],
     'server_time' => $nowFloat
 ];
