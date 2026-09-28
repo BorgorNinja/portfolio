@@ -189,6 +189,32 @@
       color: #fde047;
     }
 
+    .btn-music-toggle {
+      background: #1e2230;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      height: 34px;
+      padding: 0 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      transition: all 0.2s ease;
+      max-width: 175px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .btn-music-toggle:hover {
+      border-color: #06b6d4;
+      color: #38bdf8;
+      box-shadow: 0 0 12px rgba(6, 182, 212, 0.25);
+    }
+
     /* Main Container */
     main {
       width: 100%;
@@ -1192,6 +1218,10 @@
         <span>🪙</span>
         <span id="player-balance">10,000</span>
       </div>
+      <button class="btn-music-toggle" id="btn-music" title="Click to Change DJ Track" onclick="nextDJTrack()">
+        <span>🎧</span>
+        <span id="dj-track-title">Nevada (Vicetone)</span>
+      </button>
       <button class="btn-sound-toggle" id="btn-sound" title="Toggle Sound" onclick="toggleMute()">🔊</button>
     </div>
   </header>
@@ -1480,24 +1510,24 @@
     };
 
     /* =========================================================================
-       AUDIO SYNTHESIZER (Web Audio API)
-       Authentic arcade relay clicks, whirs, screech, explosion, and coin cascades
+       AUDIO ENGINE & REAL DJ BGM (YouTube Bangers + 8-Bit Slot Machine Synths)
        ========================================================================= */
+    const DJ_PLAYLIST = [
+      { id: 'nevada', title: 'Nevada (Vicetone)', src: 'audio/bgm_nevada.mp3' },
+      { id: 'xenogenesis', title: 'Xenogenesis (TheFatRat)', src: 'audio/bgm_xenogenesis.mp3' },
+      { id: 'perya', title: 'Peryahan Remix (Hands-Up)', src: 'audio/bgm_perya.mp3' }
+    ];
+
     class ArcadeAudio {
       constructor() {
         this.ctx = null;
         this.muted = false;
         this.bgmStarted = false;
         this.currentPhase = 'betting'; // 'betting' | 'spinning' | 'payout'
-        this.bgmVolume = 0.24;
+        this.currentTrackIndex = 0;
         this.masterCompressor = null;
         this.sfxGain = null;
-        this.bgmGain = null;
-        this.noiseBuffer = null;
-        this.schedulerTimer = null;
-        this.nextStepTime = 0;
-        this.currentStep = 0;
-        this.currentBar = 0;
+        this.bgmAudio = null;
       }
 
       init() {
@@ -1514,23 +1544,24 @@
             this.masterCompressor.connect(this.ctx.destination);
 
             this.sfxGain = this.ctx.createGain();
-            this.sfxGain.gain.setValueAtTime(0.65, this.ctx.currentTime);
+            this.sfxGain.gain.setValueAtTime(0.7, this.ctx.currentTime);
             this.sfxGain.connect(this.masterCompressor);
-
-            this.bgmGain = this.ctx.createGain();
-            this.bgmGain.gain.setValueAtTime(this.muted ? 0 : this.bgmVolume, this.ctx.currentTime);
-            this.bgmGain.connect(this.masterCompressor);
-
-            const bufferSize = Math.floor(this.ctx.sampleRate * 1.5);
-            this.noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-            const data = this.noiseBuffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) {
-              data[i] = Math.random() * 2 - 1;
-            }
           }
         }
         if (this.ctx && this.ctx.state === 'suspended') {
-          this.ctx.resume();
+          this.ctx.resume().catch(() => {});
+        }
+
+        if (!this.bgmAudio && typeof Audio !== 'undefined') {
+          this.bgmAudio = new Audio();
+          this.bgmAudio.loop = true;
+          this.bgmAudio.preload = 'auto';
+          const track = DJ_PLAYLIST[this.currentTrackIndex];
+          if (track) {
+            this.bgmAudio.src = track.src;
+          }
+          this.bgmAudio.volume = this.muted ? 0 : this.getPhaseVolume();
+          this.updateDJUI();
         }
       }
 
@@ -1538,271 +1569,68 @@
         return this.sfxGain || (this.ctx ? this.ctx.destination : null);
       }
 
-      outBGM() {
-        return this.bgmGain || (this.ctx ? this.ctx.destination : null);
-      }
-
-      toggleMute() {
-        this.muted = !this.muted;
-        if (this.ctx && this.bgmGain) {
-          this.bgmGain.gain.setValueAtTime(this.muted ? 0 : this.bgmVolume, this.ctx.currentTime);
-        }
-        if (!this.muted && !this.bgmStarted) {
-          this.startDJMusic();
-        }
+      getPhaseVolume() {
+        if (this.muted) return 0;
+        if (this.currentPhase === 'spinning') return 0.46;
+        if (this.currentPhase === 'payout') return 0.50;
+        return 0.32;
       }
 
       setPhase(phase) {
         this.currentPhase = phase;
+        if (this.bgmAudio && !this.muted) {
+          this.bgmAudio.volume = this.getPhaseVolume();
+        }
       }
 
       startDJMusic() {
         this.init();
-        if (!this.ctx || this.bgmStarted) return;
+        if (!this.bgmAudio) return;
         this.bgmStarted = true;
-        this.nextStepTime = this.ctx.currentTime + 0.05;
-        this.currentStep = 0;
-        this.currentBar = 0;
-
-        if (this.schedulerTimer) clearInterval(this.schedulerTimer);
-        this.schedulerTimer = setInterval(() => {
-          this.scheduleDJ();
-        }, 35);
+        this.bgmAudio.volume = this.muted ? 0 : this.getPhaseVolume();
+        const p = this.bgmAudio.play();
+        if (p !== undefined) {
+          p.catch(() => {});
+        }
+        this.updateDJUI();
       }
 
-      scheduleDJ() {
-        if (!this.ctx || this.ctx.state !== 'running' || this.muted) return;
-        const lookahead = 0.12;
-        const stepTime = (60 / 124) / 4; // 124 BPM 16th note
-
-        while (this.nextStepTime < this.ctx.currentTime + lookahead) {
-          this.playDJBeatStep(this.nextStepTime, this.currentStep, this.currentBar);
-          this.nextStepTime += stepTime;
-          this.currentStep++;
-          if (this.currentStep >= 16) {
-            this.currentStep = 0;
-            this.currentBar = (this.currentBar + 1) % 4;
+      toggleMute() {
+        this.muted = !this.muted;
+        if (this.bgmAudio) {
+          this.bgmAudio.volume = this.muted ? 0 : this.getPhaseVolume();
+          if (!this.muted && !this.bgmStarted) {
+            this.startDJMusic();
           }
         }
       }
 
-      playDJBeatStep(time, step, bar) {
-        const phase = this.currentPhase;
-
-        // 1. Kick Drum
-        if (phase === 'betting') {
-          if (step % 4 === 0) {
-            this.synthKick(time, 0.7);
-          }
-        } else if (phase === 'spinning') {
-          if (step % 4 === 0 || (step >= 12 && step % 2 === 0)) {
-            this.synthKick(time, 0.85);
-          }
-        } else if (phase === 'payout') {
-          if (step % 4 === 0) {
-            this.synthKick(time, 0.9);
-          }
-          if (step === 0 && bar === 0) {
-            this.synthCrash(time);
+      nextTrack() {
+        this.init();
+        this.currentTrackIndex = (this.currentTrackIndex + 1) % DJ_PLAYLIST.length;
+        const track = DJ_PLAYLIST[this.currentTrackIndex];
+        if (this.bgmAudio && track) {
+          const wasPlaying = !this.muted;
+          this.bgmAudio.pause();
+          this.bgmAudio.src = track.src;
+          this.bgmAudio.currentTime = 0;
+          this.bgmAudio.volume = this.muted ? 0 : this.getPhaseVolume();
+          if (wasPlaying) {
+            this.bgmAudio.play().then(() => {
+              this.bgmStarted = true;
+            }).catch(() => {});
           }
         }
+        this.updateDJUI();
+        return track;
+      }
 
-        // 2. Hi-Hats & Claps
-        if (phase === 'betting') {
-          if (step % 4 === 2) {
-            this.synthHat(time, true, 0.15);
-          } else if (step % 2 === 0) {
-            this.synthHat(time, false, 0.08);
-          }
-          if (step === 4 || step === 12) {
-            this.synthSnare(time, 0.22);
-          }
-        } else if (phase === 'spinning') {
-          this.synthHat(time, (step % 4 === 2), (step % 4 === 2) ? 0.18 : 0.09);
-          if (step === 4 || step === 12 || step === 8 || step === 14) {
-            this.synthSnare(time, 0.25);
-          }
-        } else if (phase === 'payout') {
-          if (step % 4 === 2) {
-            this.synthHat(time, true, 0.22);
-          }
-          if (step === 4 || step === 12) {
-            this.synthSnare(time, 0.3);
-          }
+      updateDJUI() {
+        const track = DJ_PLAYLIST[this.currentTrackIndex];
+        const titleEl = document.getElementById('dj-track-title');
+        if (titleEl && track) {
+          titleEl.textContent = track.title;
         }
-
-        // 3. Bassline (Sidechained)
-        if (phase === 'betting') {
-          const bassPattern = [73.4, null, 73.4, 87.3, null, null, 98.0, null, 73.4, null, 87.3, 110.0, null, null, 65.4, null];
-          const note = bassPattern[step];
-          if (note) {
-            this.synthBass(time, note, (step % 4 === 0), 0.22);
-          }
-        } else if (phase === 'spinning') {
-          if (step % 2 === 0) {
-            const spinBass = [73.4, 73.4, 87.3, 98.0, 73.4, 73.4, 110.0, 98.0];
-            const note = spinBass[(step / 2) % spinBass.length];
-            this.synthBass(time, note, (step % 4 === 0), 0.28);
-          }
-        } else if (phase === 'payout') {
-          if (step % 2 === 0) {
-            const payoutBass = [73.4, 92.5, 98.0, 110.0, 73.4, 98.0, 110.0, 146.8];
-            const note = payoutBass[(step / 2) % payoutBass.length];
-            this.synthBass(time, note, (step % 4 === 0), 0.32);
-          }
-        }
-
-        // 4. Synth Chords & Arpeggio
-        if (phase === 'betting') {
-          if (step === 2 || step === 6 || step === 10 || step === 14) {
-            const chords = [
-              [293.7, 349.2, 440.0], // Dm
-              [233.1, 293.7, 349.2], // Bb
-              [196.0, 233.1, 293.7], // Gm
-              [220.0, 277.2, 329.6]  // A
-            ];
-            this.synthChord(time, chords[bar], 0.12, 0.14);
-          }
-        } else if (phase === 'spinning') {
-          const arpNotes = [587.3, 698.5, 880.0, 1174.7, 698.5, 880.0, 1174.7, 1396.9, 1318.5, 1174.7, 1046.5, 880.0, 784.0, 880.0, 1046.5, 1318.5];
-          this.synthArp(time, arpNotes[step], 0.09, 0.15);
-        } else if (phase === 'payout') {
-          const hookNotes = [587.3, null, 740.0, null, 880.0, null, 1174.7, null, 880.0, null, 1174.7, null, 1480.0, null, 1760.0, null];
-          const hook = hookNotes[step];
-          if (hook) {
-            this.synthArp(time, hook, 0.18, 0.20);
-          }
-        }
-      }
-
-      synthKick(time, vol = 0.7) {
-        if (!this.ctx) return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(140, time);
-        osc.frequency.exponentialRampToValueAtTime(38, time + 0.07);
-        gain.gain.setValueAtTime(0.7 * vol, time);
-        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.18);
-        osc.connect(gain);
-        gain.connect(this.outBGM());
-        osc.start(time);
-        osc.stop(time + 0.2);
-      }
-
-      synthHat(time, isOpen = false, vol = 0.1) {
-        if (!this.ctx || !this.noiseBuffer) return;
-        const src = this.ctx.createBufferSource();
-        src.buffer = this.noiseBuffer;
-        const filter = this.ctx.createBiquadFilter();
-        filter.type = 'highpass';
-        filter.frequency.setValueAtTime(7500, time);
-        const gain = this.ctx.createGain();
-        const dur = isOpen ? 0.08 : 0.035;
-        gain.gain.setValueAtTime(vol, time);
-        gain.gain.exponentialRampToValueAtTime(0.001, time + dur);
-        src.connect(filter);
-        filter.connect(gain);
-        gain.connect(this.outBGM());
-        src.start(time);
-        src.stop(time + dur + 0.01);
-      }
-
-      synthSnare(time, vol = 0.2) {
-        if (!this.ctx || !this.noiseBuffer) return;
-        const src = this.ctx.createBufferSource();
-        src.buffer = this.noiseBuffer;
-        const filter = this.ctx.createBiquadFilter();
-        filter.type = 'bandpass';
-        filter.frequency.setValueAtTime(1800, time);
-        filter.Q.setValueAtTime(1.5, time);
-        const gain = this.ctx.createGain();
-        gain.gain.setValueAtTime(vol, time);
-        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
-        src.connect(filter);
-        filter.connect(gain);
-        gain.connect(this.outBGM());
-        src.start(time);
-        src.stop(time + 0.14);
-      }
-
-      synthCrash(time) {
-        if (!this.ctx || !this.noiseBuffer) return;
-        const src = this.ctx.createBufferSource();
-        src.buffer = this.noiseBuffer;
-        const filter = this.ctx.createBiquadFilter();
-        filter.type = 'highpass';
-        filter.frequency.setValueAtTime(4500, time);
-        const gain = this.ctx.createGain();
-        gain.gain.setValueAtTime(0.35, time);
-        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.8);
-        src.connect(filter);
-        filter.connect(gain);
-        gain.connect(this.outBGM());
-        src.start(time);
-        src.stop(time + 0.85);
-      }
-
-      synthBass(time, freq, isDucked = false, vol = 0.24) {
-        if (!this.ctx) return;
-        const osc = this.ctx.createOscillator();
-        const filter = this.ctx.createBiquadFilter();
-        const gain = this.ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(freq, time);
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(isDucked ? 320 : 680, time);
-        filter.Q.setValueAtTime(3.0, time);
-
-        if (isDucked) {
-          gain.gain.setValueAtTime(vol * 0.2, time);
-          gain.gain.linearRampToValueAtTime(vol, time + 0.05);
-          gain.gain.exponentialRampToValueAtTime(0.001, time + 0.18);
-        } else {
-          gain.gain.setValueAtTime(vol, time);
-          gain.gain.exponentialRampToValueAtTime(0.001, time + 0.16);
-        }
-
-        osc.connect(filter);
-        filter.connect(gain);
-        gain.connect(this.outBGM());
-        osc.start(time);
-        osc.stop(time + 0.19);
-      }
-
-      synthChord(time, freqs, duration = 0.12, vol = 0.14) {
-        if (!this.ctx) return;
-        freqs.forEach(f => {
-          const osc = this.ctx.createOscillator();
-          const filter = this.ctx.createBiquadFilter();
-          const gain = this.ctx.createGain();
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(f, time);
-          filter.type = 'lowpass';
-          filter.frequency.setValueAtTime(1200, time);
-          filter.frequency.exponentialRampToValueAtTime(450, time + duration);
-          gain.gain.setValueAtTime(vol / freqs.length, time);
-          gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
-          osc.connect(filter);
-          filter.connect(gain);
-          gain.connect(this.outBGM());
-          osc.start(time);
-          osc.stop(time + duration + 0.02);
-        });
-      }
-
-      synthArp(time, freq, duration = 0.09, vol = 0.15) {
-        if (!this.ctx) return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(freq, time);
-        gain.gain.setValueAtTime(vol, time);
-        gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
-        osc.connect(gain);
-        gain.connect(this.outBGM());
-        osc.start(time);
-        osc.stop(time + duration + 0.01);
       }
 
       // 8-Bit High Pitch Slot Machine Synth Sound based on tile number
@@ -2025,6 +1853,10 @@
     function toggleMute() {
       audio.toggleMute();
       document.getElementById('btn-sound').textContent = audio.muted ? '🔇' : '🔊';
+    }
+
+    function nextDJTrack() {
+      audio.nextTrack();
     }
 
     // Auto-unlock audio and start DJ music on first user gesture
