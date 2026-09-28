@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Cyber Aqua Fish Race — 4-Player Top-Down Aquatic Derby</title>
+  <title>Cyber Aqua Fish Race — 3D Aquatic Derby</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <script src="/fishrace/vendor/three.min.js"></script>
+  <script src="/fishrace/vendor/OrbitControls.js"></script>
   <style>
     :root {
       --bg-dark: #030712;
@@ -444,22 +446,70 @@
       letter-spacing: 0.8px;
     }
 
-    /* THE TOP-DOWN AQUATIC CANVAS TRACK */
+    /* 3D OCEAN TRACK VIEWPORT */
     .track-canvas-container {
       width: 100%;
-      height: 380px;
+      height: 420px;
       position: relative;
-      border-radius: 10px;
+      border-radius: 12px;
       overflow: hidden;
       border: 2px solid #1e4775;
-      box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.9);
-      background: #041224;
+      box-shadow: inset 0 0 45px rgba(0, 0, 0, 0.95), 0 10px 30px rgba(0, 0, 0, 0.7);
+      background: #031428;
     }
 
-    #race-canvas {
+    #three-viewport {
       width: 100%;
       height: 100%;
       display: block;
+      cursor: grab;
+    }
+    #three-viewport:active {
+      cursor: grabbing;
+    }
+
+    /* 3D Camera Controls Bar */
+    .track-camera-bar {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 15;
+    }
+
+    .track-cam-btn {
+      background: rgba(4, 18, 36, 0.82);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #94a3b8;
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 5px 11px;
+      border-radius: 6px;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      transition: all 0.15s ease;
+      letter-spacing: 0.6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      touch-action: manipulation;
+    }
+
+    .track-cam-btn:hover {
+      color: #ffffff;
+      border-color: #38bdf8;
+      background: rgba(14, 56, 89, 0.9);
+      transform: translateY(-1px);
+    }
+
+    .track-cam-btn.active {
+      color: #fde047;
+      border-color: #fde047;
+      background: rgba(245, 158, 11, 0.28);
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
     }
 
     /* Photo Finish Flash Overlay */
@@ -991,7 +1041,14 @@
       </div>
 
       <div class="track-canvas-container" id="track-container">
-        <canvas id="race-canvas"></canvas>
+        <!-- 3D Camera Controls Bar -->
+        <div class="track-camera-bar" id="cam-controls">
+          <button type="button" class="track-cam-btn active" data-cam="broadcast" id="cam-btn-broadcast" onclick="setCameraMode('broadcast')">🎥 BROADCAST</button>
+          <button type="button" class="track-cam-btn" data-cam="chase" id="cam-btn-chase" onclick="setCameraMode('chase')">🌊 CHASE CAM</button>
+          <button type="button" class="track-cam-btn" data-cam="finish" id="cam-btn-finish" onclick="setCameraMode('finish')">🏁 FINISH CAM</button>
+          <button type="button" class="track-cam-btn" data-cam="orbit" id="cam-btn-orbit" onclick="setCameraMode('orbit')">🔄 FREE ORBIT</button>
+        </div>
+        <div id="three-viewport"></div>
         <div class="photo-finish-overlay" id="finish-flash"></div>
         <div class="live-leader-ticker" id="leader-ticker">
           <span>LEADER:</span>
@@ -1500,270 +1557,802 @@
     }
 
     /* =========================================================================
-       RACE TRACK CANVAS SIMULATOR
+       3D OCEAN ENVIRONMENT & AQUATIC DERBY SIMULATOR (THREE.JS)
        ========================================================================= */
-    const canvas = document.getElementById('race-canvas');
-    const ctx = canvas ? canvas.getContext('2d') : null;
-    let trackWidth = 800;
-    let trackHeight = 380;
-
-    // 8 Competitor Live Race Instances
-    const raceCompetitors = FISH_ROSTER.map((f, i) => ({
-      fish: f,
-      lane: i + 1,
-      x: 60, // Start line X
-      y: 0,
-      targetY: 0,
-      speed: 1.0,
-      currentSpeed: 1.0,
-      distance: 0, // 0 to 100
-      stamina: 1.0,
-      surgeTimer: 0,
-      surgeActive: false,
-      bubbles: []
-    }));
-
-    // Ambient floating water particles
-    const waterParticles = [];
-    for (let i = 0; i < 40; i++) {
-      waterParticles.push({
-        x: Math.random() * 1000,
-        y: Math.random() * 400,
-        radius: Math.random() * 2 + 0.8,
-        speedX: Math.random() * 0.4 + 0.2,
-        opacity: Math.random() * 0.4 + 0.1
-      });
-    }
-
-    function resizeTrackCanvas() {
-      if (!canvas) return;
-      const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
-      trackWidth = rect.width;
-      trackHeight = rect.height;
-
-      // Assign lane Y centers
-      const laneH = trackHeight / 8;
-      raceCompetitors.forEach((c, idx) => {
-        c.y = laneH * idx + laneH / 2;
-        c.targetY = c.y;
-      });
-    }
-
-    let raceAnimFrame = null;
-    let raceStartTime = 0;
+    const TRACK_START_X = -90;
+    const TRACK_FINISH_X = 90;
+    const TRACK_DISTANCE = TRACK_FINISH_X - TRACK_START_X; // 180 units
     const RACE_DURATION_MS = 15000; // 15 seconds race
 
-    function initRacePositions() {
-      const startX = 65;
-      raceCompetitors.forEach((c, idx) => {
-        c.x = startX;
-        c.distance = 0;
-        c.speed = 1.0;
-        c.currentSpeed = 1.0;
-        c.stamina = 0.8 + Math.random() * 0.4;
-        c.surgeTimer = Math.random() * 4 + 3; // Surge after 3-7s
-        c.surgeActive = false;
-        c.bubbles = [];
+    // Three.js Core Globals
+    let threeScene, threeCamera, threeRenderer, threeControls;
+    let cameraMode = 'broadcast'; // 'broadcast' | 'chase' | 'finish' | 'orbit'
+    let threeContainer = null;
+    let raceAnimFrame = null;
+    let raceStartTime = 0;
+    let lastFrameTime = performance.now();
+
+    // Environment Meshes for Animation
+    let seaweedMeshes = [];
+    let ambientPlankton = [];
+    let startLaserGates = [];
+    let finishStrobeLights = [];
+    let oceanCausticLight = null;
+    let activeBubblePool = [];
+    let freeBubblePool = [];
+
+    // 8 Competitor Live Race Instances
+    const raceCompetitors = FISH_ROSTER.map((f, i) => {
+      const laneZ = (i - 3.5) * 8.5; // [-29.75, -21.25, -12.75, -4.25, 4.25, 12.75, 21.25, 29.75]
+      return {
+        fish: f,
+        lane: i + 1,
+        x: TRACK_START_X,
+        y: 0,
+        z: laneZ,
+        baseY: 0,
+        speed: 0,
+        currentSpeed: 0,
+        distance: 0, // 0 to 100%
+        stamina: 0.8 + Math.random() * 0.4,
+        surgeTimer: Math.random() * 4 + 3,
+        surgeActive: false,
+        swimPhase: Math.random() * Math.PI * 2,
+        meshData: null
+      };
+    });
+
+    /* Build Procedural Articulated 3D Fish Model */
+    function create3DFishModel(fish) {
+      const root = new THREE.Group();
+
+      const mainColor = new THREE.Color(fish.color);
+      const finColor = new THREE.Color(fish.finColor || fish.color);
+
+      // Materials
+      const bodyMat = new THREE.MeshStandardMaterial({
+        color: mainColor,
+        roughness: fish.id === 8 ? 0.6 : 0.35,
+        metalness: fish.id === 2 ? 0.5 : (fish.id === 3 ? 0.6 : 0.25)
+      });
+
+      const finMat = new THREE.MeshStandardMaterial({
+        color: finColor,
+        transparent: true,
+        opacity: 0.88,
+        side: THREE.DoubleSide,
+        roughness: 0.4
+      });
+
+      const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const eyePupilMat = new THREE.MeshBasicMaterial({ color: 0x0a0a0a });
+
+      // 1. Torso / Head
+      let bodyGeo;
+      if (fish.tailStyle === 'disc') {
+        // Sakura Discus: tall laterally compressed disc
+        bodyGeo = new THREE.SphereGeometry(1.4, 20, 14);
+        bodyGeo.scale(1.4, 2.2, 0.38);
+      } else if (fish.id === 8) {
+        // Obsidian Shark: sharp hydrodynamic torpedo
+        bodyGeo = new THREE.ConeGeometry(1.2, 4.2, 16);
+        bodyGeo.rotateZ(-Math.PI / 2); // point forward (+X)
+      } else if (fish.id === 3) {
+        // Jade Arowana: elongated slender dragon fish
+        bodyGeo = new THREE.CylinderGeometry(0.7, 1.1, 4.4, 14);
+        bodyGeo.rotateZ(-Math.PI / 2);
+        bodyGeo.scale(1.0, 1.2, 0.55);
+      } else {
+        // Betta, Koi, Guppy, Tetra, Clownfish
+        bodyGeo = new THREE.SphereGeometry(1.2, 18, 12);
+        bodyGeo.scale(2.2, 1.2, 0.65);
+      }
+
+      const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+      bodyMesh.castShadow = true;
+      root.add(bodyMesh);
+
+      // Clownfish iconic white stripes
+      if (fish.tailStyle === 'clown') {
+        [-0.5, 0.4, 1.2].forEach(sx => {
+          const stripeGeo = new THREE.TorusGeometry(1.15 - Math.abs(sx) * 0.22, 0.12, 8, 20);
+          stripeGeo.scale(0.35, 1.1, 0.65);
+          const stripeMesh = new THREE.Mesh(stripeGeo, new THREE.MeshBasicMaterial({ color: 0xffffff }));
+          stripeMesh.position.x = sx;
+          root.add(stripeMesh);
+        });
+      }
+
+      // Electric Tetra neon glowing lateral stripe
+      if (fish.tailStyle === 'dart') {
+        const neonGeo = new THREE.BoxGeometry(3.0, 0.16, 0.72);
+        const neonMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+        const neonStripe = new THREE.Mesh(neonGeo, neonMat);
+        neonStripe.position.set(0.1, 0.05, 0);
+        root.add(neonStripe);
+      }
+
+      // Eyes (Left & Right)
+      const eyeX = (fish.id === 8 ? 0.9 : 1.3);
+      const eyeY = 0.35;
+      const eyeZ = 0.55;
+
+      [-1, 1].forEach(side => {
+        const eyeWhite = new THREE.Mesh(new THREE.SphereGeometry(0.24, 10, 8), eyeWhiteMat);
+        eyeWhite.position.set(eyeX, eyeY, side * eyeZ);
+        root.add(eyeWhite);
+
+        const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), eyePupilMat);
+        pupil.position.set(eyeX + 0.08, eyeY, side * (eyeZ + 0.11));
+        root.add(pupil);
+      });
+
+      // Pectoral Fins (Left & Right)
+      const pectoralL = new THREE.Group();
+      pectoralL.position.set(0.5, -0.25, 0.65);
+      const pectGeoL = new THREE.PlaneGeometry(1.2, 0.7);
+      pectGeoL.rotateY(Math.PI / 4);
+      pectoralL.add(new THREE.Mesh(pectGeoL, finMat));
+      root.add(pectoralL);
+
+      const pectoralR = new THREE.Group();
+      pectoralR.position.set(0.5, -0.25, -0.65);
+      const pectGeoR = new THREE.PlaneGeometry(1.2, 0.7);
+      pectGeoR.rotateY(-Math.PI / 4);
+      pectoralR.add(new THREE.Mesh(pectGeoR, finMat));
+      root.add(pectoralR);
+
+      // Dorsal Fin
+      let dorsalGeo;
+      if (fish.id === 8) {
+        // Shark dorsal triangle fin
+        dorsalGeo = new THREE.BufferGeometry();
+        const dVerts = new Float32Array([
+          0.4, 0, 0,
+          -0.6, 1.8, 0,
+          -1.2, 0, 0
+        ]);
+        dorsalGeo.setAttribute('position', new THREE.BufferAttribute(dVerts, 3));
+        dorsalGeo.computeVertexNormals();
+      } else if (fish.tailStyle === 'veil') {
+        // Betta tall flowing veil fin
+        dorsalGeo = new THREE.PlaneGeometry(2.4, 1.6);
+        dorsalGeo.translate(-0.4, 1.2, 0);
+      } else {
+        dorsalGeo = new THREE.PlaneGeometry(1.6, 0.9);
+        dorsalGeo.translate(-0.3, 0.8, 0);
+      }
+      const dorsalMesh = new THREE.Mesh(dorsalGeo, finMat);
+      root.add(dorsalMesh);
+
+      // Articulated Spine 1 (Mid-body)
+      const spine1 = new THREE.Group();
+      spine1.position.set(-1.4, 0, 0);
+
+      const midBodyGeo = new THREE.SphereGeometry(0.9, 14, 10);
+      midBodyGeo.scale(1.4, 0.9, 0.45);
+      const midBodyMesh = new THREE.Mesh(midBodyGeo, bodyMat);
+      midBodyMesh.position.set(-0.7, 0, 0);
+      midBodyMesh.castShadow = true;
+      spine1.add(midBodyMesh);
+
+      // Articulated Spine 2 (Caudal Peduncle)
+      const spine2 = new THREE.Group();
+      spine2.position.set(-1.4, 0, 0);
+
+      const peduncleGeo = new THREE.SphereGeometry(0.6, 12, 8);
+      peduncleGeo.scale(1.1, 0.6, 0.28);
+      const peduncleMesh = new THREE.Mesh(peduncleGeo, bodyMat);
+      peduncleMesh.position.set(-0.5, 0, 0);
+      peduncleMesh.castShadow = true;
+      spine2.add(peduncleMesh);
+
+      // Articulated Caudal Tail Fin
+      const tailGroup = new THREE.Group();
+      tailGroup.position.set(-1.0, 0, 0);
+
+      let tailGeo;
+      if (fish.tailStyle === 'veil') {
+        // Crimson Betta veil tail
+        tailGeo = new THREE.PlaneGeometry(3.4, 3.0, 4, 3);
+        tailGeo.translate(-1.6, 0, 0);
+      } else if (fish.tailStyle === 'fan') {
+        // Cosmic Guppy fan tail
+        tailGeo = new THREE.CircleGeometry(2.2, 16, Math.PI * 0.7, Math.PI * 0.6);
+        tailGeo.rotateZ(Math.PI);
+        tailGeo.translate(-1.4, 0, 0);
+      } else if (fish.id === 8) {
+        // Shark heterocercal tail
+        tailGeo = new THREE.BufferGeometry();
+        const tVerts = new Float32Array([
+          0, 0, 0,
+          -2.2, 1.8, 0,
+          -1.4, 0.3, 0,
+          0, 0, 0,
+          -1.4, 0.3, 0,
+          -1.6, -1.0, 0
+        ]);
+        tailGeo.setAttribute('position', new THREE.BufferAttribute(tVerts, 3));
+        tailGeo.computeVertexNormals();
+      } else {
+        // Streamlined forked caudal tail
+        tailGeo = new THREE.BufferGeometry();
+        const tVerts = new Float32Array([
+          0, 0, 0,
+          -1.8, 1.2, 0,
+          -1.0, 0, 0,
+          0, 0, 0,
+          -1.0, 0, 0,
+          -1.8, -1.2, 0
+        ]);
+        tailGeo.setAttribute('position', new THREE.BufferAttribute(tVerts, 3));
+        tailGeo.computeVertexNormals();
+      }
+      const tailMesh = new THREE.Mesh(tailGeo, finMat);
+      tailGroup.add(tailMesh);
+
+      // Wire hierarchy
+      spine2.add(tailGroup);
+      spine1.add(spine2);
+      root.add(spine1);
+
+      // Golden Crown / Halo for Current Leader
+      const crownGroup = new THREE.Group();
+      crownGroup.position.set(0.2, 2.0, 0);
+      const haloGeo = new THREE.TorusGeometry(0.8, 0.08, 8, 20);
+      haloGeo.rotateX(Math.PI / 2);
+      const haloMesh = new THREE.Mesh(haloGeo, new THREE.MeshBasicMaterial({ color: 0xfde047 }));
+      crownGroup.add(haloMesh);
+
+      const starGeo = new THREE.OctahedronGeometry(0.35);
+      const starMesh = new THREE.Mesh(starGeo, new THREE.MeshBasicMaterial({ color: 0xfef08a }));
+      starMesh.position.set(0, 0.4, 0);
+      crownGroup.add(starMesh);
+
+      crownGroup.visible = false;
+      root.add(crownGroup);
+
+      return {
+        group: root,
+        spine1,
+        spine2,
+        tailGroup,
+        pectoralL,
+        pectoralR,
+        crownGroup
+      };
+    }
+
+    /* Initialize Three.js 3D Ocean Scene */
+    function initThreeScene() {
+      threeContainer = document.getElementById('three-viewport');
+      if (!threeContainer) return;
+
+      const width = threeContainer.clientWidth || 800;
+      const height = threeContainer.clientHeight || 420;
+
+      // Scene & Fog
+      threeScene = new THREE.Scene();
+      threeScene.background = new THREE.Color(0x03182d);
+      threeScene.fog = new THREE.FogExp2(0x03192f, 0.010);
+
+      // Camera
+      threeCamera = new THREE.PerspectiveCamera(50, width / height, 0.5, 450);
+      threeCamera.position.set(-85, 30, 48);
+
+      // Renderer
+      threeRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+      threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      threeRenderer.setSize(width, height);
+      threeRenderer.shadowMap.enabled = true;
+      threeRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+      threeContainer.innerHTML = '';
+      threeContainer.appendChild(threeRenderer.domElement);
+
+      // OrbitControls
+      if (typeof THREE.OrbitControls !== 'undefined') {
+        threeControls = new THREE.OrbitControls(threeCamera, threeRenderer.domElement);
+        threeControls.enableDamping = true;
+        threeControls.dampingFactor = 0.08;
+        threeControls.maxPolarAngle = Math.PI / 2 - 0.02;
+        threeControls.minDistance = 8;
+        threeControls.maxDistance = 140;
+        threeControls.target.set(-75, 0, 0);
+        threeControls.enabled = (cameraMode === 'orbit');
+      }
+
+      // Lights
+      const ambientLight = new THREE.AmbientLight(0x0b395b, 1.4);
+      threeScene.add(ambientLight);
+
+      const sunLight = new THREE.DirectionalLight(0x7ed4fc, 2.2);
+      sunLight.position.set(40, 80, 20);
+      sunLight.castShadow = true;
+      threeScene.add(sunLight);
+
+      const rimLight = new THREE.DirectionalLight(0x0284c7, 0.8);
+      rimLight.position.set(-30, -20, 20);
+      threeScene.add(rimLight);
+
+      oceanCausticLight = new THREE.PointLight(0x38bdf8, 2.5, 120);
+      oceanCausticLight.position.set(0, -6, 0);
+      threeScene.add(oceanCausticLight);
+
+      // 1. Sandy Undulating Seabed
+      const seabedGeo = new THREE.PlaneGeometry(320, 110, 48, 24);
+      const pArr = seabedGeo.attributes.position.array;
+      for (let i = 0; i < pArr.length; i += 3) {
+        const vx = pArr[i];
+        const vy = pArr[i + 1];
+        pArr[i + 2] = Math.sin(vx * 0.06) * 1.8 + Math.cos(vy * 0.08) * 1.4 + Math.sin(vx * 0.16 + vy * 0.1) * 0.6;
+      }
+      seabedGeo.computeVertexNormals();
+      const seabedMat = new THREE.MeshStandardMaterial({
+        color: 0x09253a,
+        roughness: 0.9,
+        metalness: 0.1
+      });
+      const seabed = new THREE.Mesh(seabedGeo, seabedMat);
+      seabed.rotation.x = -Math.PI / 2;
+      seabed.position.y = -12;
+      seabed.receiveShadow = true;
+      threeScene.add(seabed);
+
+      // 2. Corals & Ocean Rocks along borders
+      const coralColors = [0xec4899, 0xf97316, 0x06b6d4, 0x10b981, 0x8b5cf6, 0xfde047];
+      for (let i = 0; i < 32; i++) {
+        const side = (i % 2 === 0) ? -1 : 1;
+        const zPos = side * (38 + Math.random() * 10);
+        const xPos = -95 + Math.random() * 190;
+        const scale = 1.5 + Math.random() * 2.5;
+
+        const col = coralColors[i % coralColors.length];
+        const coralMat = new THREE.MeshStandardMaterial({
+          color: col,
+          roughness: 0.5,
+          metalness: 0.1
+        });
+
+        let coralGeo;
+        if (i % 3 === 0) {
+          coralGeo = new THREE.DodecahedronGeometry(scale, 1);
+        } else if (i % 3 === 1) {
+          coralGeo = new THREE.CylinderGeometry(scale * 0.4, scale * 0.7, scale * 2.2, 8);
+        } else {
+          coralGeo = new THREE.SphereGeometry(scale, 10, 8);
+        }
+
+        const coralMesh = new THREE.Mesh(coralGeo, coralMat);
+        coralMesh.position.set(xPos, -11.5 + scale * 0.5, zPos);
+        coralMesh.castShadow = true;
+        threeScene.add(coralMesh);
+      }
+
+      // 3. Swaying Seaweed Kelp Forest
+      seaweedMeshes = [];
+      const seaweedMat = new THREE.MeshStandardMaterial({
+        color: 0x059669,
+        side: THREE.DoubleSide,
+        roughness: 0.6
+      });
+      for (let i = 0; i < 40; i++) {
+        const side = (i % 2 === 0) ? -1 : 1;
+        const zPos = side * (35 + Math.random() * 10);
+        const xPos = -90 + (i / 40) * 180 + (Math.random() * 6 - 3);
+        const h = 8 + Math.random() * 8;
+        const swGeo = new THREE.PlaneGeometry(0.7, h, 1, 6);
+        swGeo.translate(0, h / 2, 0);
+        const swMesh = new THREE.Mesh(swGeo, seaweedMat);
+        swMesh.position.set(xPos, -12, zPos);
+        swMesh.userData = {
+          baseY: -12,
+          h: h,
+          swayOffset: Math.random() * Math.PI * 2
+        };
+        threeScene.add(swMesh);
+        seaweedMeshes.push(swMesh);
+      }
+
+      // 4. Water Surface Ripples
+      const surfaceGeo = new THREE.PlaneGeometry(320, 110, 24, 12);
+      const surfaceMat = new THREE.MeshStandardMaterial({
+        color: 0x0284c7,
+        transparent: true,
+        opacity: 0.35,
+        roughness: 0.15,
+        metalness: 0.6,
+        side: THREE.DoubleSide
+      });
+      const surfaceMesh = new THREE.Mesh(surfaceGeo, surfaceMat);
+      surfaceMesh.rotation.x = Math.PI / 2;
+      surfaceMesh.position.y = 13.5;
+      threeScene.add(surfaceMesh);
+
+      // 5. Start Gantry Truss Arch (X = -90)
+      const trussMat = new THREE.MeshStandardMaterial({ color: 0x1e3a5f, metalness: 0.8, roughness: 0.3 });
+      const gantryBar = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 72, 16), trussMat);
+      gantryBar.rotation.x = Math.PI / 2;
+      gantryBar.position.set(-90, 8, 0);
+      threeScene.add(gantryBar);
+
+      [-36, 36].forEach(zp => {
+        const pillar = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.6, 20, 16), trussMat);
+        pillar.position.set(-90, -2, zp);
+        threeScene.add(pillar);
+      });
+
+      startLaserGates = [];
+      for (let i = 0; i < 8; i++) {
+        const lz = (i - 3.5) * 8.5;
+        const box = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.2, 2.2), new THREE.MeshBasicMaterial({ color: 0x0284c7 }));
+        box.position.set(-90, 8, lz);
+        threeScene.add(box);
+
+        const laserGeo = new THREE.PlaneGeometry(0.2, 6);
+        const laserMat = new THREE.MeshBasicMaterial({
+          color: 0x38bdf8,
+          transparent: true,
+          opacity: 0.5,
+          side: THREE.DoubleSide
+        });
+        const laserMesh = new THREE.Mesh(laserGeo, laserMat);
+        laserMesh.rotation.y = Math.PI / 2;
+        laserMesh.position.set(-90, 0, lz);
+        threeScene.add(laserMesh);
+        startLaserGates.push(laserMesh);
+      }
+
+      // 6. Checkered Finish Arch (X = 90)
+      const finishPillarsMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.8, roughness: 0.2 });
+      [-36, 36].forEach(zp => {
+        const pillar = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.8, 22, 16), finishPillarsMat);
+        pillar.position.set(90, -1, zp);
+        threeScene.add(pillar);
+      });
+
+      const archTop = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.5, 74), finishPillarsMat);
+      archTop.position.set(90, 9.5, 0);
+      threeScene.add(archTop);
+
+      const checkerCols = 24;
+      for (let c = 0; c < checkerCols; c++) {
+        const isYellow = (c % 2 === 0);
+        const tile = new THREE.Mesh(
+          new THREE.BoxGeometry(2.7, 1.2, 70 / checkerCols),
+          new THREE.MeshBasicMaterial({ color: isYellow ? 0xfde047 : 0x0f172a })
+        );
+        tile.position.set(90, 7.5, -34 + (c + 0.5) * (68 / checkerCols));
+        threeScene.add(tile);
+      }
+
+      for (let c = 0; c < checkerCols; c++) {
+        const isYellow = (c % 2 === 0);
+        const strip = new THREE.Mesh(
+          new THREE.PlaneGeometry(3.5, 70 / checkerCols),
+          new THREE.MeshBasicMaterial({ color: isYellow ? 0xfde047 : 0x0f172a })
+        );
+        strip.rotation.x = -Math.PI / 2;
+        strip.position.set(90, -11.8, -34 + (c + 0.5) * (68 / checkerCols));
+        threeScene.add(strip);
+      }
+
+      finishStrobeLights = [];
+      [-36, 36].forEach(zp => {
+        const strobe = new THREE.PointLight(0xfde047, 2, 35);
+        strobe.position.set(90, 11, zp);
+        threeScene.add(strobe);
+        finishStrobeLights.push(strobe);
+      });
+
+      // 7. Distance Marker Gates (25m = -45, 50m = 0, 75m = 45)
+      [-45, 0, 45].forEach(gx => {
+        const hoopGeo = new THREE.TorusGeometry(36, 0.35, 8, 28, Math.PI);
+        hoopGeo.rotateZ(Math.PI / 2);
+        hoopGeo.rotateY(Math.PI / 2);
+        const hoopMesh = new THREE.Mesh(hoopGeo, new THREE.MeshBasicMaterial({ color: 0x0284c7, transparent: true, opacity: 0.6 }));
+        hoopMesh.position.set(gx, -11.5, 0);
+        threeScene.add(hoopMesh);
+      });
+
+      // 8. Lane Divider Floating Cables
+      [-25.5, -17, -8.5, 0, 8.5, 17, 25.5].forEach(divZ => {
+        const cableGeo = new THREE.CylinderGeometry(0.08, 0.08, 184, 6);
+        cableGeo.rotateZ(Math.PI / 2);
+        const cableMesh = new THREE.Mesh(cableGeo, new THREE.MeshBasicMaterial({ color: 0x0369a1, transparent: true, opacity: 0.5 }));
+        cableMesh.position.set(0, -3, divZ);
+        threeScene.add(cableMesh);
+
+        for (let bx = -80; bx <= 80; bx += 20) {
+          const buoy = new THREE.Mesh(
+            new THREE.SphereGeometry(0.35, 8, 8),
+            new THREE.MeshBasicMaterial({ color: (bx % 40 === 0) ? 0xfde047 : 0x38bdf8 })
+          );
+          buoy.position.set(bx, -2.8, divZ);
+          threeScene.add(buoy);
+        }
+      });
+
+      // 9. Ambient Floating Water Plankton & Bubbles
+      ambientPlankton = [];
+      const planktonGeo = new THREE.SphereGeometry(0.12, 6, 6);
+      const planktonMat = new THREE.MeshBasicMaterial({ color: 0xe0f2fe, transparent: true, opacity: 0.45 });
+      for (let p = 0; p < 80; p++) {
+        const pm = new THREE.Mesh(planktonGeo, planktonMat);
+        pm.position.set(
+          -100 + Math.random() * 200,
+          -11 + Math.random() * 24,
+          -35 + Math.random() * 70
+        );
+        pm.userData = {
+          speedY: 0.03 + Math.random() * 0.04,
+          driftX: (Math.random() - 0.5) * 0.02
+        };
+        threeScene.add(pm);
+        ambientPlankton.push(pm);
+      }
+
+      // 10. Bubble Wake Pool for Competitors
+      activeBubblePool = [];
+      freeBubblePool = [];
+      const bubbleGeo = new THREE.SphereGeometry(0.18, 6, 6);
+      const bubbleMat = new THREE.MeshBasicMaterial({ color: 0xdbeafe, transparent: true, opacity: 0.65 });
+      for (let b = 0; b < 120; b++) {
+        const bm = new THREE.Mesh(bubbleGeo, bubbleMat);
+        bm.visible = false;
+        threeScene.add(bm);
+        freeBubblePool.push(bm);
+      }
+
+      // 11. Instantiate 8 3D Competitor Fish Models
+      raceCompetitors.forEach(c => {
+        c.meshData = create3DFishModel(c.fish);
+        c.meshData.group.position.set(c.x, c.baseY, c.z);
+        threeScene.add(c.meshData.group);
       });
     }
 
+    function onWindowResize3D() {
+      if (!threeContainer || !threeRenderer || !threeCamera) return;
+      const width = threeContainer.clientWidth;
+      const height = threeContainer.clientHeight;
+      threeCamera.aspect = width / height;
+      threeCamera.updateProjectionMatrix();
+      threeRenderer.setSize(width, height);
+    }
+
+    /* Spawn Bubble from Fish Tail */
+    function spawnFishBubble(c, isSurge) {
+      if (freeBubblePool.length === 0) return;
+      const count = isSurge ? 3 : 1;
+      for (let i = 0; i < count; i++) {
+        if (freeBubblePool.length === 0) break;
+        const bm = freeBubblePool.pop();
+        bm.position.set(
+          c.x - 2.8,
+          c.meshData.group.position.y + (Math.random() * 0.4 - 0.2),
+          c.z + (Math.random() * 0.4 - 0.2)
+        );
+        bm.userData = {
+          vy: 0.04 + Math.random() * 0.04,
+          vx: -0.15 - Math.random() * 0.1,
+          life: 1.0
+        };
+        bm.visible = true;
+        activeBubblePool.push(bm);
+      }
+    }
+
+    /* Set 3D Camera Mode */
+    function setCameraMode(mode) {
+      cameraMode = mode;
+      document.querySelectorAll('.track-cam-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-cam') === mode);
+      });
+      if (threeControls) {
+        threeControls.enabled = (mode === 'orbit');
+      }
+    }
+    window.setCameraMode = setCameraMode;
+
+    /* Reset / Init Race Positions for New Round */
+    function initRacePositions() {
+      raceCompetitors.forEach(c => {
+        c.x = TRACK_START_X;
+        c.distance = 0;
+        c.speed = 0;
+        c.currentSpeed = 0;
+        c.stamina = 0.8 + Math.random() * 0.4;
+        c.surgeTimer = Math.random() * 4 + 3;
+        c.surgeActive = false;
+        if (c.meshData) {
+          c.meshData.group.position.set(c.x, c.baseY, c.z);
+          c.meshData.crownGroup.visible = false;
+        }
+      });
+
+      // Raise start laser gates
+      startLaserGates.forEach(g => {
+        g.position.y = 0;
+      });
+
+      const leaderEl = document.getElementById('leader-name');
+      if (leaderEl) leaderEl.textContent = '—';
+    }
+
+    /* Main 3D Render & Simulation Loop */
     function renderRaceLoop(timestamp) {
-      if (!ctx) return;
-      const timeSec = timestamp / 1000;
+      const delta = Math.min((timestamp - lastFrameTime) / 1000, 0.1) || 0.016;
+      lastFrameTime = timestamp;
 
-      // Clear Canvas
-      ctx.clearRect(0, 0, trackWidth, trackHeight);
-
-      // 1. Water Background with Caustics & Shimmer
-      const waterGrad = ctx.createLinearGradient(0, 0, trackWidth, trackHeight);
-      waterGrad.addColorStop(0, '#06192e');
-      waterGrad.addColorStop(0.5, '#092542');
-      waterGrad.addColorStop(1, '#051629');
-      ctx.fillStyle = waterGrad;
-      ctx.fillRect(0, 0, trackWidth, trackHeight);
-
-      // Caustic light waves
-      ctx.fillStyle = 'rgba(56, 189, 248, 0.035)';
-      for (let w = 0; w < 5; w++) {
-        ctx.beginPath();
-        const waveY = (w * 80 + Math.sin(timeSec + w) * 20) % trackHeight;
-        ctx.arc(trackWidth / 2 + Math.cos(timeSec * 0.5 + w) * 100, waveY, 180, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      // 2. Swim Lanes & Distance Buoys
-      const laneH = trackHeight / 8;
-      const startLineX = 65;
-      const finishLineX = trackWidth - 65;
-
-      for (let i = 0; i < 8; i++) {
-        const laneY = i * laneH;
-
-        // Lane divider dashed rope
-        if (i > 0) {
-          ctx.strokeStyle = 'rgba(56, 189, 248, 0.15)';
-          ctx.lineWidth = 1;
-          ctx.setLineDash([6, 6]);
-          ctx.beginPath();
-          ctx.moveTo(0, laneY);
-          ctx.lineTo(trackWidth, laneY);
-          ctx.stroke();
-          ctx.setLineDash([]);
-        }
-
-        // Lane Number Badge at Left Start
-        ctx.fillStyle = 'rgba(148, 163, 184, 0.35)';
-        ctx.font = '700 11px Orbitron, monospace';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(`L${i + 1}`, 22, laneY + laneH / 2);
-      }
-
-      // Start Gate Line
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(startLineX, 0);
-      ctx.lineTo(startLineX, trackHeight);
-      ctx.stroke();
-
-      // Checkered Finish Gate Line
-      ctx.save();
-      const checkerSize = 8;
-      const cols = 2;
-      const rows = Math.ceil(trackHeight / checkerSize);
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          ctx.fillStyle = ((r + c) % 2 === 0) ? '#fde047' : '#000000';
-          ctx.fillRect(finishLineX + c * checkerSize, r * checkerSize, checkerSize, checkerSize);
-        }
-      }
-      ctx.strokeStyle = '#f59e0b';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(finishLineX, 0, cols * checkerSize, trackHeight);
-      ctx.restore();
-
-      // Distance Markers (25m, 50m, 75m)
-      [0.25, 0.5, 0.75].forEach(pct => {
-        const markX = startLineX + (finishLineX - startLineX) * pct;
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(markX, 0);
-        ctx.lineTo(markX, trackHeight);
-        ctx.stroke();
-
-        ctx.fillStyle = 'rgba(148, 163, 184, 0.4)';
-        ctx.font = '9px Orbitron, monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText(`${Math.round(pct * 100)}m`, markX, 12);
+      // 1. Animate Swaying Seaweed
+      seaweedMeshes.forEach(sw => {
+        sw.rotation.z = Math.sin(timestamp * 0.002 + sw.userData.swayOffset) * 0.12;
       });
 
-      // 3. Ambient Water Particles (Rising Bubbles)
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-      waterParticles.forEach(p => {
-        p.x += p.speedX;
-        if (p.x > trackWidth) p.x = 0;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y + Math.sin(timeSec + p.x) * 3, p.radius, 0, Math.PI * 2);
-        ctx.fill();
+      // 2. Animate Dynamic Caustic Light & Strobes
+      if (oceanCausticLight) {
+        oceanCausticLight.position.x = Math.sin(timestamp * 0.0008) * 45;
+        oceanCausticLight.position.z = Math.cos(timestamp * 0.0011) * 25;
+      }
+      finishStrobeLights.forEach((s, idx) => {
+        s.intensity = 1.5 + Math.sin(timestamp * 0.008 + idx * 2) * 1.0;
       });
 
-      // 4. Update & Draw Competitors
+      // 3. Animate Ambient Plankton & Bubbles
+      ambientPlankton.forEach(pm => {
+        pm.position.y += pm.userData.speedY;
+        pm.position.x += pm.userData.driftX;
+        if (pm.position.y > 13) {
+          pm.position.y = -11.5;
+          pm.position.x = -100 + Math.random() * 200;
+        }
+      });
+
+      // 4. Animate Active Fish Bubble Wakes
+      for (let b = activeBubblePool.length - 1; b >= 0; b--) {
+        const bm = activeBubblePool[b];
+        bm.position.y += bm.userData.vy;
+        bm.position.x += bm.userData.vx;
+        bm.userData.life -= delta * 0.9;
+        if (bm.userData.life <= 0 || bm.position.y > 13) {
+          bm.visible = false;
+          activeBubblePool.splice(b, 1);
+          freeBubblePool.push(bm);
+        }
+      }
+
+      // 5. Race State Physics & Fish Articulation
+      let currentLeader = null;
+      let maxDist = -1;
+
       if (state.phase === 'racing') {
         const elapsed = Date.now() - raceStartTime;
         state.raceProgress = Math.min(1.0, elapsed / RACE_DURATION_MS);
 
-        // Find current leader
-        let maxDist = -1;
-        let currentLeader = null;
+        // Lower laser gates smoothly into the floor
+        startLaserGates.forEach(g => {
+          g.position.y = Math.max(-12, g.position.y - delta * 20);
+        });
 
         raceCompetitors.forEach(c => {
-          // Dynamic Speed Physics
-          const baseSpeed = (finishLineX - startLineX) / (RACE_DURATION_MS / 1000);
-          
-          // Random surging / stamina variation
-          const randVariation = Math.sin(timeSec * 3 + c.lane * 1.5) * 12;
-          
-          // Check special surge event
-          c.surgeTimer -= 0.016;
+          const baseSpeed = TRACK_DISTANCE / (RACE_DURATION_MS / 1000);
+          const randVariation = Math.sin((timestamp / 1000) * 3 + c.lane * 1.5) * 1.6;
+
+          // Check surge event
+          c.surgeTimer -= delta;
           if (c.surgeTimer <= 0 && !c.surgeActive && c.distance < 75) {
             c.surgeActive = true;
-            c.surgeTimer = 2.5; // Surge duration
+            c.surgeTimer = 2.4;
             audio.playSplash();
           }
 
           let surgeBoost = 0;
           if (c.surgeActive) {
-            surgeBoost = 22;
-            c.surgeTimer -= 0.016;
+            surgeBoost = 3.6;
+            c.surgeTimer -= delta;
             if (c.surgeTimer <= 0) c.surgeActive = false;
           }
 
-          // Advance fish position
           c.speed = baseSpeed + randVariation + surgeBoost;
-          c.x += c.speed * 0.016;
+          c.x += c.speed * delta;
 
-          // Clamp to finish line
-          if (c.x >= finishLineX) {
-            c.x = finishLineX;
+          // Check finish line
+          if (c.x >= TRACK_FINISH_X) {
+            c.x = TRACK_FINISH_X;
             if (!state.winner) {
               state.winner = c.fish;
               triggerPhotoFinish(c.fish);
             }
           }
 
-          c.distance = Math.min(100, Math.round(((c.x - startLineX) / (finishLineX - startLineX)) * 100));
+          c.distance = Math.min(100, Math.round(((c.x - TRACK_START_X) / TRACK_DISTANCE) * 100));
 
           if (c.distance > maxDist) {
             maxDist = c.distance;
             currentLeader = c;
           }
 
-          // Generate bubble wake behind fish
-          if (Math.random() < 0.35) {
-            c.bubbles.push({
-              x: c.x - 18,
-              y: c.y + (Math.random() * 6 - 3),
-              radius: Math.random() * 2 + 1,
-              alpha: 0.6
-            });
+          // Generate bubbles
+          if (Math.random() < (c.surgeActive ? 0.85 : 0.35)) {
+            spawnFishBubble(c, c.surgeActive);
           }
         });
 
         // Update live leader display
         if (currentLeader) {
-          document.getElementById('leader-name').textContent = `L${currentLeader.lane} ${currentLeader.fish.name.toUpperCase()}`;
+          const leaderEl = document.getElementById('leader-name');
+          if (leaderEl) {
+            leaderEl.textContent = `L${currentLeader.lane} ${currentLeader.fish.name.toUpperCase()}`;
+          }
         }
       }
 
-      // Draw Fish Wake Bubbles
+      // Update 3D Fish Animations & Undulation
       raceCompetitors.forEach(c => {
-        for (let b = c.bubbles.length - 1; b >= 0; b--) {
-          const bub = c.bubbles[b];
-          bub.x -= 0.8;
-          bub.radius += 0.04;
-          bub.alpha -= 0.02;
-          if (bub.alpha <= 0) {
-            c.bubbles.splice(b, 1);
-            continue;
-          }
-          ctx.fillStyle = `rgba(255, 255, 255, ${bub.alpha})`;
-          ctx.beginPath();
-          ctx.arc(bub.x, bub.y, bub.radius, 0, Math.PI * 2);
-          ctx.fill();
+        if (!c.meshData) return;
+
+        const isCurrentLeader = (currentLeader && currentLeader.fish.id === c.fish.id);
+        c.meshData.crownGroup.visible = !!isCurrentLeader;
+        if (isCurrentLeader) {
+          c.meshData.crownGroup.rotation.y += delta * 2.5;
         }
+
+        let wagSpeed = 3.0; // Idle betting wag
+        if (state.phase === 'racing') {
+          wagSpeed = 7.0 + (c.speed / 12) * 8.0;
+        } else if (state.phase === 'payout') {
+          wagSpeed = (state.winner && state.winner.id === c.fish.id) ? 9.0 : 3.0;
+        }
+
+        c.swimPhase += delta * wagSpeed;
+        const w1 = Math.sin(c.swimPhase);
+        const w2 = Math.sin(c.swimPhase - 0.7);
+        const w3 = Math.sin(c.swimPhase - 1.4);
+
+        c.meshData.spine1.rotation.y = w1 * 0.22;
+        c.meshData.spine2.rotation.y = w2 * 0.35;
+        c.meshData.tailGroup.rotation.y = w3 * (0.55 + (c.surgeActive ? 0.25 : 0));
+
+        c.meshData.pectoralL.rotation.z = Math.sin(c.swimPhase * 1.2) * 0.25;
+        c.meshData.pectoralR.rotation.z = -Math.sin(c.swimPhase * 1.2) * 0.25;
+
+        // Position updates
+        c.meshData.group.position.x = c.x;
+        c.meshData.group.position.y = c.baseY + Math.sin(c.swimPhase * 0.6) * 0.32;
+        c.meshData.group.rotation.z = w1 * 0.05;
       });
 
-      // Draw Each Fish
-      raceCompetitors.forEach(c => {
-        const isCurrentLeader = (state.winner ? state.winner.id === c.fish.id : false);
-        drawTopDownFish(ctx, c.x, c.y, 0, c.fish, timeSec * (c.speed / 20), isCurrentLeader);
-      });
+      // 6. Camera Controller Modes
+      if (threeCamera && threeControls) {
+        if (cameraMode === 'broadcast') {
+          const packX = (state.phase === 'racing')
+            ? raceCompetitors.reduce((acc, c) => acc + c.x, 0) / 8
+            : TRACK_START_X;
+          const targetCamX = THREE.MathUtils.clamp(packX - 10, -82, 75);
+          threeCamera.position.lerp(new THREE.Vector3(targetCamX, 28, 46), 0.05);
+          threeControls.target.lerp(new THREE.Vector3(targetCamX + 12, 0, 0), 0.05);
+          threeCamera.lookAt(threeControls.target);
+        } else if (cameraMode === 'chase') {
+          const lead = currentLeader || raceCompetitors[0];
+          const targetPos = new THREE.Vector3(lead.x - 20, lead.y + 6, lead.z + 8);
+          const targetLook = new THREE.Vector3(lead.x + 12, lead.y, lead.z);
+          threeCamera.position.lerp(targetPos, 0.08);
+          threeControls.target.lerp(targetLook, 0.08);
+          threeCamera.lookAt(threeControls.target);
+        } else if (cameraMode === 'finish') {
+          threeCamera.position.lerp(new THREE.Vector3(112, 4, 0), 0.06);
+          threeControls.target.lerp(new THREE.Vector3(75, 0, 0), 0.06);
+          threeCamera.lookAt(threeControls.target);
+        } else if (cameraMode === 'orbit') {
+          threeControls.update();
+        }
+      }
+
+      // 7. Render 3D Scene
+      if (threeRenderer && threeScene && threeCamera) {
+        threeRenderer.render(threeScene, threeCamera);
+      }
 
       raceAnimFrame = requestAnimationFrame(renderRaceLoop);
     }
@@ -1772,12 +2361,15 @@
     function triggerPhotoFinish(winnerFish) {
       audio.playStarterHorn();
       const flashEl = document.getElementById('finish-flash');
-      flashEl.classList.add('flash');
-      setTimeout(() => flashEl.classList.remove('flash'), 150);
+      if (flashEl) {
+        flashEl.classList.add('flash');
+        setTimeout(() => flashEl.classList.remove('flash'), 150);
+      }
 
       // Finish race resolution
       finishRace(winnerFish);
     }
+
 
     /* =========================================================================
        INITIALIZATION & BETTING DECK CREATION
@@ -1844,8 +2436,8 @@
       renderSeats();
       randomizeOdds(false);
 
-      resizeTrackCanvas();
-      window.addEventListener('resize', resizeTrackCanvas);
+      initThreeScene();
+      window.addEventListener('resize', onWindowResize3D);
 
       // Join room and pull other JTrash players
       syncRoomHeartbeat();
@@ -1853,7 +2445,7 @@
       // Start main game loop (30s betting timer)
       startBettingPhase();
 
-      // Start Canvas Render Loop
+      // Start 3D Render Loop
       raceAnimFrame = requestAnimationFrame(renderRaceLoop);
     }
 
