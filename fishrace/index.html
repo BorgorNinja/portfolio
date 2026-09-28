@@ -1289,8 +1289,30 @@
       odds: { 1: 4, 2: 3, 3: 8, 4: 12, 5: 6, 6: 5, 7: 15, 8: 20 },
       history: [2, 1, 6, 5, 3, 2, 8, 4],
       raceProgress: 0, // 0.0 to 1.0
-      winner: null
+      winner: null,
+      serverClockOffset: 0,
+      phaseStartTime: null,
+      phaseDuration: 30.0
     };
+
+    function getRoundHash(roundId, lane, salt) {
+      const seed = (Math.abs(roundId || 1) * 9301 + lane * 49297 + salt * 233280) % 233280;
+      return seed / 233280.0;
+    }
+
+    function getSynchronizedPhaseTimes() {
+      if (!state.phaseStartTime) {
+        return {
+          elapsed: typeof state.serverElapsed === 'number' ? state.serverElapsed : 0,
+          timeLeft: typeof state.timeLeft === 'number' ? state.timeLeft : 30.0
+        };
+      }
+      const currentServerTimeSec = (Date.now() + (state.serverClockOffset || 0)) / 1000;
+      const elapsed = Math.max(0, currentServerTimeSec - state.phaseStartTime);
+      const dur = state.phaseDuration || 30.0;
+      const timeLeft = Math.max(0, +(dur - elapsed).toFixed(1));
+      return { elapsed, timeLeft };
+    }
 
     /* =========================================================================
        AUDIO SYNTHESIZER (Web Audio API)
@@ -2793,9 +2815,10 @@
       let maxDist = -1;
 
       if (state.phase === 'racing') {
-        const elapsed = Date.now() - raceStartTime;
+        const times = getSynchronizedPhaseTimes();
+        const elapsed = times.elapsed; // Exact server elapsed seconds (identical on PC & mobile)
         const totalRaceTime = 28.5; // Winner crosses finish line at 28.5s of the 30.0s round
-        const progress = Math.min(1.0, elapsed / (totalRaceTime * 1000));
+        const progress = Math.min(1.0, Math.max(0.0, elapsed / totalRaceTime));
         state.raceProgress = progress;
 
         // Lower laser gates smoothly into the floor
@@ -2803,89 +2826,81 @@
           g.position.y = Math.max(-12, g.position.y - delta * 20);
         });
 
+        const currentRound = state.currentRoundId || 1;
+        const winnerId = state.serverWinnerId;
+        const t = Math.max(0, elapsed);
+
         raceCompetitors.forEach(c => {
-          const isWinner = (state.serverWinnerId && c.fish.id === state.serverWinnerId);
-          const baseSpeed = TRACK_DISTANCE / totalRaceTime;
-          const wobble = Math.sin((timestamp / 1000) * 2.2 + c.lane * 1.4) * 0.7;
+          const isWinner = (winnerId && c.fish.id === winnerId);
 
-          // Surge mechanics
-          c.surgeTimer -= delta;
-          if (c.surgeTimer <= 0 && !c.surgeActive && progress < 0.85) {
-            c.surgeActive = true;
-            c.surgeTimer = 2.2 + Math.random() * 1.2;
-            audio.playSplash();
-          }
+          // 1. Synchronized linear progression along track (-90 to +90)
+          const baseX = TRACK_START_X + (TRACK_DISTANCE * progress);
 
+          // 2. Natural smooth lane undulations & position jockeying
+          const w1 = Math.sin(t * 1.5 + c.lane * 1.9) * 3.4;
+          const w2 = Math.sin(t * 0.75 + c.lane * 3.2) * 2.2;
+
+          // 3. Deterministic surges per round/lane (identical on all devices)
+          const s1Time = 4.0 + getRoundHash(currentRound, c.lane, 1) * 7.0; // between 4s and 11s
+          const s2Time = 13.0 + getRoundHash(currentRound, c.lane, 2) * 6.5; // between 13s and 19.5s
           let surgeBoost = 0;
-          if (c.surgeActive) {
-            surgeBoost = 1.4;
-            c.surgeTimer -= delta;
-            if (c.surgeTimer <= 0) c.surgeActive = false;
+          let isSurging = false;
+          const d1 = t - s1Time;
+          if (Math.abs(d1) < 1.8) {
+            surgeBoost += Math.cos(d1 / 1.8 * Math.PI * 0.5) * 4.6;
+            isSurging = true;
+          }
+          const d2 = t - s2Time;
+          if (Math.abs(d2) < 1.8) {
+            surgeBoost += Math.cos(d2 / 1.8 * Math.PI * 0.5) * 4.2;
+            isSurging = true;
           }
 
-          // Winner guidance:
-          // Early on (0-60%), all fish jostle freely.
-          // Mid-race (60-80%), winner secures top-2 pack.
-          // Late race (80-100%), winner surges ahead to cross the finish line first!
-          let pacingFactor = 1.0;
-          if (isWinner) {
-            if (progress > 0.75) {
-              pacingFactor = 1.22;
-            } else if (progress > 0.4) {
-              pacingFactor = 1.08;
+          // 4. Final stretch and winner separation (after 17.5s)
+          let stretchDelta = 0;
+          if (t > 17.5) {
+            const stretchRatio = Math.min(1.0, (t - 17.5) / 11.0);
+            if (isWinner) {
+              stretchDelta = Math.pow(stretchRatio, 1.5) * 7.5;
+            } else {
+              const packSpread = (getRoundHash(currentRound, c.lane, 3) * 3.5) - 4.5;
+              stretchDelta = packSpread * stretchRatio;
             }
+          }
+
+          // 5. Target X calculation
+          let targetX = baseX + w1 + w2 + surgeBoost + stretchDelta;
+          if (t < 28.5) {
+            targetX = THREE.MathUtils.clamp(targetX, TRACK_START_X, TRACK_FINISH_X - (isWinner ? 0.1 : 1.8));
           } else {
-            if (progress > 0.8) {
-              const winFish = raceCompetitors.find(item => item.fish.id === state.serverWinnerId);
-              if (winFish && c.x >= winFish.x - 2.5) {
-                pacingFactor = 0.88;
-              }
+            if (isWinner) {
+              targetX = Math.max(TRACK_FINISH_X + 2.5, targetX);
+            } else {
+              const coast = Math.min(4.0, t - 28.5);
+              targetX = Math.min(TRACK_FINISH_X + 5.0, TRACK_FINISH_X - 1.5 + (coast * 1.8) + (c.lane % 3));
             }
           }
 
-          c.speed = (baseSpeed * pacingFactor) + wobble + surgeBoost;
-          c.x += c.speed * delta;
-
-          // Keep fish naturally paced with elapsed time even under frame drops or background tab throttling
-          const expectedPackX = TRACK_START_X + (TRACK_DISTANCE * progress);
-          const laneSpread = Math.sin(c.lane * 1.6) * 3.5;
-          const minExpectedX = expectedPackX - 10 + laneSpread;
-          if (c.x < minExpectedX) {
-            c.x = minExpectedX;
-          }
-
-          // DYNAMIC OBSTACLE SENSING & PATHFINDING
+          // 6. Obstacle avoidance in Z
           let steerZ = 0;
-          let steerY = 0;
-          raceObstacles.forEach(obs => {
-            const dx = obs.x - c.x;
-            const dz = obs.z - c.z;
-            const dy = obs.y - c.y;
-            if (dx > 0 && dx < 18 && Math.abs(dz) < 6.2) {
-              const side = (dz >= 0) ? -1 : 1;
-              const strength = (1.0 - (dx / 18)) * 4.6;
-              steerZ += side * strength;
-              steerY += (dy >= 0 ? -1.0 : 1.0) * (1.0 - (dx / 18));
-            }
-          });
-
-          c.targetZ = c.baseZ + THREE.MathUtils.clamp(steerZ, -4.6, 4.6);
-          c.z += (c.targetZ - c.z) * delta * 5.2;
-
-          // Check finish line
-          if (c.x >= TRACK_FINISH_X) {
-            c.x = Math.max(c.x, TRACK_FINISH_X);
-            if (!state.winner) {
-              const targetId = state.serverWinnerId || c.fish.id;
-              const winFish = FISH_ROSTER.find(f => f.id === targetId) || c.fish;
-              const winnerComp = raceCompetitors.find(item => item.fish.id === winFish.id);
-              if (winnerComp) {
-                winnerComp.x = Math.max(winnerComp.x, TRACK_FINISH_X + 2.5);
-                if (winnerComp.meshData) winnerComp.meshData.group.position.x = winnerComp.x;
+          if (raceObstacles && Array.isArray(raceObstacles)) {
+            for (let o = 0; o < raceObstacles.length; o++) {
+              const obs = raceObstacles[o];
+              const dx = obs.x - targetX;
+              const dz = obs.z - c.baseZ;
+              if (dx > -4 && dx < 14 && Math.abs(dz) < 6.2) {
+                const side = (dz >= 0) ? -1 : 1;
+                const strength = (1.0 - (Math.abs(dx) / 14.0)) * 4.6;
+                steerZ += side * strength;
               }
-              triggerPhotoFinish(winFish);
             }
           }
+          steerZ = THREE.MathUtils.clamp(steerZ, -4.6, 4.6);
+          const targetZ = c.baseZ + steerZ;
+
+          c.x = targetX;
+          c.z += (targetZ - c.z) * delta * 5.2;
+          c.surgeActive = isSurging;
 
           c.distance = Math.min(100, Math.round(((c.x - TRACK_START_X) / TRACK_DISTANCE) * 100));
 
@@ -2895,13 +2910,15 @@
           }
 
           // Generate bubbles
-          if (Math.random() < (c.surgeActive ? 0.85 : 0.35)) {
-            spawnFishBubble(c, c.surgeActive);
+          if (isSurging && Math.random() < 0.6) {
+            spawnFishBubble(c, true);
+          } else if (Math.random() < 0.25) {
+            spawnFishBubble(c, false);
           }
         });
 
-        // Guaranteed finish: if time elapsed hits 28.5s and winner hasn't triggered, push winner across
-        if (progress >= 1.0 && !state.winner) {
+        // 7. Finish trigger exactly when elapsed reaches 28.5s
+        if (elapsed >= 28.5 && !state.winner) {
           const targetId = state.serverWinnerId || (currentLeader ? currentLeader.fish.id : 1);
           const winFish = FISH_ROSTER.find(f => f.id === targetId) || FISH_ROSTER[0];
           const winnerComp = raceCompetitors.find(item => item.fish.id === winFish.id);
@@ -3720,6 +3737,19 @@
             applyServerObstacles(g.obstacles);
           }
 
+          if (typeof g.server_time === 'number') {
+            state.serverClockOffset = (g.server_time * 1000) - Date.now();
+          }
+          if (typeof g.phase_start_time === 'number') {
+            state.phaseStartTime = g.phase_start_time;
+          }
+          if (typeof g.duration === 'number') {
+            state.phaseDuration = g.duration;
+          }
+          if (typeof g.elapsed === 'number') {
+            state.serverElapsed = g.elapsed;
+          }
+
           if (g.winner_id) {
             state.serverWinnerId = g.winner_id;
           }
@@ -3748,19 +3778,13 @@
               } else if (g.phase === 'payout') {
                 applyPayoutPhase(g.time_left, g.winner_id);
               }
-            } else {
-              // Drift correction
-              if (Math.abs(state.timeLeft - g.time_left) > 1.2) {
-                state.timeLeft = g.time_left;
-                updateTimerUI();
-              }
             }
           }
         }
       } catch (err) {}
     }
 
-    setInterval(syncRoomHeartbeat, 2000);
+    setInterval(syncRoomHeartbeat, 1500);
 
     /* =========================================================================
        GAME CYCLE: SERVER-SYNCHRONIZED (30s BETTING -> 30s RACE -> 12s PAYOUT)
@@ -3780,15 +3804,14 @@
     }
 
     function masterTimerTick() {
-      if (typeof state.timeLeft === 'number' && state.timeLeft > 0) {
-        state.timeLeft = Math.max(0, +(state.timeLeft - 0.1).toFixed(1));
-        updateTimerUI();
+      const times = getSynchronizedPhaseTimes();
+      state.timeLeft = times.timeLeft;
+      updateTimerUI();
 
-        if (state.phase === 'betting') {
-          if (state.timeLeft <= 5.0 && state.timeLeft > 0 && Math.round(state.timeLeft * 10) % 10 === 0) {
-            audio.playBeep(false);
-            setAnnouncer(`GATES CLOSING IN ${Math.ceil(state.timeLeft)}s!`);
-          }
+      if (state.phase === 'betting') {
+        if (state.timeLeft <= 5.0 && state.timeLeft > 0 && Math.round(state.timeLeft * 10) % 10 === 0) {
+          audio.playBeep(false);
+          setAnnouncer(`GATES CLOSING IN ${Math.ceil(state.timeLeft)}s!`);
         }
       }
     }
@@ -3829,31 +3852,12 @@
       renderSeats();
       updateBettingControls();
 
-      const actualElapsed = (typeof elapsed === 'number' && elapsed >= 0) ? elapsed : (30.0 - state.timeLeft);
-      raceStartTime = Date.now() - (actualElapsed * 1000);
-
-      // If refreshed or joined mid-race, position fish at current elapsed progress with natural lane spacing
-      if (actualElapsed > 0.5) {
-        const baseProgress = Math.min(0.95, actualElapsed / 28.5);
-        raceCompetitors.forEach((c, idx) => {
-          const isWinner = (state.serverWinnerId && c.fish.id === state.serverWinnerId);
-          const laneVariation = Math.sin(idx * 1.7) * 4.5;
-          const winnerAdvantage = isWinner ? (baseProgress > 0.6 ? 5.0 : 1.5) : -2.0;
-          const fishX = THREE.MathUtils.clamp(
-            TRACK_START_X + (TRACK_DISTANCE * baseProgress) + laneVariation + winnerAdvantage,
-            TRACK_START_X,
-            TRACK_FINISH_X - (isWinner ? 0 : 3)
-          );
-          c.x = fishX;
-          c.distance = Math.min(100, Math.round(((c.x - TRACK_START_X) / TRACK_DISTANCE) * 100));
-          if (c.meshData) {
-            c.meshData.group.position.x = c.x;
-          }
-        });
-        startLaserGates.forEach(g => { g.position.y = -12; });
-      } else {
+      const times = getSynchronizedPhaseTimes();
+      if (times.elapsed <= 0.5) {
         initRacePositions();
         audio.playStarterHorn();
+      } else {
+        startLaserGates.forEach(g => { g.position.y = -12; });
       }
     }
 

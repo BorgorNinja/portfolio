@@ -182,6 +182,7 @@ $elapsed = max(0.0, round($nowFloat - floatval($room['game']['phase_start_time']
 $responseGame = [
     'round_id' => intval($room['game']['round_id'] ?? 1),
     'phase' => $room['game']['phase'] ?? 'betting',
+    'phase_start_time' => floatval($room['game']['phase_start_time'] ?? $nowFloat),
     'time_left' => $timeLeft,
     'elapsed' => $elapsed,
     'duration' => floatval($room['game']['phase_duration'] ?? 30.0),
