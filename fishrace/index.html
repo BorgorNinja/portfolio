@@ -343,14 +343,29 @@
 
     /* Betting Console Disabled / Locked State */
     .player-betting-console.betting-locked {
-      opacity: 0.38 !important;
-      pointer-events: none !important;
-      filter: grayscale(0.85) contrast(0.9) !important;
-      cursor: not-allowed !important;
-      transition: opacity 0.25s ease, filter 0.25s ease;
+      transition: opacity 0.25s ease;
     }
-    .player-betting-console.betting-locked * {
+    .player-betting-console.betting-locked .fish-bet-card {
       cursor: not-allowed !important;
+      transform: none !important;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5) !important;
+    }
+    .player-betting-console.betting-locked .fish-bet-card:hover {
+      transform: none !important;
+      border-color: #1c3c64 !important;
+    }
+    .player-betting-console.betting-locked .group-bets-row,
+    .player-betting-console.betting-locked .chip-selector-bar,
+    .player-betting-console.betting-locked .betting-action-bar {
+      opacity: 0.42 !important;
+      pointer-events: none !important;
+      filter: grayscale(0.7) !important;
+      cursor: not-allowed !important;
+    }
+    .player-betting-console.betting-locked .btn-standup {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      filter: none !important;
     }
 
     /* AQUATIC RACE TRACK STADIUM CONTAINER */
@@ -623,7 +638,9 @@
       font-family: var(--font-display);
       font-size: 10px;
       font-weight: 900;
-      color: #94a3b8;
+      padding: 1px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
     }
 
     .card-wager-pill {
@@ -638,7 +655,7 @@
       border: 1px solid #1c3d64;
       padding: 1px 6px;
       border-radius: 10px;
-      min-width: 30px;
+      min-width: 28px;
       text-align: center;
       transition: all 0.2s ease;
     }
@@ -650,16 +667,19 @@
     }
 
     .mini-fish-preview-box {
-      width: 54px;
-      height: 40px;
+      width: 100%;
+      height: 48px;
       margin-top: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
+      background: radial-gradient(circle, rgba(14, 56, 89, 0.45) 0%, transparent 75%);
+      border-radius: 6px;
     }
     .mini-fish-canvas {
-      width: 54px;
-      height: 40px;
+      width: 76px;
+      height: 46px;
+      display: block;
     }
 
     .fish-name-label {
@@ -1420,141 +1440,540 @@
     }
 
     /* =========================================================================
-       PROCEDURAL TOP-DOWN FISH RENDERER
-       Draws anatomical fish with undulating spine segments and flowing fins
+       PROCEDURAL SIDE-PROFILE FISH RENDERER (BETTING DECK)
+       Accurate side-profile anatomical illustrations matching 3D models
        ========================================================================= */
 
-    function drawTopDownFish(ctx, x, y, angle, fish, time, isLeader = false) {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(angle);
-
-      const s = fish.size / 34; // scale multiplier
-      const wagFreq = 8;
-      const wagAmp = 0.22;
-      const tailWag = Math.sin(time * wagFreq) * wagAmp;
-
-      // Draw Pectoral Fins (Left & Right)
-      ctx.save();
-      ctx.fillStyle = fish.finColor || fish.color;
-      ctx.globalAlpha = 0.85;
-
-      // Left fin
-      const finFlap = Math.sin(time * 6) * 0.15;
+    function drawRoundRectPath(ctx, x, y, w, h, r) {
       ctx.beginPath();
-      ctx.ellipse(-2 * s, -11 * s, 10 * s, 4 * s, -0.6 + finFlap, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Right fin
-      ctx.beginPath();
-      ctx.ellipse(-2 * s, 11 * s, 10 * s, 4 * s, 0.6 - finFlap, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-
-      // Fish Body Spine (Segmented for natural curving)
-      ctx.save();
-
-      // Main Torso Gradient
-      const grad = ctx.createRadialGradient(6 * s, -2 * s, 2 * s, 0, 0, 16 * s);
-      grad.addColorStop(0, fish.accentColor || '#ffffff');
-      grad.addColorStop(0.4, fish.color);
-      grad.addColorStop(1, fish.finColor || fish.color);
-      ctx.fillStyle = grad;
-
-      // Smooth contoured fish body path
-      ctx.beginPath();
-      ctx.moveTo(18 * s, 0); // Nose
-      // Top curve to tail base
-      ctx.bezierCurveTo(10 * s, -9 * s, -4 * s, -8 * s, -12 * s + tailWag * 4, -3 * s);
-      // Caudal peduncle
-      ctx.lineTo(-16 * s + tailWag * 8, 0);
-      // Bottom curve back to nose
-      ctx.lineTo(-12 * s + tailWag * 4, 3 * s);
-      ctx.bezierCurveTo(-4 * s, 8 * s, 10 * s, 9 * s, 18 * s, 0);
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
       ctx.closePath();
-      ctx.fill();
+    }
 
-      // Clownfish distinct white stripe accents
-      if (fish.tailStyle === 'clown') {
+    function drawProfileFish(ctx, w, h, fish, time) {
+      const cx = w / 2;
+      const cy = h / 2;
+      const wag = Math.sin(time * 6);
+      const tailRot = Math.sin(time * 6 - 0.6) * 0.22;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+
+      // Background subtle glow matching fish color
+      const bgGlow = ctx.createRadialGradient(0, 0, 4, 0, 0, 32);
+      bgGlow.addColorStop(0, fish.color + '26');
+      bgGlow.addColorStop(1, 'transparent');
+      ctx.fillStyle = bgGlow;
+      ctx.fillRect(-cx, -cy, w, h);
+
+      if (fish.id === 1) {
+        // 1. CRIMSON BETTA: Flowing veil tail, tall dorsal veil, long red ventral ribbons
+        ctx.save();
+        ctx.translate(-10, 0);
+        ctx.rotate(tailRot);
+        const tailGrad = ctx.createLinearGradient(0, 0, -22, 0);
+        tailGrad.addColorStop(0, '#b91c1c');
+        tailGrad.addColorStop(0.5, '#ef4444');
+        tailGrad.addColorStop(1, 'rgba(252, 165, 165, 0.7)');
+        ctx.fillStyle = tailGrad;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.bezierCurveTo(-8, -16, -24, -14, -26, 0);
+        ctx.bezierCurveTo(-24, 14, -8, 16, 0, 0);
+        ctx.fill();
+        ctx.restore();
+
+        // Dorsal veil crest
+        ctx.fillStyle = '#b91c1c';
+        ctx.beginPath();
+        ctx.moveTo(4, -5);
+        ctx.bezierCurveTo(-2, -18, -14, -14, -8, -4);
+        ctx.fill();
+
+        // Ventral ribbon
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(6, 4);
+        ctx.quadraticCurveTo(2, 14 + wag * 2, -2, 16);
+        ctx.stroke();
+
+        // Torso
+        const bGrad = ctx.createLinearGradient(16, 0, -10, 0);
+        bGrad.addColorStop(0, '#fca5a5');
+        bGrad.addColorStop(0.3, '#ef4444');
+        bGrad.addColorStop(1, '#991b1b');
+        ctx.fillStyle = bGrad;
+        ctx.beginPath();
+        ctx.moveTo(16, 0);
+        ctx.quadraticCurveTo(6, -8, -10, -2);
+        ctx.lineTo(-10, 2);
+        ctx.quadraticCurveTo(6, 8, 16, 0);
+        ctx.fill();
+
+        // Pectoral fin
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.75)';
+        ctx.beginPath();
+        ctx.ellipse(3, 1, 5, 2.5, Math.PI / 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Eye
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.ellipse(4 * s, 0, 2.5 * s, 7 * s, 0, 0, Math.PI * 2);
+        ctx.arc(10, -2, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(10.7, -2, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+
+      } else if (fish.id === 2) {
+        // 2. GOLDEN KOI: Robust golden carp, barbels, scale luster, white belly
+        ctx.save();
+        ctx.translate(-10, 0);
+        ctx.rotate(tailRot);
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-15, -9);
+        ctx.lineTo(-10, 0);
+        ctx.lineTo(-15, 9);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        // Dorsal fin ridge
+        ctx.fillStyle = '#d97706';
+        ctx.beginPath();
+        ctx.moveTo(2, -6);
+        ctx.quadraticCurveTo(-4, -10, -10, -4);
+        ctx.lineTo(-10, -3);
+        ctx.fill();
+
+        // Body
+        const bGrad = ctx.createLinearGradient(0, -6, 0, 7);
+        bGrad.addColorStop(0, '#f59e0b');
+        bGrad.addColorStop(0.6, '#fbbf24');
+        bGrad.addColorStop(1, '#fef08a');
+        ctx.fillStyle = bGrad;
+        ctx.beginPath();
+        ctx.moveTo(16, 0);
+        ctx.quadraticCurveTo(6, -8, -10, -3);
+        ctx.lineTo(-10, 3);
+        ctx.quadraticCurveTo(6, 8, 16, 0);
+        ctx.fill();
+
+        // Whisker barbels at snout
+        ctx.strokeStyle = '#d97706';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(15, 2);
+        ctx.quadraticCurveTo(17, 6, 14, 7);
+        ctx.stroke();
+
+        // Pectoral fin
+        ctx.fillStyle = 'rgba(245, 158, 11, 0.8)';
+        ctx.beginPath();
+        ctx.ellipse(4, 2, 5, 2.8, Math.PI / 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Eye
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(11, -2, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(11.6, -2, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+
+      } else if (fish.id === 3) {
+        // 3. JADE AROWANA: Sleek dragon fish, upturned jaw, chin barbels, emerald scales
+        ctx.save();
+        ctx.translate(-12, 0);
+        ctx.rotate(tailRot);
+        ctx.fillStyle = '#047857';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-14, -6);
+        ctx.lineTo(-12, 0);
+        ctx.lineTo(-14, 6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        // Rear dorsal & anal fin
+        ctx.fillStyle = '#059669';
+        ctx.beginPath();
+        ctx.moveTo(-4, -4);
+        ctx.lineTo(-12, -7);
+        ctx.lineTo(-12, -2);
         ctx.fill();
         ctx.beginPath();
-        ctx.ellipse(-6 * s, 0, 2 * s, 5.5 * s, 0, 0, Math.PI * 2);
+        ctx.moveTo(-4, 4);
+        ctx.lineTo(-12, 7);
+        ctx.lineTo(-12, 2);
         ctx.fill();
-      }
 
-      // Neon Tetra iridescent lateral stripe
-      if (fish.tailStyle === 'dart') {
+        // Elongated body
+        const bGrad = ctx.createLinearGradient(18, 0, -12, 0);
+        bGrad.addColorStop(0, '#a7f3d0');
+        bGrad.addColorStop(0.3, '#10b981');
+        bGrad.addColorStop(1, '#065f46');
+        ctx.fillStyle = bGrad;
+        ctx.beginPath();
+        ctx.moveTo(18, -1);
+        ctx.lineTo(20, -3); // upturned lower jaw
+        ctx.lineTo(17, -4);
+        ctx.quadraticCurveTo(4, -6, -12, -2);
+        ctx.lineTo(-12, 2);
+        ctx.quadraticCurveTo(4, 6, 17, 3);
+        ctx.closePath();
+        ctx.fill();
+
+        // Chin barbels
+        ctx.strokeStyle = '#34d399';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(19, -2);
+        ctx.lineTo(23, -3);
+        ctx.stroke();
+
+        // Eye
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(13, -2, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(13.6, -2, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+
+      } else if (fish.id === 4) {
+        // 4. COSMIC GUPPY: Slender purple body with ENORMOUS flared fan tail
+        ctx.save();
+        ctx.translate(-7, 0);
+        ctx.rotate(tailRot * 1.4);
+        const fanGrad = ctx.createRadialGradient(0, 0, 2, -16, 0, 20);
+        fanGrad.addColorStop(0, '#7e22ce');
+        fanGrad.addColorStop(0.5, '#a855f7');
+        fanGrad.addColorStop(1, '#f0abfc');
+        ctx.fillStyle = fanGrad;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-20, -14);
+        ctx.quadraticCurveTo(-24, 0, -20, 14);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        // Small dorsal
+        ctx.fillStyle = '#c084fc';
+        ctx.beginPath();
+        ctx.moveTo(0, -4);
+        ctx.quadraticCurveTo(-4, -9, -6, -3);
+        ctx.fill();
+
+        // Body
+        const bGrad = ctx.createLinearGradient(14, 0, -7, 0);
+        bGrad.addColorStop(0, '#f0abfc');
+        bGrad.addColorStop(0.4, '#a855f7');
+        bGrad.addColorStop(1, '#581c87');
+        ctx.fillStyle = bGrad;
+        ctx.beginPath();
+        ctx.moveTo(14, 0);
+        ctx.quadraticCurveTo(4, -5, -7, -2);
+        ctx.lineTo(-7, 2);
+        ctx.quadraticCurveTo(4, 5, 14, 0);
+        ctx.fill();
+
+        // Eye
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(10, -1, 2.0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(10.6, -1, 1.1, 0, Math.PI * 2);
+        ctx.fill();
+
+      } else if (fish.id === 5) {
+        // 5. ELECTRIC TETRA: Neon-blue body with bright glowing electric-cyan lateral stripe
+        ctx.save();
+        ctx.translate(-10, 0);
+        ctx.rotate(tailRot);
+        ctx.fillStyle = '#0e7490';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-13, -7);
+        ctx.lineTo(-9, 0);
+        ctx.lineTo(-13, 7);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        // Body
+        const bGrad = ctx.createLinearGradient(0, -6, 0, 6);
+        bGrad.addColorStop(0, '#0284c7');
+        bGrad.addColorStop(0.5, '#06b6d4');
+        bGrad.addColorStop(1, '#083344');
+        ctx.fillStyle = bGrad;
+        ctx.beginPath();
+        ctx.moveTo(16, 0);
+        ctx.quadraticCurveTo(5, -6, -10, -2);
+        ctx.lineTo(-10, 2);
+        ctx.quadraticCurveTo(5, 6, 16, 0);
+        ctx.fill();
+
+        // Fiery red splash on lower tail
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.moveTo(-1, 1);
+        ctx.lineTo(-10, 2);
+        ctx.lineTo(-8, 5);
+        ctx.closePath();
+        ctx.fill();
+
+        // GLOWING NEON CYAN LATERAL STRIPE
+        ctx.save();
         ctx.strokeStyle = '#38bdf8';
-        ctx.lineWidth = 2.5 * s;
+        ctx.lineWidth = 2.5;
         ctx.shadowColor = '#38bdf8';
         ctx.shadowBlur = 8;
         ctx.beginPath();
-        ctx.moveTo(12 * s, 0);
-        ctx.lineTo(-10 * s, 0);
+        ctx.moveTo(12, -0.5);
+        ctx.lineTo(-9, -0.5);
         ctx.stroke();
-        ctx.shadowBlur = 0;
-      }
+        ctx.restore();
 
-      // Eyes (Left & Right)
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(12 * s, -5 * s, 2.2 * s, 0, Math.PI * 2);
-      ctx.arc(12 * s, 5 * s, 2.2 * s, 0, Math.PI * 2);
-      ctx.fill();
+        // Eye
+        ctx.fillStyle = '#38bdf8';
+        ctx.beginPath();
+        ctx.arc(11, -1.5, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#021827';
+        ctx.beginPath();
+        ctx.arc(11.6, -1.5, 1.2, 0, Math.PI * 2);
+        ctx.fill();
 
-      ctx.fillStyle = '#000000';
-      ctx.beginPath();
-      ctx.arc(12.5 * s, -5 * s, 1.2 * s, 0, Math.PI * 2);
-      ctx.arc(12.5 * s, 5 * s, 1.2 * s, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Flowing Caudal Tail Fin
-      ctx.save();
-      ctx.translate(-15 * s, 0);
-      ctx.rotate(tailWag * 1.5);
-      ctx.fillStyle = fish.finColor || fish.color;
-      ctx.globalAlpha = 0.9;
-
-      ctx.beginPath();
-      if (fish.tailStyle === 'veil') {
-        // Long flowing veil tail (Betta)
-        ctx.moveTo(0, 0);
-        ctx.bezierCurveTo(-12 * s, -14 * s, -22 * s, -10 * s, -26 * s, -4 * s);
-        ctx.bezierCurveTo(-28 * s, 0, -22 * s, 10 * s, -12 * s, 14 * s);
+      } else if (fish.id === 6) {
+        // 6. NEMO CLOWNFISH: Orange body with 3 iconic white vertical stripes & black trim
+        ctx.save();
+        ctx.translate(-10, 0);
+        ctx.rotate(tailRot);
+        ctx.fillStyle = '#f97316';
+        ctx.beginPath();
+        ctx.arc(0, 0, 8, -Math.PI / 3, Math.PI / 3, false);
+        ctx.lineTo(-8, 0);
         ctx.closePath();
-      } else if (fish.tailStyle === 'fan') {
-        // Fan tail (Guppy)
-        ctx.moveTo(0, 0);
-        ctx.lineTo(-18 * s, -12 * s);
-        ctx.quadraticCurveTo(-24 * s, 0, -18 * s, 12 * s);
-        ctx.closePath();
-      } else {
-        // Forked / streamline caudal fin (Koi, Shark, etc.)
-        ctx.moveTo(0, 0);
-        ctx.lineTo(-14 * s, -10 * s);
-        ctx.lineTo(-9 * s, 0);
-        ctx.lineTo(-14 * s, 10 * s);
-        ctx.closePath();
-      }
-      ctx.fill();
-      ctx.restore();
-
-      // Leader Golden Crown / Aura
-      if (isLeader) {
-        ctx.strokeStyle = '#fde047';
-        ctx.lineWidth = 2;
-        ctx.shadowColor = '#fde047';
-        ctx.shadowBlur = 12;
+        ctx.fill();
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 1.2;
         ctx.stroke();
-        ctx.shadowBlur = 0;
+        ctx.restore();
+
+        // Dorsal fin with black edge
+        ctx.fillStyle = '#ea580c';
+        ctx.beginPath();
+        ctx.moveTo(4, -5);
+        ctx.quadraticCurveTo(-2, -10, -8, -4);
+        ctx.lineTo(-8, -3);
+        ctx.fill();
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        // Orange body
+        const bGrad = ctx.createLinearGradient(0, -6, 0, 6);
+        bGrad.addColorStop(0, '#fb923c');
+        bGrad.addColorStop(0.5, '#f97316');
+        bGrad.addColorStop(1, '#c2410c');
+        ctx.fillStyle = bGrad;
+        ctx.beginPath();
+        ctx.moveTo(15, 0);
+        ctx.quadraticCurveTo(5, -7, -10, -3);
+        ctx.lineTo(-10, 3);
+        ctx.quadraticCurveTo(5, 7, 15, 0);
+        ctx.fill();
+
+        // 3 WHITE VERTICAL STRIPES WITH BLACK BORDERS
+        const drawStripe = (sx, sy1, sy2, curveX) => {
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.moveTo(sx, sy1);
+          ctx.quadraticCurveTo(sx + curveX, 0, sx, sy2);
+          ctx.lineTo(sx - 3, sy2);
+          ctx.quadraticCurveTo(sx - 3 + curveX, 0, sx - 3, sy1);
+          ctx.closePath();
+          ctx.fill();
+          ctx.strokeStyle = '#0f172a';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        };
+
+        drawStripe(8, -5, 5, 1);
+        drawStripe(-1, -6.5, 6.5, 2);
+        drawStripe(-8, -4, 4, 0.5);
+
+        // Eye
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(11, -2, 2.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(11.7, -2, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+
+      } else if (fish.id === 7) {
+        // 7. SAKURA DISCUS: Tall circular disc body, top & bottom sail fins, pink stripes
+        ctx.save();
+        ctx.translate(-11, 0);
+        ctx.rotate(tailRot);
+        ctx.fillStyle = 'rgba(244, 114, 182, 0.75)';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-12, -7);
+        ctx.quadraticCurveTo(-14, 0, -12, 7);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        // Top sail fin
+        ctx.fillStyle = '#be185d';
+        ctx.beginPath();
+        ctx.moveTo(6, -9);
+        ctx.quadraticCurveTo(-4, -17, -11, -5);
+        ctx.lineTo(-4, -8);
+        ctx.fill();
+
+        // Bottom sail fin
+        ctx.beginPath();
+        ctx.moveTo(6, 9);
+        ctx.quadraticCurveTo(-4, 17, -11, 5);
+        ctx.lineTo(-4, 8);
+        ctx.fill();
+
+        // Circular Disc Body
+        const bGrad = ctx.createRadialGradient(0, 0, 3, 0, 0, 14);
+        bGrad.addColorStop(0, '#fbcfe8');
+        bGrad.addColorStop(0.5, '#ec4899');
+        bGrad.addColorStop(1, '#9d174d');
+        ctx.fillStyle = bGrad;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 14, 12, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Pastel vertical wavy ripples
+        ctx.strokeStyle = 'rgba(253, 232, 244, 0.5)';
+        ctx.lineWidth = 1.2;
+        [-4, 2].forEach(rx => {
+          ctx.beginPath();
+          ctx.moveTo(rx, -9);
+          ctx.quadraticCurveTo(rx + 2, 0, rx, 9);
+          ctx.stroke();
+        });
+
+        // Eye with ruby ring
+        ctx.fillStyle = '#f43f5e';
+        ctx.beginPath();
+        ctx.arc(7, -3, 2.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(7.5, -3, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+
+      } else if (fish.id === 8) {
+        // 8. OBSIDIAN SHARK: Torpedo slate body, sharp snout, triangular dorsal, red tips
+        ctx.save();
+        ctx.translate(-12, 0);
+        ctx.rotate(tailRot);
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-16, -11);
+        ctx.lineTo(-10, 0);
+        ctx.lineTo(-13, 7);
+        ctx.closePath();
+        ctx.fill();
+
+        // Crimson red tip on upper tail lobe
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.moveTo(-11, -7.5);
+        ctx.lineTo(-16, -11);
+        ctx.lineTo(-14, -5);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        // Sharp Triangular Dorsal Shark Fin with red tip
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath();
+        ctx.moveTo(3, -4);
+        ctx.lineTo(-2, -15);
+        ctx.lineTo(-6, -4);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.moveTo(0, -11);
+        ctx.lineTo(-2, -15);
+        ctx.lineTo(-4, -11);
+        ctx.closePath();
+        ctx.fill();
+
+        // Slate Torpedo Body
+        const bGrad = ctx.createLinearGradient(18, 0, -12, 0);
+        bGrad.addColorStop(0, '#64748b');
+        bGrad.addColorStop(0.3, '#334155');
+        bGrad.addColorStop(1, '#0f172a');
+        ctx.fillStyle = bGrad;
+        ctx.beginPath();
+        ctx.moveTo(18, 0);
+        ctx.quadraticCurveTo(6, -6, -12, -2);
+        ctx.lineTo(-12, 2);
+        ctx.quadraticCurveTo(6, 6, 18, 0);
+        ctx.fill();
+
+        // Gill slits
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 1;
+        [4, 6, 8].forEach(gx => {
+          ctx.beginPath();
+          ctx.moveTo(gx, -2);
+          ctx.lineTo(gx - 0.5, 2);
+          ctx.stroke();
+        });
+
+        // Eye
+        ctx.fillStyle = '#94a3b8';
+        ctx.beginPath();
+        ctx.arc(12, -1.8, 2.0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#050b14';
+        ctx.beginPath();
+        ctx.arc(12.6, -1.8, 1.1, 0, Math.PI * 2);
+        ctx.fill();
       }
 
-      ctx.restore();
       ctx.restore();
     }
+
+    function drawTopDownFish(ctx, x, y, angle, fish, time, isLeader = false) {
+      drawProfileFish(ctx, 76, 46, fish, time);
+    }
+
 
     /* =========================================================================
        3D OCEAN ENVIRONMENT & AQUATIC DERBY SIMULATOR (THREE.JS)
@@ -1562,7 +1981,7 @@
     const TRACK_START_X = -90;
     const TRACK_FINISH_X = 90;
     const TRACK_DISTANCE = TRACK_FINISH_X - TRACK_START_X; // 180 units
-    const RACE_DURATION_MS = 15000; // 15 seconds race
+    const RACE_DURATION_MS = 30000; // 30 seconds race
 
     // Three.js Core Globals
     let threeScene, threeCamera, threeRenderer, threeControls;
@@ -1571,6 +1990,7 @@
     let raceAnimFrame = null;
     let raceStartTime = 0;
     let lastFrameTime = performance.now();
+    let payoutStartTime = 0;
 
     // Environment Meshes for Animation
     let seaweedMeshes = [];
@@ -1580,6 +2000,7 @@
     let oceanCausticLight = null;
     let activeBubblePool = [];
     let freeBubblePool = [];
+    let raceObstacles = [];
 
     // 8 Competitor Live Race Instances
     const raceCompetitors = FISH_ROSTER.map((f, i) => {
@@ -1591,16 +2012,66 @@
         y: 0,
         z: laneZ,
         baseY: 0,
+        baseZ: laneZ,
+        targetZ: laneZ,
         speed: 0,
         currentSpeed: 0,
         distance: 0, // 0 to 100%
         stamina: 0.8 + Math.random() * 0.4,
-        surgeTimer: Math.random() * 4 + 3,
+        surgeTimer: Math.random() * 8 + 6,
         surgeActive: false,
         swimPhase: Math.random() * Math.PI * 2,
         meshData: null
       };
     });
+
+    /* Generate 3D Floating Name & Lane Billboard Badge */
+    function makeFishLabelSprite(fish) {
+      const c = document.createElement('canvas');
+      c.width = 256;
+      c.height = 76;
+      const ctx = c.getContext('2d');
+
+      // Rounded glass pill
+      ctx.fillStyle = 'rgba(3, 14, 27, 0.92)';
+      drawRoundRectPath(ctx, 4, 4, 248, 68, 16);
+      ctx.fill();
+
+      // Glowing border in fish color
+      ctx.strokeStyle = fish.color;
+      ctx.lineWidth = 4;
+      ctx.shadowColor = fish.color;
+      ctx.shadowBlur = 10;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Lane badge box
+      ctx.fillStyle = fish.color;
+      drawRoundRectPath(ctx, 10, 10, 52, 56, 10);
+      ctx.fill();
+
+      // Lane number L1..L8
+      ctx.fillStyle = '#030b14';
+      ctx.font = '900 26px Orbitron, monospace, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`L${fish.id}`, 36, 38);
+
+      // Fish name
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 18px Orbitron, monospace, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(fish.name.toUpperCase(), 72, 38);
+
+      const texture = new THREE.CanvasTexture(c);
+      texture.minFilter = THREE.LinearFilter;
+      const spriteMat = new THREE.SpriteMaterial({ map: texture, depthTest: false });
+      const sprite = new THREE.Sprite(spriteMat);
+      sprite.scale.set(6.4, 1.9, 1.0);
+      sprite.position.set(0, 3.4, 0);
+      return sprite;
+    }
 
     /* Build Procedural Articulated 3D Fish Model */
     function create3DFishModel(fish) {
@@ -1629,7 +2100,7 @@
 
       // 1. Torso / Head
       let bodyGeo;
-      if (fish.tailStyle === 'disc') {
+      if (fish.tailStyle === 'disc' || fish.id === 7) {
         // Sakura Discus: tall laterally compressed disc
         bodyGeo = new THREE.SphereGeometry(1.4, 20, 14);
         bodyGeo.scale(1.4, 2.2, 0.38);
@@ -1653,7 +2124,7 @@
       root.add(bodyMesh);
 
       // Clownfish iconic white stripes
-      if (fish.tailStyle === 'clown') {
+      if (fish.id === 6 || fish.tailStyle === 'clown') {
         [-0.5, 0.4, 1.2].forEach(sx => {
           const stripeGeo = new THREE.TorusGeometry(1.15 - Math.abs(sx) * 0.22, 0.12, 8, 20);
           stripeGeo.scale(0.35, 1.1, 0.65);
@@ -1664,7 +2135,7 @@
       }
 
       // Electric Tetra neon glowing lateral stripe
-      if (fish.tailStyle === 'dart') {
+      if (fish.id === 5 || fish.tailStyle === 'dart') {
         const neonGeo = new THREE.BoxGeometry(3.0, 0.16, 0.72);
         const neonMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
         const neonStripe = new THREE.Mesh(neonGeo, neonMat);
@@ -1714,7 +2185,7 @@
         ]);
         dorsalGeo.setAttribute('position', new THREE.BufferAttribute(dVerts, 3));
         dorsalGeo.computeVertexNormals();
-      } else if (fish.tailStyle === 'veil') {
+      } else if (fish.tailStyle === 'veil' || fish.id === 1) {
         // Betta tall flowing veil fin
         dorsalGeo = new THREE.PlaneGeometry(2.4, 1.6);
         dorsalGeo.translate(-0.4, 1.2, 0);
@@ -1752,11 +2223,11 @@
       tailGroup.position.set(-1.0, 0, 0);
 
       let tailGeo;
-      if (fish.tailStyle === 'veil') {
+      if (fish.tailStyle === 'veil' || fish.id === 1) {
         // Crimson Betta veil tail
         tailGeo = new THREE.PlaneGeometry(3.4, 3.0, 4, 3);
         tailGeo.translate(-1.6, 0, 0);
-      } else if (fish.tailStyle === 'fan') {
+      } else if (fish.tailStyle === 'fan' || fish.id === 4) {
         // Cosmic Guppy fan tail
         tailGeo = new THREE.CircleGeometry(2.2, 16, Math.PI * 0.7, Math.PI * 0.6);
         tailGeo.rotateZ(Math.PI);
@@ -1796,17 +2267,21 @@
       spine1.add(spine2);
       root.add(spine1);
 
-      // Golden Crown / Halo for Current Leader
+      // 3D Floating Name & Lane Billboard Badge
+      const labelSprite = makeFishLabelSprite(fish);
+      root.add(labelSprite);
+
+      // Golden Crown / Halo for Current Leader / Winner
       const crownGroup = new THREE.Group();
-      crownGroup.position.set(0.2, 2.0, 0);
-      const haloGeo = new THREE.TorusGeometry(0.8, 0.08, 8, 20);
+      crownGroup.position.set(0.2, 4.4, 0);
+      const haloGeo = new THREE.TorusGeometry(0.9, 0.1, 8, 20);
       haloGeo.rotateX(Math.PI / 2);
       const haloMesh = new THREE.Mesh(haloGeo, new THREE.MeshBasicMaterial({ color: 0xfde047 }));
       crownGroup.add(haloMesh);
 
-      const starGeo = new THREE.OctahedronGeometry(0.35);
+      const starGeo = new THREE.OctahedronGeometry(0.4);
       const starMesh = new THREE.Mesh(starGeo, new THREE.MeshBasicMaterial({ color: 0xfef08a }));
-      starMesh.position.set(0, 0.4, 0);
+      starMesh.position.set(0, 0.45, 0);
       crownGroup.add(starMesh);
 
       crownGroup.visible = false;
@@ -1819,7 +2294,8 @@
         tailGroup,
         pectoralL,
         pectoralR,
-        crownGroup
+        crownGroup,
+        labelSprite
       };
     }
 
@@ -1837,8 +2313,9 @@
       threeScene.fog = new THREE.FogExp2(0x03192f, 0.010);
 
       // Camera
-      threeCamera = new THREE.PerspectiveCamera(50, width / height, 0.5, 450);
-      threeCamera.position.set(-85, 30, 48);
+      const isMobile = (window.innerWidth < 640);
+      threeCamera = new THREE.PerspectiveCamera(isMobile ? 62 : 50, width / height, 0.5, 450);
+      threeCamera.position.set(-85, 30, isMobile ? 60 : 48);
 
       // Renderer
       threeRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
@@ -2073,17 +2550,63 @@
         }
       });
 
-      // 9. Ambient Floating Water Plankton & Bubbles
+      // 9. Procedural 3D Obstacles across the Track (Urchins, Coral Spires, Geysers)
+      raceObstacles = [];
+      const obsTypes = ['urchin', 'spire', 'vent', 'urchin', 'spire', 'vent', 'urchin', 'spire'];
+      for (let i = 0; i < 8; i++) {
+        const oGroup = new THREE.Group();
+        const type = obsTypes[i];
+
+        if (type === 'urchin') {
+          const uMat = new THREE.MeshStandardMaterial({ color: 0x2e1065, roughness: 0.5, metalness: 0.4 });
+          const uBody = new THREE.Mesh(new THREE.DodecahedronGeometry(1.2, 1), uMat);
+          oGroup.add(uBody);
+          for (let s = 0; s < 10; s++) {
+            const spike = new THREE.Mesh(new THREE.ConeGeometry(0.28, 1.5, 6), new THREE.MeshBasicMaterial({ color: 0xa855f7 }));
+            spike.position.set((Math.random() - 0.5) * 1.4, (Math.random() - 0.5) * 1.4, (Math.random() - 0.5) * 1.4);
+            spike.lookAt(spike.position.clone().multiplyScalar(2));
+            oGroup.add(spike);
+          }
+          const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.38, 8, 8), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
+          beacon.position.set(0, 1.3, 0);
+          oGroup.add(beacon);
+        } else if (type === 'spire') {
+          const sMat = new THREE.MeshStandardMaterial({ color: 0x0f2b3c, roughness: 0.8 });
+          const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 2.0, 15, 8), sMat);
+          spire.position.y = -4;
+          oGroup.add(spire);
+          const shelfMat = new THREE.MeshStandardMaterial({ color: (i % 2 === 0 ? 0x06b6d4 : 0xec4899), roughness: 0.3 });
+          const shelf = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 0.4, 0.5, 8), shelfMat);
+          shelf.position.y = 0;
+          oGroup.add(shelf);
+        } else {
+          const vMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
+          const cone = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 2.2, 8, 8), vMat);
+          cone.position.y = -8;
+          oGroup.add(cone);
+          const glow = new THREE.Mesh(new THREE.SphereGeometry(0.75, 8, 8), new THREE.MeshBasicMaterial({ color: 0xf97316 }));
+          glow.position.y = -3.8;
+          oGroup.add(glow);
+        }
+
+        oGroup.position.set(0, -999, 0);
+        threeScene.add(oGroup);
+        raceObstacles.push({
+          group: oGroup,
+          type: type,
+          x: 0,
+          z: 0,
+          y: 0
+        });
+      }
+
+      // 10. Ambient Floating Water Plankton & Bubbles
       ambientPlankton = [];
       const planktonGeo = new THREE.SphereGeometry(0.12, 6, 6);
       const planktonMat = new THREE.MeshBasicMaterial({ color: 0xe0f2fe, transparent: true, opacity: 0.45 });
       for (let p = 0; p < 80; p++) {
         const pm = new THREE.Mesh(planktonGeo, planktonMat);
-        pm.position.set(
-          -100 + Math.random() * 200,
-          -11 + Math.random() * 24,
-          -35 + Math.random() * 70
-        );
+        pm.position.set(-100 + Math.random() * 200, -11 + Math.random() * 24, -35 + Math.random() * 70);
         pm.userData = {
           speedY: 0.03 + Math.random() * 0.04,
           driftX: (Math.random() - 0.5) * 0.02
@@ -2092,19 +2615,19 @@
         ambientPlankton.push(pm);
       }
 
-      // 10. Bubble Wake Pool for Competitors
+      // 11. Bubble Wake Pool for Competitors
       activeBubblePool = [];
       freeBubblePool = [];
       const bubbleGeo = new THREE.SphereGeometry(0.18, 6, 6);
       const bubbleMat = new THREE.MeshBasicMaterial({ color: 0xdbeafe, transparent: true, opacity: 0.65 });
-      for (let b = 0; b < 120; b++) {
+      for (let b = 0; b < 140; b++) {
         const bm = new THREE.Mesh(bubbleGeo, bubbleMat);
         bm.visible = false;
         threeScene.add(bm);
         freeBubblePool.push(bm);
       }
 
-      // 11. Instantiate 8 3D Competitor Fish Models
+      // 12. Instantiate 8 3D Competitor Fish Models
       raceCompetitors.forEach(c => {
         c.meshData = create3DFishModel(c.fish);
         c.meshData.group.position.set(c.x, c.baseY, c.z);
@@ -2116,6 +2639,8 @@
       if (!threeContainer || !threeRenderer || !threeCamera) return;
       const width = threeContainer.clientWidth;
       const height = threeContainer.clientHeight;
+      const isMobile = (window.innerWidth < 640);
+      threeCamera.fov = isMobile ? 62 : 50;
       threeCamera.aspect = width / height;
       threeCamera.updateProjectionMatrix();
       threeRenderer.setSize(width, height);
@@ -2155,20 +2680,34 @@
     }
     window.setCameraMode = setCameraMode;
 
-    /* Reset / Init Race Positions for New Round */
+    /* Reset / Init Race Positions & Randomize Obstacles for New Round */
     function initRacePositions() {
       raceCompetitors.forEach(c => {
         c.x = TRACK_START_X;
+        c.z = c.baseZ;
+        c.targetZ = c.baseZ;
         c.distance = 0;
         c.speed = 0;
         c.currentSpeed = 0;
         c.stamina = 0.8 + Math.random() * 0.4;
-        c.surgeTimer = Math.random() * 4 + 3;
+        c.surgeTimer = Math.random() * 8 + 6;
         c.surgeActive = false;
         if (c.meshData) {
           c.meshData.group.position.set(c.x, c.baseY, c.z);
+          c.meshData.group.rotation.set(0, 0, 0);
           c.meshData.crownGroup.visible = false;
+          c.meshData.crownGroup.scale.set(1, 1, 1);
         }
+      });
+
+      // Randomize 3D Obstacles across the lanes
+      raceObstacles.forEach((obs, idx) => {
+        obs.x = -65 + idx * 18 + (Math.random() * 6 - 3);
+        const lanePick = (idx % 8);
+        const laneCenterZ = (lanePick - 3.5) * 8.5;
+        obs.z = laneCenterZ + (Math.random() * 3.5 - 1.75);
+        obs.y = (obs.type === 'urchin' ? (Math.random() * 3 - 1.5) : 0);
+        obs.group.position.set(obs.x, (obs.type === 'urchin' ? obs.y : 0), obs.z);
       });
 
       // Raise start laser gates
@@ -2222,7 +2761,7 @@
         }
       }
 
-      // 5. Race State Physics & Fish Articulation
+      // 5. Race State Physics, Pathfinding & Fish Articulation
       let currentLeader = null;
       let maxDist = -1;
 
@@ -2236,26 +2775,44 @@
         });
 
         raceCompetitors.forEach(c => {
-          const baseSpeed = TRACK_DISTANCE / (RACE_DURATION_MS / 1000);
-          const randVariation = Math.sin((timestamp / 1000) * 3 + c.lane * 1.5) * 1.6;
+          const baseSpeed = TRACK_DISTANCE / (RACE_DURATION_MS / 1000); // 180 / 30s = 6 units/sec
+          const randVariation = Math.sin((timestamp / 1000) * 2.2 + c.lane * 1.4) * 0.9;
 
           // Check surge event
           c.surgeTimer -= delta;
-          if (c.surgeTimer <= 0 && !c.surgeActive && c.distance < 75) {
+          if (c.surgeTimer <= 0 && !c.surgeActive && c.distance < 80) {
             c.surgeActive = true;
-            c.surgeTimer = 2.4;
+            c.surgeTimer = 3.2;
             audio.playSplash();
           }
 
           let surgeBoost = 0;
           if (c.surgeActive) {
-            surgeBoost = 3.6;
+            surgeBoost = 2.4;
             c.surgeTimer -= delta;
             if (c.surgeTimer <= 0) c.surgeActive = false;
           }
 
           c.speed = baseSpeed + randVariation + surgeBoost;
           c.x += c.speed * delta;
+
+          // DYNAMIC OBSTACLE SENSING & PATHFINDING
+          let steerZ = 0;
+          let steerY = 0;
+          raceObstacles.forEach(obs => {
+            const dx = obs.x - c.x;
+            const dz = obs.z - c.z;
+            const dy = obs.y - c.y;
+            if (dx > 0 && dx < 18 && Math.abs(dz) < 6.2) {
+              const side = (dz >= 0) ? -1 : 1;
+              const strength = (1.0 - (dx / 18)) * 4.6;
+              steerZ += side * strength;
+              steerY += (dy >= 0 ? -1.0 : 1.0) * (1.0 - (dx / 18));
+            }
+          });
+
+          c.targetZ = c.baseZ + THREE.MathUtils.clamp(steerZ, -4.6, 4.6);
+          c.z += (c.targetZ - c.z) * delta * 5.2;
 
           // Check finish line
           if (c.x >= TRACK_FINISH_X) {
@@ -2293,16 +2850,21 @@
         if (!c.meshData) return;
 
         const isCurrentLeader = (currentLeader && currentLeader.fish.id === c.fish.id);
-        c.meshData.crownGroup.visible = !!isCurrentLeader;
-        if (isCurrentLeader) {
-          c.meshData.crownGroup.rotation.y += delta * 2.5;
+        const isWinner = (state.phase === 'payout' && state.winner && state.winner.id === c.fish.id);
+
+        c.meshData.crownGroup.visible = (isCurrentLeader || isWinner);
+        if (isCurrentLeader || isWinner) {
+          c.meshData.crownGroup.rotation.y += delta * (isWinner ? 4.5 : 2.5);
+          if (isWinner) {
+            c.meshData.crownGroup.scale.setScalar(1.2 + Math.sin(timestamp * 0.008) * 0.2);
+          }
         }
 
         let wagSpeed = 3.0; // Idle betting wag
         if (state.phase === 'racing') {
-          wagSpeed = 7.0 + (c.speed / 12) * 8.0;
+          wagSpeed = 7.0 + (c.speed / 6) * 6.0;
         } else if (state.phase === 'payout') {
-          wagSpeed = (state.winner && state.winner.id === c.fish.id) ? 9.0 : 3.0;
+          wagSpeed = isWinner ? 9.5 : 2.5;
         }
 
         c.swimPhase += delta * wagSpeed;
@@ -2317,21 +2879,64 @@
         c.meshData.pectoralL.rotation.z = Math.sin(c.swimPhase * 1.2) * 0.25;
         c.meshData.pectoralR.rotation.z = -Math.sin(c.swimPhase * 1.2) * 0.25;
 
-        // Position updates
+        // Position & Banking updates
         c.meshData.group.position.x = c.x;
-        c.meshData.group.position.y = c.baseY + Math.sin(c.swimPhase * 0.6) * 0.32;
-        c.meshData.group.rotation.z = w1 * 0.05;
+        c.meshData.group.position.z = c.z;
+
+        if (isWinner) {
+          // CELEBRATORY VICTORY LAP: Playful loop and bobbing
+          const winTime = (Date.now() - payoutStartTime) * 0.001;
+          c.meshData.group.position.y = c.baseY + Math.sin(winTime * 3) * 1.8;
+          c.meshData.group.rotation.x = Math.sin(winTime * 2.5) * 0.4;
+          c.meshData.group.rotation.z = Math.sin(winTime * 2) * 0.25;
+          // Spawn golden victory bubbles
+          if (Math.random() < 0.65) spawnFishBubble(c, true);
+        } else {
+          c.meshData.group.position.y = c.baseY + Math.sin(c.swimPhase * 0.6) * 0.32;
+          const bankAngle = (c.targetZ - c.z) * 0.12;
+          c.meshData.group.rotation.y = bankAngle;
+          c.meshData.group.rotation.z = bankAngle * 0.45;
+        }
       });
 
-      // 6. Camera Controller Modes
+      // 6. Dynamic Camera Controller Modes
       if (threeCamera && threeControls) {
-        if (cameraMode === 'broadcast') {
+        if (state.phase === 'payout' && state.winner) {
+          // CINEMATIC CELEBRATORY WINNER FOCUS CAM
+          const winC = raceCompetitors.find(item => item.fish.id === state.winner.id);
+          if (winC) {
+            const orbitAngle = (Date.now() - payoutStartTime) * 0.0012;
+            const camTargetPos = new THREE.Vector3(
+              winC.x + Math.sin(orbitAngle) * 16,
+              winC.baseY + 5 + Math.sin(orbitAngle * 1.5) * 2,
+              winC.z + Math.cos(orbitAngle) * 16
+            );
+            threeCamera.position.lerp(camTargetPos, 0.06);
+            threeControls.target.lerp(new THREE.Vector3(winC.x, winC.baseY + 1, winC.z), 0.06);
+            threeCamera.lookAt(threeControls.target);
+          }
+        } else if (cameraMode === 'broadcast') {
           const packX = (state.phase === 'racing')
             ? raceCompetitors.reduce((acc, c) => acc + c.x, 0) / 8
             : TRACK_START_X;
-          const targetCamX = THREE.MathUtils.clamp(packX - 10, -82, 75);
-          threeCamera.position.lerp(new THREE.Vector3(targetCamX, 28, 46), 0.05);
-          threeControls.target.lerp(new THREE.Vector3(targetCamX + 12, 0, 0), 0.05);
+          const isMobile = (window.innerWidth < 640);
+          if (isMobile) {
+            if (threeCamera.fov !== 62) {
+              threeCamera.fov = 62;
+              threeCamera.updateProjectionMatrix();
+            }
+            const targetCamX = THREE.MathUtils.clamp(packX - 16, -88, 70);
+            threeCamera.position.lerp(new THREE.Vector3(targetCamX, 26, 62), 0.05);
+            threeControls.target.lerp(new THREE.Vector3(targetCamX + 10, 0, 0), 0.05);
+          } else {
+            if (threeCamera.fov !== 50) {
+              threeCamera.fov = 50;
+              threeCamera.updateProjectionMatrix();
+            }
+            const targetCamX = THREE.MathUtils.clamp(packX - 10, -82, 75);
+            threeCamera.position.lerp(new THREE.Vector3(targetCamX, 28, 46), 0.05);
+            threeControls.target.lerp(new THREE.Vector3(targetCamX + 12, 0, 0), 0.05);
+          }
           threeCamera.lookAt(threeControls.target);
         } else if (cameraMode === 'chase') {
           const lead = currentLeader || raceCompetitors[0];
@@ -2359,14 +2964,15 @@
 
     /* Trigger Dramatic Photo Finish */
     function triggerPhotoFinish(winnerFish) {
+      payoutStartTime = Date.now();
       audio.playStarterHorn();
       const flashEl = document.getElementById('finish-flash');
       if (flashEl) {
         flashEl.classList.add('flash');
-        setTimeout(() => flashEl.classList.remove('flash'), 150);
+        setTimeout(() => flashEl.classList.remove('flash'), 180);
       }
 
-      // Finish race resolution
+      // Finish race resolution with celebratory showcase
       finishRace(winnerFish);
     }
 
@@ -2458,13 +3064,14 @@
         const card = document.createElement('div');
         card.className = 'fish-bet-card';
         card.id = `fish-card-${f.id}`;
+        card.style.borderTop = `3px solid ${f.color}`;
         card.onclick = () => placeFishBet(f.id);
 
         card.innerHTML = `
-          <span class="fish-lane-badge">L${f.id}</span>
+          <span class="fish-lane-badge" style="color: ${f.color}; background: ${f.color}24; border: 1px solid ${f.color}66;">L${f.id}</span>
           <div class="card-wager-pill" id="wager-pill-${f.id}">0</div>
           <div class="mini-fish-preview-box">
-            <canvas class="mini-fish-canvas" id="mini-fish-cv-${f.id}" width="54" height="40"></canvas>
+            <canvas class="mini-fish-canvas" id="mini-fish-cv-${f.id}" width="76" height="46"></canvas>
           </div>
           <div class="fish-name-label" style="color: ${f.color};">${f.name}</div>
           <div class="fish-odds-box">
@@ -2485,8 +3092,8 @@
           const cv = document.getElementById(`mini-fish-cv-${f.id}`);
           if (!cv) return;
           const mCtx = cv.getContext('2d');
-          mCtx.clearRect(0, 0, 54, 40);
-          drawTopDownFish(mCtx, 27, 20, 0, f, ts / 300);
+          mCtx.clearRect(0, 0, 76, 46);
+          drawProfileFish(mCtx, 76, 46, f, ts / 400);
         });
         requestAnimationFrame(renderMiniPreviews);
       }
@@ -3049,14 +3656,14 @@
 
     function startRacePhase() {
       state.phase = 'racing';
-      state.timeLeft = 15.0;
+      state.timeLeft = 30.0;
       updateTimerUI();
 
       state.lastBets = (state.activeSeat !== -1 && state.players[state.activeSeat]) ? { ...(state.players[state.activeSeat].bets || {}) } : {};
 
       const badge = document.getElementById('phase-badge');
       badge.className = 'phase-badge-title racing';
-      document.getElementById('phase-text').textContent = 'RACE IN PROGRESS (15s)';
+      document.getElementById('phase-text').textContent = 'RACE IN PROGRESS (30s)';
       setAnnouncer("THE GATES ARE OPEN! THEY'RE OFF IN THE AQUA DERBY!");
       renderSeats();
       updateBettingControls();
@@ -3074,7 +3681,7 @@
     function finishRace(winnerFish) {
       if (state.phase === 'payout') return;
       state.phase = 'payout';
-      state.timeLeft = 6.0;
+      state.timeLeft = 12.0;
       updateTimerUI();
       updateBettingControls();
 
@@ -3086,7 +3693,7 @@
 
       const badge = document.getElementById('phase-badge');
       badge.className = 'phase-badge-title payout';
-      document.getElementById('phase-text').textContent = 'PHOTO FINISH / PAYOUT';
+      document.getElementById('phase-text').textContent = 'VICTORY CELEBRATION (12s)';
 
       setAnnouncer(`🏆 WINNER: LANE ${winnerFish.id} ${winnerFish.name.toUpperCase()}! [${state.odds[winnerFish.id]}x]`);
 
@@ -3130,8 +3737,8 @@
       renderSeats();
       updatePlayerBetsUI();
 
-      // Restart next betting phase after 6s
-      setTimeout(startBettingPhase, 6000);
+      // Restart next betting phase after 12s celebratory showcase
+      setTimeout(startBettingPhase, 12000);
     }
 
     function setAnnouncer(text) {
