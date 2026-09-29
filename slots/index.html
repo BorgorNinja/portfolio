@@ -5931,13 +5931,17 @@
 
     let lastAmbientTime = 0;
     function drawAmbient(timestamp) {
+      if (document.hidden) {
+        requestAnimationFrame(drawAmbient);
+        return;
+      }
       // Pause ambient nebula drawing while reels are spinning on ALL devices to guarantee solid 60 FPS
       if (state.isSpinning) {
         requestAnimationFrame(drawAmbient);
         return;
       }
-      // Throttle ambient canvas to ~30fps on mobile to save battery and frame budget
-      if (isMobileDevice && timestamp - lastAmbientTime < 32) {
+      // Throttle ambient canvas to ~30fps on all devices to save battery and GPU frame budget
+      if (timestamp - lastAmbientTime < 33) {
         requestAnimationFrame(drawAmbient);
         return;
       }
@@ -5994,6 +5998,7 @@
     // Interactive 3D Cabinet Parallax
     let targetTiltX = 0, targetTiltY = 0;
     let currentTiltX = 0, currentTiltY = 0;
+    let isTiltTicking = false;
 
     function init3DParallax() {
       if (isMobileDevice) return; // Do NOT run 3D parallax on mobile touch screens
@@ -6008,30 +6013,45 @@
         const normX = (e.clientX - cx) / (rect.width / 2);
         const normY = (e.clientY - cy) / (rect.height / 2);
 
-        targetTiltY = Math.max(-5.5, Math.min(5.5, normX * 4.5));   // rotateY: tilt left/right
-        targetTiltX = Math.max(-4.5, Math.min(4.5, -normY * 3.5));  // rotateX: tilt up/down
+        targetTiltY = Math.max(-4, Math.min(4, normX * 3.5));
+        targetTiltX = Math.max(-3, Math.min(3, -normY * 2.5));
+        if (!isTiltTicking) {
+          isTiltTicking = true;
+          requestAnimationFrame(updateTilt);
+        }
       });
 
       stage.addEventListener('mouseleave', () => {
         targetTiltX = 0;
         targetTiltY = 0;
+        if (!isTiltTicking) {
+          isTiltTicking = true;
+          requestAnimationFrame(updateTilt);
+        }
       });
 
       function updateTilt() {
-        if (state.is3D) {
-          currentTiltX += (targetTiltX - currentTiltX) * 0.12;
-          currentTiltY += (targetTiltY - currentTiltY) * 0.12;
-          if (Math.abs(currentTiltX) > 0.02 || Math.abs(currentTiltY) > 0.02) {
-            gridEl.style.transform = `rotateX(${currentTiltX.toFixed(2)}deg) rotateY(${currentTiltY.toFixed(2)}deg)`;
-          } else {
-            gridEl.style.transform = '';
-          }
-        } else {
-          gridEl.style.transform = '';
+        if (!state.is3D || document.hidden) {
+          if (gridEl.style.transform !== '') gridEl.style.transform = '';
+          isTiltTicking = false;
+          return;
         }
-        requestAnimationFrame(updateTilt);
+        currentTiltX += (targetTiltX - currentTiltX) * 0.15;
+        currentTiltY += (targetTiltY - currentTiltY) * 0.15;
+        if (Math.abs(currentTiltX - targetTiltX) > 0.05 || Math.abs(currentTiltY - targetTiltY) > 0.05) {
+          gridEl.style.transform = `rotateX(${currentTiltX.toFixed(2)}deg) rotateY(${currentTiltY.toFixed(2)}deg)`;
+          requestAnimationFrame(updateTilt);
+        } else {
+          currentTiltX = targetTiltX;
+          currentTiltY = targetTiltY;
+          if (currentTiltX === 0 && currentTiltY === 0) {
+            gridEl.style.transform = '';
+          } else {
+            gridEl.style.transform = `rotateX(${currentTiltX.toFixed(2)}deg) rotateY(${currentTiltY.toFixed(2)}deg)`;
+          }
+          isTiltTicking = false;
+        }
       }
-      requestAnimationFrame(updateTilt);
     }
 
     // Spacebar to spin / dismiss overlay, Escape to close overlay
@@ -6417,11 +6437,16 @@
           state.globalMultiplier = 2;
           state.freeSpinsRemaining = 16;
         } else {
-          // 50% Gamble BUST: Reduced to 3 consolation spins
-          statusMsg.innerHTML = '<span style="color: #ef4444;">💀 BUST! Staked coins lost. 3 Consolation Spins awarded.</span>';
-          sound.playDrop(1.5);
+          // True 50/50 Gamble BUST: All staked coins lost! 0 free spins.
+          statusMsg.innerHTML = '<span style="color: #ef4444;">💀 BUST! Staked coins lost. Zero free spins awarded.</span>';
+          sound.playDrop(2.5);
           state.bonusMood = 'cold';
-          state.freeSpinsRemaining = 3;
+          state.freeSpinsRemaining = 0;
+          setTimeout(() => {
+            document.getElementById('gamble-wheel-modal').style.display = 'none';
+            renderUI();
+          }, 1800);
+          return;
         }
 
         setTimeout(() => {

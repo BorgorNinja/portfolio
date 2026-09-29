@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theater.css">
   <style>
     :root {
       --bg: #06080e;
@@ -601,10 +602,17 @@
     <!-- Games Grid with 3D Live Render Previews -->
         <!-- Category Filter Bar -->
     <div class="lobby-filter-bar">
-      <button class="filter-pill active" onclick="filterGames('all', this)">✨ All Games (9)</button>
-      <button class="filter-pill" onclick="filterGames('slots', this)">🎰 Slots Arena (4)</button>
-      <button class="filter-pill" onclick="filterGames('arcade', this)">🕹️ Arcade & Table (4)</button>
+      <button class="filter-pill active" onclick="filterGames('all', this)">✨ All Games (52)</button>
+      <button class="filter-pill" onclick="filterGames('slots', this)">🎰 Slots Arena (16)</button>
+      <button class="filter-pill" onclick="filterGames('cards', this)">🃏 Card Games (20)</button>
+      <button class="filter-pill" onclick="filterGames('betting', this)">🎲 Betting & Table (16)</button>
       <button class="filter-pill" onclick="filterGames('banking', this)">🗑️ E-Wallet (1)</button>
+    </div>
+
+    <!-- Live Search Bar -->
+    <div class="arcade-search-container" style="width: 100%; max-width: 680px; margin: 0 auto 28px; position: relative;">
+      <input type="text" id="arcade-search-input" placeholder="🔍 Search 50+ games (e.g. blackjack, crash, poker, plinko, 777, perya)..." style="width: 100%; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 14px; padding: 12px 42px 12px 20px; color: #fff; font-family: var(--font-sans); font-size: 0.95rem; outline: none; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); backdrop-filter: blur(10px);" oninput="handleArcadeSearch(this.value)">
+      <button onclick="clearArcadeSearch()" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; font-size: 1.1rem; cursor: pointer; padding: 4px;">✕</button>
     </div>
 
     <div class="games-grid">
@@ -754,7 +762,7 @@
       </div>
 
       <!-- Game 2: Cyber Pinball -->
-      <div class="game-card" id="card-pinball" data-category="arcade" style="--glow-color: rgba(56, 189, 248, 0.4); --border-hover: #38bdf8;" onclick="location.href='/pinball/'">
+      <div class="game-card" id="card-pinball" data-category="betting" style="--glow-color: rgba(56, 189, 248, 0.4); --border-hover: #38bdf8;" onclick="location.href='/pinball/'">
         <div class="preview-viewport">
           <canvas class="preview-canvas" id="canvas-preview-pinball" width="300" height="190"></canvas>
           <div class="live-badge">
@@ -792,7 +800,7 @@
       </div>
 
       <!-- Game 3: Neon 8-Ball Pool -->
-      <div class="game-card" id="card-pool" data-category="arcade" style="--glow-color: rgba(16, 185, 129, 0.4); --border-hover: #34d399;" onclick="location.href='/pool/'">
+      <div class="game-card" id="card-pool" data-category="betting" style="--glow-color: rgba(16, 185, 129, 0.4); --border-hover: #34d399;" onclick="location.href='/pool/'">
         <div class="preview-viewport">
           <canvas class="preview-canvas" id="canvas-preview-pool" width="300" height="190"></canvas>
           <div class="live-badge">
@@ -830,7 +838,7 @@
       </div>
 
       <!-- Game: Neon Velvet Roulette -->
-      <div class="game-card" id="card-roulette" data-category="arcade" style="--glow-color: rgba(245, 158, 11, 0.4); --border-hover: #f59e0b;" onclick="location.href='/roulette/'">
+      <div class="game-card" id="card-roulette" data-category="betting" style="--glow-color: rgba(245, 158, 11, 0.4); --border-hover: #f59e0b;" onclick="location.href='/roulette/'">
         <div class="preview-viewport">
           <canvas class="preview-canvas" id="canvas-preview-roulette" width="300" height="190"></canvas>
           <div class="live-badge">
@@ -866,7 +874,7 @@
       </div>
 
       <!-- Game: Cyber Aqua Fish Race -->
-      <div class="game-card" id="card-fishrace" data-category="arcade" style="--glow-color: rgba(6, 182, 212, 0.4); --border-hover: #06b6d4;" onclick="location.href='/fishrace/'">
+      <div class="game-card" id="card-fishrace" data-category="betting" style="--glow-color: rgba(6, 182, 212, 0.4); --border-hover: #06b6d4;" onclick="location.href='/fishrace/'">
         <div class="preview-viewport">
           <canvas class="preview-canvas" id="canvas-preview-fishrace" width="300" height="190"></canvas>
           <div class="live-badge">
@@ -1771,6 +1779,126 @@
 
     // Check matches on load
     fetchMatches();
+  </script>
+
+  <script src="games_data.js"></script>
+  <script src="casino_engine.js"></script>
+  <script>
+    /* =========================================================================
+       DYNAMIC 50+ GAMES CATALOG POPULATION & SEARCH
+       ========================================================================= */
+    function populateArcadeCatalog() {
+      if (typeof ARCADE_GAMES === 'undefined') return;
+      const grid = document.querySelector('.games-grid');
+      if (!grid) return;
+
+      const existingIds = new Set([
+        'slots_borgor', 'slots_cyber', 'slots_candy', 'slots_anubis',
+        'pinball', 'pool', 'perya_roulette', 'aqua_fishrace', 'jtrash'
+      ]);
+
+      ARCADE_GAMES.forEach(g => {
+        if (existingIds.has(g.id)) return; // Keep top custom preview cards
+
+        const card = document.createElement('div');
+        card.className = 'game-card';
+        card.id = `card-${g.id}`;
+        card.setAttribute('data-category', g.category);
+        card.style.setProperty('--glow-color', `${g.accent}55`);
+        card.style.setProperty('--border-hover', g.accent);
+
+        card.onclick = () => {
+          if (g.directUrl) window.location.href = g.directUrl;
+          else if (window.CasinoEngine) window.CasinoEngine.openGame(g.id);
+        };
+
+        card.innerHTML = `
+          <div class="preview-viewport" style="background: radial-gradient(circle at 50% 50%, ${g.accent}25 0%, #080c16 100%); display:flex; align-items:center; justify-content:center; position:relative; min-height:190px;">
+            <div style="font-size: 3.8rem; filter: drop-shadow(0 0 16px ${g.accent}66); transform: scale(1); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);">${g.icon}</div>
+            <div class="live-badge">
+              <span class="live-pulse-dot" style="background: ${g.accent}; box-shadow: 0 0 8px ${g.accent};"></span>
+              <span>${g.badge}</span>
+            </div>
+            <div style="position: absolute; bottom: 8px; right: 10px; font-size: 0.72rem; font-family: var(--font-mono); color: #94a3b8; background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">RTP ${g.rtp}</div>
+          </div>
+
+          <div class="card-body">
+            <div>
+              <div class="game-title-row">
+                <span class="game-name">${g.title}</span>
+                <span class="game-genre" style="color: ${g.accent};">${g.genre}</span>
+              </div>
+              <p class="game-blurb">${g.blurb}</p>
+            </div>
+
+            <div class="game-tags">
+              ${g.tags.map(t => `<span class="tag-badge">${t}</span>`).join('')}
+            </div>
+
+            <div class="card-actions" onclick="event.stopPropagation()">
+              <button class="btn-play-primary" style="background: linear-gradient(135deg, ${g.accent}ee, ${g.accent}99); border-color: ${g.accent}; color: #fff;" onclick="CasinoEngine.openGame('${g.id}')">
+                <span>🎮 Play Now</span>
+              </button>
+              <a href="/arcade/play.html?game=${g.id}" class="btn-challenge-secondary" style="border-color: rgba(255,255,255,0.15); color: #cbd5e1;" title="Open Pop-out Theater">
+                <span>⛶ Pop-out</span>
+              </a>
+            </div>
+          </div>
+        `;
+
+        // 3D tilt tracking for new card
+        card.addEventListener('mousemove', (e) => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          card.style.setProperty('--mouse-x', `${x}px`);
+          card.style.setProperty('--mouse-y', `${y}px`);
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+          const rotateX = ((y - centerY) / centerY) * -8;
+          const rotateY = ((x - centerX) / centerX) * 8;
+          card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.02, 1.02, 1.02)`;
+        });
+        card.addEventListener('mouseleave', () => {
+          card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+        });
+
+        grid.appendChild(card);
+      });
+    }
+
+    function handleArcadeSearch(query) {
+      const q = query.trim().toLowerCase();
+      const cards = document.querySelectorAll('.game-card');
+      cards.forEach(c => {
+        const text = c.textContent.toLowerCase();
+        if (!q || text.includes(q)) {
+          c.style.display = 'flex';
+        } else {
+          c.style.display = 'none';
+        }
+      });
+    }
+
+    function clearArcadeSearch() {
+      const input = document.getElementById('arcade-search-input');
+      if (input) {
+        input.value = '';
+        handleArcadeSearch('');
+      }
+    }
+
+    // Populate catalog
+    populateArcadeCatalog();
+
+    // Check ?game= parameter in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetGame = urlParams.get('game');
+    if (targetGame && window.CasinoEngine) {
+      setTimeout(() => {
+        window.CasinoEngine.openGame(targetGame);
+      }, 350);
+    }
   </script>
 </body>
 </html>
