@@ -603,6 +603,20 @@ const ARCADE_GAMES = [
     directUrl: '/slots/?variant=anubis'
   },
   {
+    id: 'slots_vegas',
+    title: 'Classic Vegas 777 (Arena)',
+    category: 'slots',
+    genre: 'Vegas High-Roller Scatter',
+    icon: '🎰',
+    badge: 'FLAMING 777',
+    accent: '#fde047',
+    rtp: '96.8%',
+    maxWin: '5000x',
+    blurb: 'Vegas Strip 6x5 scatter machine. Tumbling reels, flaming 500x multiplier stars, diamond vault crackdown, and 15 free spins.',
+    tags: ['6x5 Grid', 'Flaming 777s', '500x Stars', 'Tumble Drop'],
+    directUrl: '/slots/?variant=vegas'
+  },
+  {
     id: 'slot_vegas777',
     title: 'Classic Vegas 777',
     category: 'slots',

@@ -761,6 +761,42 @@
         </div>
       </div>
 
+            <!-- Slot 5: Classic Vegas 777 -->
+      <div class="game-card" id="card-slots-vegas" data-category="slots" style="--glow-color: rgba(253, 224, 71, 0.4); --border-hover: #fde047;" onclick="location.href='/slots/?variant=vegas'">
+        <div class="preview-viewport">
+          <canvas class="preview-canvas" id="canvas-preview-slots-vegas" width="300" height="190"></canvas>
+          <div class="live-badge">
+            <span class="live-pulse-dot" style="background: #fde047; box-shadow: 0 0 8px #fde047;"></span>
+            <span>FLAMING 777</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div>
+            <div class="game-title-row">
+              <span class="game-name">Classic Vegas 777</span>
+              <span class="game-genre" style="color: #fde047;">Vegas High-Roller Scatter</span>
+            </div>
+            <p class="game-blurb">
+              Vegas Strip 6x5 scatter machine. Tumbling reels, flaming 500x multiplier stars, diamond vault crackdown, and 15 free spins.
+            </p>
+          </div>
+
+          <div class="game-tags">
+            <span class="tag-badge">6x5 Grid</span>
+            <span class="tag-badge">Flaming 777s</span>
+            <span class="tag-badge">500x Stars</span>
+            <span class="tag-badge">Tumble Drop</span>
+          </div>
+
+          <div class="card-actions" onclick="event.stopPropagation()">
+            <a href="/slots/?variant=vegas" class="btn-play-primary" style="background: linear-gradient(135deg, #f59e0b, #d97706); border-color: #fde047; color: #000; font-weight:800;">
+              <span>🎰 Spin Vegas</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
       <!-- Game 2: Cyber Pinball -->
       <div class="game-card" id="card-pinball" data-category="betting" style="--glow-color: rgba(56, 189, 248, 0.4); --border-hover: #38bdf8;" onclick="location.href='/pinball/'">
         <div class="preview-viewport">
@@ -1047,6 +1083,56 @@
     const ctxSlotsCyber = cvSlotsCyber ? cvSlotsCyber.getContext('2d') : null;
     let angleCyber = 0.5;
     const cyberSymbols = ['⚡', '💾', '🤖', '🔮', '🗡️', '💠'];
+
+        // 1E. CLASSIC VEGAS 777: Rotating 3D Golden Stepper Cylinder Drum
+    const cvSlotsVegas = document.getElementById('canvas-preview-slots-vegas');
+    const ctxSlotsVegas = cvSlotsVegas ? cvSlotsVegas.getContext('2d') : null;
+    let angleVegas = 1.8;
+    const vegasSymbols = ['7️⃣', 'BAR', '🔔', '💎', '🍒', '👑'];
+
+    function renderSlotsVegas3D() {
+      if (!ctxSlotsVegas) return;
+      ctxSlotsVegas.clearRect(0, 0, 300, 190);
+      angleVegas += 0.024;
+      const cx = 150;
+      const cy = 95;
+      const radius = 62;
+
+      ctxSlotsVegas.save();
+      ctxSlotsVegas.strokeStyle = 'rgba(253, 224, 71, 0.45)';
+      ctxSlotsVegas.lineWidth = 2;
+      ctxSlotsVegas.beginPath();
+      ctxSlotsVegas.ellipse(cx, cy - 25, radius + 15, 20, 0, 0, Math.PI * 2);
+      ctxSlotsVegas.stroke();
+      ctxSlotsVegas.beginPath();
+      ctxSlotsVegas.ellipse(cx, cy + 25, radius + 15, 20, 0, 0, Math.PI * 2);
+      ctxSlotsVegas.stroke();
+
+      const total = vegasSymbols.length;
+      for (let i = 0; i < total; i++) {
+        const a = angleVegas + (i * (Math.PI * 2 / total));
+        const cos = Math.cos(a);
+        const sin = Math.sin(a);
+        const depth = (sin + 1) / 2;
+        const scale = 0.5 + depth * 0.7;
+        const alpha = 0.2 + depth * 0.8;
+        const x = cx + cos * (radius + 15);
+        const y = cy + sin * 18;
+
+        if (sin > -0.6) {
+          ctxSlotsVegas.save();
+          ctxSlotsVegas.globalAlpha = alpha;
+          ctxSlotsVegas.font = `${Math.round(26 * scale)}px sans-serif`;
+          ctxSlotsVegas.textAlign = 'center';
+          ctxSlotsVegas.textBaseline = 'middle';
+          ctxSlotsVegas.shadowColor = '#fde047';
+          ctxSlotsVegas.shadowBlur = depth > 0.7 ? 16 : 0;
+          ctxSlotsVegas.fillText(vegasSymbols[i], x, y);
+          ctxSlotsVegas.restore();
+        }
+      }
+      ctxSlotsVegas.restore();
+    }
 
     function renderSlotsCyber3D() {
       if (!ctxSlotsCyber) return;
@@ -1656,6 +1742,7 @@
     function animate() {
       renderSlots3D();
       renderSlotsCyber3D();
+        renderSlotsVegas3D();
       renderSlotsCandy3D();
       renderSlotsAnubis3D();
       renderPinball3D();
@@ -1793,7 +1880,7 @@
       if (!grid) return;
 
       const existingIds = new Set([
-        'slots_borgor', 'slots_cyber', 'slots_candy', 'slots_anubis',
+        'slots_borgor', 'slots_cyber', 'slots_candy', 'slots_anubis', 'slots_vegas', 'slot_vegas777',
         'pinball', 'pool', 'perya_roulette', 'aqua_fishrace', 'jtrash'
       ]);
 
