@@ -715,3 +715,188 @@
   font-size: 2rem;
   user-select: none;
 }
+
+
+/* =========================================================================
+   HIGH-GRADE VEGAS & GATES OF BORGOR SLOT CABINET ENHANCEMENTS
+   ========================================================================= */
+.slot-cabinet-frame {
+  background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #090a16 70%, #030712 100%) !important;
+  border: 3px solid #f5b041 !important;
+  box-shadow: 0 0 35px rgba(245, 176, 65, 0.4), inset 0 0 25px rgba(0, 0, 0, 0.9) !important;
+  border-radius: 24px !important;
+  padding: 22px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 16px !important;
+  position: relative !important;
+  overflow: hidden;
+}
+
+.slot-cabinet-frame::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #f59e0b, #fef08a, #f59e0b, #38bdf8, #f59e0b);
+  box-shadow: 0 0 12px #fde047;
+}
+
+.slot-reels-stage {
+  display: grid !important;
+  gap: 10px !important;
+  width: 100% !important;
+  max-width: 620px !important;
+  background: #060913 !important;
+  border: 3px solid rgba(245, 176, 65, 0.5) !important;
+  border-radius: 18px !important;
+  padding: 12px !important;
+  position: relative !important;
+  box-shadow: inset 0 30px 30px -10px rgba(0,0,0,0.85), inset 0 -30px 30px -10px rgba(0,0,0,0.85), 0 10px 25px rgba(0,0,0,0.7) !important;
+  overflow: hidden;
+}
+
+.slot-reels-stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(255,255,255,0.04) 45%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 55%, rgba(0,0,0,0.75) 100%);
+  border-radius: 15px;
+}
+
+.slot-reel-strip {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  background: linear-gradient(180deg, #0f172a 0%, #090d16 50%, #0f172a 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 12px !important;
+  padding: 8px !important;
+  overflow: hidden !important;
+  transition: transform 0.15s ease-out;
+}
+
+.slot-reel-strip.reel-spinning {
+  filter: blur(2px);
+  transform: translateY(-8px);
+}
+
+@keyframes reelBounceStop {
+  0% { transform: translateY(-24px); }
+  65% { transform: translateY(8px); }
+  85% { transform: translateY(-3px); }
+  100% { transform: translateY(0); }
+}
+
+.slot-reel-strip.reel-bounce-stop {
+  animation: reelBounceStop 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.slot-symbol-box {
+  aspect-ratio: 1 !important;
+  background: radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.06) 0%, rgba(0, 0, 0, 0.4) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 6px !important;
+  user-select: none !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s;
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.06), 0 3px 6px rgba(0,0,0,0.4);
+}
+
+.slot-svg-sym {
+  width: 82%;
+  height: 82%;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes winGlowPulse {
+  0% { transform: scale(1); filter: drop-shadow(0 0 6px #fde047) brightness(1.1); }
+  50% { transform: scale(1.1); filter: drop-shadow(0 0 20px #f59e0b) drop-shadow(0 0 35px #fde047) brightness(1.4); }
+  100% { transform: scale(1); filter: drop-shadow(0 0 6px #fde047) brightness(1.1); }
+}
+
+.winning-symbol-glow {
+  animation: winGlowPulse 0.8s infinite ease-in-out !important;
+  border: 2px solid #fde047 !important;
+  background: radial-gradient(circle, rgba(245, 176, 65, 0.35) 0%, rgba(0,0,0,0.6) 100%) !important;
+  z-index: 5;
+}
+
+/* CELEBRATION OVERLAY & PARTICLE CANVAS */
+.theater-particle-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1005;
+}
+
+.win-celebration-banner {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.7);
+  background: radial-gradient(circle, #1e1b4b 0%, #090a16 80%, #030712 100%);
+  border: 3px solid #f5b041;
+  box-shadow: 0 0 50px rgba(245, 176, 65, 0.7), 0 20px 60px rgba(0,0,0,0.9);
+  border-radius: 24px;
+  padding: 24px 44px;
+  text-align: center;
+  z-index: 1010;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.win-celebration-banner.active {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.win-celebration-title {
+  font-family: var(--font-display, 'Cinzel', serif);
+  font-size: 2.2rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #d97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 25px rgba(245, 176, 65, 0.6);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.win-celebration-amount {
+  font-family: var(--font-mono, monospace);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #38bdf8;
+  text-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
+}
+
+/* LUXURY TABLE & CARD POLISH */
+.felt-table {
+  background: radial-gradient(circle at 50% 40%, #064e3b 0%, #022c22 65%, #011913 100%) !important;
+  border: 4px solid #f5b041 !important;
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(16, 185, 129, 0.25) !important;
+  border-radius: 28px !important;
+}
+
+.casino-card {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6), 0 1px 3px rgba(0,0,0,0.4) !important;
+  border: 1px solid rgba(0,0,0,0.15) !important;
+}
+
+.casino-card.card-royal {
+  border: 1.5px solid #d97706 !important;
+  background: linear-gradient(135deg, #ffffff 0%, #fefce8 100%) !important;
+}

@@ -1,27 +1,201 @@
 /**
- * BORGOR ARCADIA & GRAND CASINO — UNIVERSAL ENGINE
- * High-performance, 60 FPS, Web Audio powered gaming engine for all 52+ games.
+ * BORGOR ARCADIA & GRAND CASINO — HIGH-GRADE VEGAS ENGINE
+ * High-performance, 60 FPS, Web Audio & Vector SVG powered gaming engine.
+ * Calibrated to the visual and acoustic standard of Gates of Borgor.
  */
 (function() {
   'use strict';
 
   /* =========================================================================
-     1. WEB AUDIO PROCEDURAL SYNTHESIZER
+     1. VECTOR SVG SYMBOL LIBRARY (GATES OF BORGOR STANDARD)
+     ========================================================================= */
+  const SVGS = {
+    seven: `<svg viewBox="0 0 100 100" class="slot-svg-sym">
+      <defs>
+        <linearGradient id="gold7" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#fff5c0"/>
+          <stop offset="30%" stop-color="#f59e0b"/>
+          <stop offset="70%" stop-color="#d97706"/>
+          <stop offset="100%" stop-color="#78350f"/>
+        </linearGradient>
+      </defs>
+      <path d="M18 16 L82 16 L82 32 L54 84 L34 84 L58 32 L18 32 Z" fill="url(#gold7)" stroke="#fef08a" stroke-width="3"/>
+      <path d="M24 22 L76 22 L76 28 L56 72 L44 72 L62 28 L24 28 Z" fill="#ffffff" opacity="0.45"/>
+      <polygon points="78,14 80,18 84,20 80,22 78,26 76,22 72,20 76,18" fill="#fff"/>
+    </svg>`,
+
+    bar: `<svg viewBox="0 0 100 100" class="slot-svg-sym">
+      <defs>
+        <linearGradient id="barGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#f8fafc"/>
+          <stop offset="25%" stop-color="#94a3b8"/>
+          <stop offset="75%" stop-color="#475569"/>
+          <stop offset="100%" stop-color="#0f172a"/>
+        </linearGradient>
+        <linearGradient id="goldPlate" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#f59e0b"/>
+          <stop offset="50%" stop-color="#fef08a"/>
+          <stop offset="100%" stop-color="#d97706"/>
+        </linearGradient>
+      </defs>
+      <rect x="10" y="24" width="80" height="52" rx="8" fill="url(#barGrad)" stroke="url(#goldPlate)" stroke-width="4"/>
+      <rect x="14" y="28" width="72" height="44" rx="6" fill="#090d16" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+      <text x="50" y="58" font-family="'Cinzel', sans-serif" font-size="22" font-weight="900" fill="url(#goldPlate)" text-anchor="middle" letter-spacing="3">BAR</text>
+    </svg>`,
+
+    bell: `<svg viewBox="0 0 100 100" class="slot-svg-sym">
+      <defs>
+        <linearGradient id="bellGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#fef08a"/>
+          <stop offset="40%" stop-color="#f59e0b"/>
+          <stop offset="85%" stop-color="#b45309"/>
+          <stop offset="100%" stop-color="#78350f"/>
+        </linearGradient>
+      </defs>
+      <ellipse cx="50" cy="18" rx="8" ry="5" fill="#f59e0b" stroke="#fef08a" stroke-width="2"/>
+      <path d="M50 18 C38 28, 22 55, 18 72 L82 72 C78 55, 62 28, 50 18 Z" fill="url(#bellGrad)" stroke="#fef08a" stroke-width="2.5"/>
+      <ellipse cx="50" cy="74" rx="36" ry="7" fill="#b45309" stroke="#fef08a" stroke-width="2"/>
+      <ellipse cx="50" cy="80" rx="9" ry="8" fill="#f59e0b" stroke="#78350f" stroke-width="2"/>
+      <path d="M30 40 Q40 50 42 66" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
+    </svg>`,
+
+    diamond: `<svg viewBox="0 0 100 100" class="slot-svg-sym">
+      <defs>
+        <linearGradient id="diaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#e0f2fe"/>
+          <stop offset="35%" stop-color="#38bdf8"/>
+          <stop offset="80%" stop-color="#0284c7"/>
+          <stop offset="100%" stop-color="#075985"/>
+        </linearGradient>
+      </defs>
+      <polygon points="50,14 84,36 50,86 16,36" fill="url(#diaGrad)" stroke="#bae6fd" stroke-width="2.5"/>
+      <polygon points="50,14 66,36 50,86 34,36" fill="#38bdf8" opacity="0.6" stroke="#bae6fd" stroke-width="1.5"/>
+      <polygon points="34,36 50,14 66,36 50,44" fill="#e0f2fe" opacity="0.8"/>
+      <line x1="16" y1="36" x2="84" y2="36" stroke="#bae6fd" stroke-width="1.5"/>
+      <circle cx="50" cy="24" r="3" fill="#fff"/>
+    </svg>`,
+
+    crown: `<svg viewBox="0 0 100 100" class="slot-svg-sym">
+      <defs>
+        <linearGradient id="crownGold" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#fef08a"/>
+          <stop offset="50%" stop-color="#f59e0b"/>
+          <stop offset="100%" stop-color="#b45309"/>
+        </linearGradient>
+      </defs>
+      <path d="M16 72 L84 72 L90 34 L68 52 L50 22 L32 52 L10 34 Z" fill="url(#crownGold)" stroke="#fef08a" stroke-width="2.5"/>
+      <rect x="14" y="68" width="72" height="12" rx="3" fill="#b45309" stroke="#fef08a" stroke-width="2"/>
+      <circle cx="10" cy="32" r="4" fill="#ef4444" stroke="#fef08a" stroke-width="1"/>
+      <circle cx="50" cy="20" r="5" fill="#38bdf8" stroke="#fef08a" stroke-width="1.5"/>
+      <circle cx="90" cy="32" r="4" fill="#ef4444" stroke="#fef08a" stroke-width="1"/>
+    </svg>`,
+
+    cherry: `<svg viewBox="0 0 100 100" class="slot-svg-sym">
+      <defs>
+        <radialGradient id="cherryRed" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stop-color="#f87171"/>
+          <stop offset="40%" stop-color="#dc2626"/>
+          <stop offset="85%" stop-color="#991b1b"/>
+          <stop offset="100%" stop-color="#450a0a"/>
+        </radialGradient>
+      </defs>
+      <path d="M36 46 Q46 16 66 18 Q62 26 44 48" fill="none" stroke="#65a30d" stroke-width="3" stroke-linecap="round"/>
+      <path d="M64 54 Q68 28 66 18" fill="none" stroke="#65a30d" stroke-width="3" stroke-linecap="round"/>
+      <path d="M66 18 Q80 14 84 24 Q74 28 66 18 Z" fill="#84cc16" stroke="#4d7c0f" stroke-width="1"/>
+      <circle cx="34" cy="62" r="20" fill="url(#cherryRed)" stroke="#fca5a5" stroke-width="1.5"/>
+      <circle cx="66" cy="68" r="19" fill="url(#cherryRed)" stroke="#fca5a5" stroke-width="1.5"/>
+      <ellipse cx="28" cy="54" rx="4" ry="2.5" fill="#fff" opacity="0.75" transform="rotate(-30 28 54)"/>
+    </svg>`,
+
+    scatter: `<svg viewBox="0 0 100 100" class="slot-svg-sym">
+      <defs>
+        <radialGradient id="scGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fff" stop-opacity="0.9"/>
+          <stop offset="60%" stop-color="#f59e0b" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#b45309" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="scBun" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#fef08a"/>
+          <stop offset="40%" stop-color="#f59e0b"/>
+          <stop offset="100%" stop-color="#9a3412"/>
+        </linearGradient>
+      </defs>
+      <circle cx="50" cy="50" r="46" fill="url(#scGlow)"/>
+      <circle cx="50" cy="50" r="42" fill="none" stroke="#fef08a" stroke-width="2" stroke-dasharray="6,4"/>
+      <path d="M22 42 C22 24, 78 24, 78 42 Z" fill="url(#scBun)" stroke="#fef08a" stroke-width="2"/>
+      <ellipse cx="36" cy="33" rx="2" ry="1.2" fill="#fff"/>
+      <ellipse cx="64" cy="33" rx="2" ry="1.2" fill="#fff"/>
+      <rect x="18" y="46" width="64" height="10" rx="3" fill="#16a34a" stroke="#22c55e" stroke-width="1.5"/>
+      <rect x="16" y="58" width="68" height="12" rx="4" fill="#78350f" stroke="#451a03" stroke-width="1.5"/>
+      <path d="M22 72 C22 84, 78 84, 78 72 Z" fill="url(#scBun)" stroke="#fef08a" stroke-width="2"/>
+    </svg>`,
+
+    coin: `<svg viewBox="0 0 100 100" class="slot-svg-sym">
+      <defs>
+        <radialGradient id="goldCoin" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fef08a"/>
+          <stop offset="60%" stop-color="#f59e0b"/>
+          <stop offset="100%" stop-color="#b45309"/>
+        </radialGradient>
+      </defs>
+      <circle cx="50" cy="50" r="42" fill="url(#goldCoin)" stroke="#fef08a" stroke-width="3"/>
+      <circle cx="50" cy="50" r="32" fill="none" stroke="#78350f" stroke-width="2"/>
+      <rect x="40" y="40" width="20" height="20" rx="2" fill="#78350f" stroke="#fef08a" stroke-width="2"/>
+      <circle cx="50" cy="20" r="2.5" fill="#fef08a"/>
+      <circle cx="50" cy="80" r="2.5" fill="#fef08a"/>
+    </svg>`
+  };
+
+  function getSymbolHTML(sym) {
+    if (sym === '7️⃣' || sym === 'seven') return SVGS.seven;
+    if (sym === 'BAR' || sym === 'bar') return SVGS.bar;
+    if (sym === '🔔' || sym === 'bell') return SVGS.bell;
+    if (sym === '💎' || sym === 'diamond') return SVGS.diamond;
+    if (sym === '👑' || sym === 'crown') return SVGS.crown;
+    if (sym === '🍒' || sym === 'cherry') return SVGS.cherry;
+    if (sym === '🪙' || sym === 'coin') return SVGS.coin;
+    if (sym === '🍔' || sym === 'scatter') return SVGS.scatter;
+
+    // Fallback crisp badge with drop shadow for other thematic emoji
+    return `<div style="font-size:2.2rem; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.6)); line-height:1;">${sym}</div>`;
+  }
+
+  /* =========================================================================
+     2. WEB AUDIO PROCEDURAL SYNTHESIZER (GATES OF BORGOR AUDIO CORE)
      ========================================================================= */
   class SoundEngine {
     constructor() {
       this.ctx = null;
       this.muted = localStorage.getItem('borgor_arcade_muted') === '1';
+      this.masterGain = null;
     }
 
     init() {
       if (!this.ctx) {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (AudioCtx) this.ctx = new AudioCtx();
+        if (AudioCtx) {
+          this.ctx = new AudioCtx();
+          this.masterGain = this.ctx.createGain();
+          this.masterGain.gain.setValueAtTime(0.9, this.ctx.currentTime);
+
+          const comp = this.ctx.createDynamicsCompressor();
+          comp.threshold.setValueAtTime(-12, this.ctx.currentTime);
+          comp.knee.setValueAtTime(24, this.ctx.currentTime);
+          comp.ratio.setValueAtTime(10, this.ctx.currentTime);
+          comp.attack.setValueAtTime(0.003, this.ctx.currentTime);
+          comp.release.setValueAtTime(0.25, this.ctx.currentTime);
+
+          this.masterGain.connect(comp);
+          comp.connect(this.ctx.destination);
+        }
       }
       if (this.ctx && this.ctx.state === 'suspended') {
         this.ctx.resume();
       }
+    }
+
+    out() {
+      return this.masterGain || (this.ctx ? this.ctx.destination : null);
     }
 
     toggleMute() {
@@ -42,73 +216,351 @@
         gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        gain.connect(this.out());
         osc.start();
         osc.stop(this.ctx.currentTime + duration);
       } catch (e) {}
     }
 
+    lever() {
+      if (this.muted) return;
+      this.init();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      // Mechanical lever thud
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(240, now);
+      osc.frequency.exponentialRampToValueAtTime(55, now + 0.16);
+      gain.gain.setValueAtTime(0.4, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+      osc.connect(gain);
+      gain.connect(this.out());
+      osc.start(now);
+      osc.stop(now + 0.18);
+    }
+
+    spinTick() {
+      if (this.muted) return;
+      this.init();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(750 + Math.random() * 250, now);
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+      osc.connect(gain);
+      gain.connect(this.out());
+      osc.start(now);
+      osc.stop(now + 0.035);
+    }
+
+    reelStop(reelIdx = 0) {
+      if (this.muted) return;
+      this.init();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const baseFreq = 260 + (reelIdx * 65);
+
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(baseFreq, now);
+      osc.frequency.exponentialRampToValueAtTime(60, now + 0.14);
+      gain.gain.setValueAtTime(0.35, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      osc.connect(gain);
+      gain.connect(this.out());
+      osc.start(now);
+      osc.stop(now + 0.15);
+
+      // Clack metallic component
+      const click = this.ctx.createOscillator();
+      const clickGain = this.ctx.createGain();
+      click.type = 'square';
+      click.frequency.setValueAtTime(1400 + (reelIdx * 120), now);
+      clickGain.gain.setValueAtTime(0.12, now);
+      clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+      click.connect(clickGain);
+      clickGain.connect(this.out());
+      click.start(now);
+      click.stop(now + 0.04);
+    }
+
+    fanfare(amount = 0) {
+      if (this.muted) return;
+      this.init();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const chords = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+      chords.forEach((freq, idx) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + (idx * 0.07));
+        gain.gain.setValueAtTime(0.22, now + (idx * 0.07));
+        gain.gain.exponentialRampToValueAtTime(0.001, now + (idx * 0.07) + 0.35);
+        osc.connect(gain);
+        gain.connect(this.out());
+        osc.start(now + (idx * 0.07));
+        osc.stop(now + (idx * 0.07) + 0.35);
+      });
+
+      // Rapid coin shower clinks
+      for (let c = 0; c < 8; c++) {
+        setTimeout(() => {
+          if (!this.ctx) return;
+          const t = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(2200 + Math.random() * 1400, t);
+          gain.gain.setValueAtTime(0.14, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+          osc.connect(gain);
+          gain.connect(this.out());
+          osc.start(t);
+          osc.stop(t + 0.05);
+        }, 120 + (c * 65));
+      }
+    }
+
     chip() {
-      this.playTone(1800, 'sine', 0.04, 0.12);
-      setTimeout(() => this.playTone(2400, 'triangle', 0.05, 0.08), 25);
+      if (this.muted) return;
+      this.init();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(1800, now);
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+      osc.connect(gain);
+      gain.connect(this.out());
+      osc.start(now);
+      osc.stop(now + 0.04);
     }
 
     card() {
-      this.playTone(400, 'triangle', 0.06, 0.1);
-      setTimeout(() => this.playTone(800, 'sine', 0.05, 0.08), 35);
+      if (this.muted) return;
+      this.init();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(380, now);
+      osc.frequency.exponentialRampToValueAtTime(140, now + 0.07);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      osc.connect(gain);
+      gain.connect(this.out());
+      osc.start(now);
+      osc.stop(now + 0.08);
     }
 
-    win() {
-      const chords = [523.25, 659.25, 783.99, 1046.50];
-      chords.forEach((freq, idx) => {
-        setTimeout(() => this.playTone(freq, 'triangle', 0.22, 0.15), idx * 70);
-      });
-    }
-
-    bigWin() {
-      const chords = [440, 554.37, 659.25, 880, 1108.73, 1318.51, 1760];
-      chords.forEach((freq, idx) => {
-        setTimeout(() => this.playTone(freq, 'sawtooth', 0.35, 0.12), idx * 80);
-      });
-    }
+    win() { this.fanfare(); }
+    bigWin() { this.fanfare(); }
+    spin() { this.spinTick(); }
 
     lose() {
-      this.playTone(320, 'sawtooth', 0.15, 0.12);
-      setTimeout(() => this.playTone(220, 'sawtooth', 0.25, 0.14), 110);
+      if (this.muted) return;
+      this.init();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(260, now);
+      osc.frequency.linearRampToValueAtTime(130, now + 0.22);
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+      osc.connect(gain);
+      gain.connect(this.out());
+      osc.start(now);
+      osc.stop(now + 0.24);
     }
 
     click() {
-      this.playTone(880, 'sine', 0.03, 0.08);
-    }
-
-    spin() {
-      this.playTone(600 + Math.random() * 400, 'square', 0.04, 0.06);
+      if (this.muted) return;
+      this.init();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, now);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+      osc.connect(gain);
+      gain.connect(this.out());
+      osc.start(now);
+      osc.stop(now + 0.025);
     }
 
     dice() {
       for (let i = 0; i < 4; i++) {
-        setTimeout(() => this.playTone(900 + Math.random() * 300, 'triangle', 0.05, 0.09), i * 40);
+        setTimeout(() => this.chip(), i * 40);
       }
     }
 
     rocket() {
-      this.playTone(120, 'sawtooth', 0.2, 0.15);
+      if (this.muted) return;
+      this.init();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(110, now);
+      osc.frequency.exponentialRampToValueAtTime(280, now + 0.3);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      osc.connect(gain);
+      gain.connect(this.out());
+      osc.start(now);
+      osc.stop(now + 0.35);
     }
 
     boom() {
-      this.playTone(80, 'sawtooth', 0.4, 0.25);
+      if (this.muted) return;
+      this.init();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(120, now);
+      osc.frequency.exponentialRampToValueAtTime(25, now + 0.35);
+      gain.gain.setValueAtTime(0.5, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+      osc.connect(gain);
+      gain.connect(this.out());
+      osc.start(now);
+      osc.stop(now + 0.38);
     }
 
     cashout() {
-      this.playTone(1046.50, 'sine', 0.15, 0.18);
-      setTimeout(() => this.playTone(1318.51, 'sine', 0.25, 0.2), 90);
+      this.fanfare();
     }
   }
 
   const sound = new SoundEngine();
 
   /* =========================================================================
-     2. WALLET & BALANCE CONTROLLER
+     3. 60 FPS PARTICLE BURST & CELEBRATION ENGINE
+     ========================================================================= */
+  class CelebrationEngine {
+    constructor() {
+      this.canvas = null;
+      this.ctx = null;
+      this.particles = [];
+      this.animId = null;
+    }
+
+    init(container) {
+      if (this.canvas) return;
+      this.canvas = document.createElement('canvas');
+      this.canvas.className = 'theater-particle-canvas';
+      container.appendChild(this.canvas);
+      this.ctx = this.canvas.getContext('2d');
+      this.resize();
+      window.addEventListener('resize', () => this.resize());
+    }
+
+    resize() {
+      if (!this.canvas) return;
+      const rect = this.canvas.getBoundingClientRect();
+      this.canvas.width = rect.width || 800;
+      this.canvas.height = rect.height || 600;
+    }
+
+    burst(type = 'win', count = 60) {
+      if (!this.canvas) return;
+      this.resize();
+      const w = this.canvas.width;
+      const h = this.canvas.height;
+      const centerX = w / 2;
+      const centerY = h / 2;
+
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 4 + Math.random() * 9;
+        this.particles.push({
+          x: centerX,
+          y: centerY,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 3,
+          gravity: 0.28,
+          size: 5 + Math.random() * 7,
+          color: ['#fde047', '#f59e0b', '#38bdf8', '#ffffff', '#a855f7'][Math.floor(Math.random() * 5)],
+          isCoin: Math.random() > 0.4,
+          rotation: Math.random() * Math.PI,
+          vRot: (Math.random() - 0.5) * 0.2,
+          life: 1,
+          decay: 0.015 + Math.random() * 0.015
+        });
+      }
+
+      if (!this.animId) {
+        this.loop();
+      }
+    }
+
+    loop() {
+      if (!this.ctx || !this.canvas) return;
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+      for (let i = this.particles.length - 1; i >= 0; i--) {
+        const p = this.particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += p.gravity;
+        p.rotation += p.vRot;
+        p.life -= p.decay;
+
+        if (p.life <= 0 || p.y > this.canvas.height + 20) {
+          this.particles.splice(i, 1);
+          continue;
+        }
+
+        this.ctx.save();
+        this.ctx.globalAlpha = Math.max(0, p.life);
+        this.ctx.translate(p.x, p.y);
+        this.ctx.rotate(p.rotation);
+
+        if (p.isCoin) {
+          this.ctx.fillStyle = '#f59e0b';
+          this.ctx.strokeStyle = '#fef08a';
+          this.ctx.lineWidth = 1.5;
+          this.ctx.beginPath();
+          this.ctx.ellipse(0, 0, p.size, p.size * 0.5, 0, 0, Math.PI * 2);
+          this.ctx.fill();
+          this.ctx.stroke();
+        } else {
+          this.ctx.fillStyle = p.color;
+          this.ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+        }
+
+        this.ctx.restore();
+      }
+
+      if (this.particles.length > 0) {
+        this.animId = requestAnimationFrame(() => this.loop());
+      } else {
+        this.animId = null;
+      }
+    }
+  }
+
+  const celebration = new CelebrationEngine();
+
+  /* =========================================================================
+     4. WALLET & BALANCE CONTROLLER
      ========================================================================= */
   class WalletManager {
     constructor() {
@@ -125,7 +577,6 @@
     saveBalance() {
       localStorage.setItem('borgor_slots_balance', this.balance);
       localStorage.setItem('jtrash_wallet_balance', this.balance);
-      // Update DOM HUD if present
       const slotHud = document.getElementById('hud-slot-bal');
       if (slotHud) slotHud.textContent = this.balance.toLocaleString();
       const walletHud = document.getElementById('hud-wallet-bal');
@@ -133,13 +584,8 @@
       this.listeners.forEach(cb => cb(this.balance));
     }
 
-    subscribe(cb) {
-      this.listeners.push(cb);
-    }
-
-    get() {
-      return this.balance;
-    }
+    subscribe(cb) { this.listeners.push(cb); }
+    get() { return this.balance; }
 
     deduct(amt) {
       if (this.balance < amt) return false;
@@ -163,7 +609,7 @@
   const wallet = new WalletManager();
 
   /* =========================================================================
-     3. DECK OF CARDS UTILITIES
+     5. DECK OF CARDS & CASINO FELT UTILITIES
      ========================================================================= */
   const SUITS = ['♠', '♥', '♦', '♣'];
   const RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
@@ -208,8 +654,9 @@
         </div>
       `;
     }
+    const isRoyal = ['J', 'Q', 'K', 'A'].includes(card.rank);
     return `
-      <div class="casino-card" style="color: ${card.color};">
+      <div class="casino-card ${isRoyal ? 'card-royal' : ''}" style="color: ${card.color};">
         <div class="card-corner top-left">
           <span>${card.rank}</span>
           <span class="suit-icon">${card.suit}</span>
@@ -223,11 +670,6 @@
     `;
   }
 
-  /* =========================================================================
-     4. GAME TEMPLATES & ENGINES
-     ========================================================================= */
-
-  /* --- 4A: BLACKJACK FAMILY (Classic, Single Deck, Pontoon, Spanish 21) --- */
   function buildBlackjack(gameDef, container) {
     let deck = createDeck(gameDef.id === 'single_deck_bj' ? 1 : 6);
     let bet = 100;
@@ -1213,7 +1655,11 @@
     };
   }
 
-  /* --- 4G: UNIVERSAL SLOT ENGINE (Vegas 777, Fruit Fiesta, Dragon Hold, etc.) --- */
+
+
+  /* =========================================================================
+     4G: HIGH-GRADE VEGAS SLOT ENGINE (GATES OF BORGOR QUALITY STANDARD)
+     ========================================================================= */
   function buildGenericSlot(gameDef, container) {
     let bet = 100;
     const is3Reel = gameDef.id === 'slot_vegas777';
@@ -1221,32 +1667,34 @@
     const numRows = 3;
 
     const symbolsMap = {
-      slot_vegas777: ['🍒', '🍋', '🔔', 'BAR', '7️⃣'],
-      slot_fruit_fiesta: ['🍉', '🍇', '🍊', '🍓', '⭐', '7️⃣'],
-      slot_dragon_hold: ['🪙', '🏮', '🐲', '🪭', '👑', '💎'],
-      slot_buffalo: ['🦬', '🦅', '🐺', '🦌', '🌵', '🌅'],
-      slot_book_dead: ['📖', '⚱️', '🪲', '👁️', '🗿', '👑'],
-      slot_money_cart: ['🚂', '💣', '🔫', '💰', '🤠', '⚡'],
-      slot_mahjong: ['🀄', '🀅', '🀆', '🪙', '🏮', '✨'],
-      slot_perya_fruit: ['🍎', '🍊', '🥭', '🔔', '🍉', '⭐', '7️⃣', 'BAR'],
-      slot_neon_reels: ['🕶️', '📼', '🕹️', '🌴', '⚡', '💎'],
-      slot_aztec_gold: ['🗿', '🐍', '🐆', '🪙', '💎', '👑']
+      slot_vegas777: ['cherry', 'bell', 'bar', 'seven', 'diamond'],
+      slot_fruit_fiesta: ['🍉', '🍇', 'cherry', 'bell', 'seven'],
+      slot_dragon_hold: ['coin', 'bell', 'crown', 'diamond', 'seven'],
+      slot_buffalo: ['🦬', '🦅', 'bell', 'diamond', 'seven'],
+      slot_book_dead: ['📖', '⚱️', 'crown', 'diamond', 'seven'],
+      slot_money_cart: ['🚂', '💣', 'bar', 'coin', 'seven'],
+      slot_mahjong: ['🀄', '🀅', 'coin', 'diamond', 'seven'],
+      slot_perya_fruit: ['🍉', 'cherry', 'bell', 'bar', 'seven'],
+      slot_neon_reels: ['⚡', 'diamond', 'bar', 'seven', 'crown'],
+      slot_aztec_gold: ['coin', 'crown', 'diamond', 'bell', 'seven']
     };
 
-    const symbols = symbolsMap[gameDef.id] || ['🍒', '🍋', '🍇', '🔔', '💎', '7️⃣'];
+    const symbols = symbolsMap[gameDef.id] || ['cherry', 'bell', 'bar', 'seven', 'diamond'];
 
     container.innerHTML = `
       <div class="theater-game-shell">
         <div class="slot-cabinet-frame">
-          <div class="table-badge">${gameDef.title.toUpperCase()} • ${gameDef.badge}</div>
+          <div class="table-badge" style="background: rgba(245, 176, 65, 0.2); border-color: #f5b041; color: #fef08a;">
+            ${gameDef.title.toUpperCase()} • ${gameDef.badge}
+          </div>
           <div class="slot-reels-stage" id="slot-stage" style="grid-template-columns: repeat(${numReels}, 1fr)">
             ${Array.from({ length: numReels }, (_, r) => `
               <div class="slot-reel-strip" id="reel-${r}">
-                ${Array.from({ length: numRows }, () => `<div class="slot-symbol-box">${symbols[0]}</div>`).join('')}
+                ${Array.from({ length: numRows }, () => `<div class="slot-symbol-box">${getSymbolHTML(symbols[0])}</div>`).join('')}
               </div>
             `).join('')}
           </div>
-          <div class="felt-center-banner" id="slot-banner">Spin the reels to win up to ${gameDef.maxWin}!</div>
+          <div class="felt-center-banner" id="slot-banner">Pull the lever to win up to ${gameDef.maxWin}!</div>
         </div>
 
         <div class="theater-controls-bar">
@@ -1258,7 +1706,9 @@
             <button class="btn-ctrl-sub" id="btn-slot-max">MAX</button>
           </div>
           <div class="action-buttons-group">
-            <button class="btn-action primary" id="btn-slot-spin">SPIN REELS 🎰</button>
+            <button class="btn-action primary" id="btn-slot-spin" style="background: linear-gradient(135deg, #f59e0b, #d97706); border-color: #fde047; box-shadow: 0 0 20px rgba(245, 176, 65, 0.4);">
+              SPIN REELS 🎰
+            </button>
           </div>
         </div>
       </div>
@@ -1282,48 +1732,74 @@
         alert('Insufficient coins!');
         return;
       }
-      sound.chip();
+
+      sound.lever();
       spinning = true;
       btnSpin.disabled = true;
-      elBanner.textContent = 'SPINNING...';
+      elBanner.innerHTML = `<span style="color:#fde047">SPINNING REELS...</span>`;
 
-      // Spinning animation
-      let spins = 0;
-      const spinInterval = setInterval(() => {
-        spins++;
-        sound.spin();
+      // Clear any past glowing symbols
+      container.querySelectorAll('.winning-symbol-glow').forEach(el => el.classList.remove('winning-symbol-glow'));
+
+      // Pre-determine final grid
+      const finalGrid = [];
+      for (let r = 0; r < numReels; r++) {
+        const col = [];
+        for (let row = 0; row < numRows; row++) {
+          col.push(symbols[Math.floor(Math.random() * symbols.length)]);
+        }
+        finalGrid.push(col);
+      }
+
+      // Add spinning blur class to all reels
+      for (let r = 0; r < numReels; r++) {
+        const reel = container.querySelector(`#reel-${r}`);
+        reel.classList.remove('reel-bounce-stop');
+        reel.classList.add('reel-spinning');
+      }
+
+      // Fast tick animation loop
+      const tickTimer = setInterval(() => {
+        sound.spinTick();
         for (let r = 0; r < numReels; r++) {
           const reel = container.querySelector(`#reel-${r}`);
-          reel.innerHTML = Array.from({ length: numRows }, () => {
-            const sym = symbols[Math.floor(Math.random() * symbols.length)];
-            return `<div class="slot-symbol-box">${sym}</div>`;
-          }).join('');
-        }
-
-        if (spins > 14) {
-          clearInterval(spinInterval);
-          finalizeSpin();
+          if (reel.classList.contains('reel-spinning')) {
+            reel.innerHTML = Array.from({ length: numRows }, () => {
+              const sym = symbols[Math.floor(Math.random() * symbols.length)];
+              return `<div class="slot-symbol-box">${getSymbolHTML(sym)}</div>`;
+            }).join('');
+          }
         }
       }, 70);
 
-      function finalizeSpin() {
+      // Staggered stop schedule: 600ms, 800ms, 1000ms, etc.
+      for (let r = 0; r < numReels; r++) {
+        const stopDelay = 550 + (r * 180);
+        setTimeout(() => {
+          const reel = container.querySelector(`#reel-${r}`);
+          reel.classList.remove('reel-spinning');
+          reel.classList.add('reel-bounce-stop');
+          sound.reelStop(r);
+
+          // Populate reel with final symbols
+          reel.innerHTML = finalGrid[r].map((sym, rowIdx) => {
+            return `<div class="slot-symbol-box" id="sym-${r}-${rowIdx}">${getSymbolHTML(sym)}</div>`;
+          }).join('');
+
+          // If last reel has stopped, finalize evaluation
+          if (r === numReels - 1) {
+            clearInterval(tickTimer);
+            finalizeEvaluation(finalGrid);
+          }
+        }, stopDelay);
+      }
+
+      function finalizeEvaluation(grid) {
         spinning = false;
         btnSpin.disabled = false;
 
-        // Generate final grid
-        const finalGrid = [];
-        for (let r = 0; r < numReels; r++) {
-          const col = [];
-          for (let row = 0; row < numRows; row++) {
-            col.push(symbols[Math.floor(Math.random() * symbols.length)]);
-          }
-          finalGrid.push(col);
-          const reel = container.querySelector(`#reel-${r}`);
-          reel.innerHTML = col.map(s => `<div class="slot-symbol-box">${s}</div>`).join('');
-        }
-
-        // Check horizontal paylines (Middle line row 1)
-        const midRow = finalGrid.map(col => col[1]);
+        // Check middle payline (row 1)
+        const midRow = grid.map(col => col[1]);
         const first = midRow[0];
         let matches = 1;
         for (let i = 1; i < midRow.length; i++) {
@@ -1332,21 +1808,35 @@
         }
 
         let won = 0;
+        let isWin = false;
+
         if (is3Reel && matches === 3) {
-          const mult = first === '7️⃣' ? 100 : (first === 'BAR' ? 40 : 15);
+          isWin = true;
+          const mult = first === 'seven' ? 100 : (first === 'bar' ? 40 : 15);
           won = bet * mult;
         } else if (!is3Reel && matches >= 3) {
-          const mult = matches === 5 ? 50 : (matches === 4 ? 10 : 3);
+          isWin = true;
+          const mult = matches === 5 ? 50 : (matches === 4 ? 12 : 3);
           won = bet * mult;
         }
 
-        if (won > 0) {
+        if (isWin && won > 0) {
           wallet.add(won);
-          sound.win();
-          elBanner.innerHTML = `<span style="color:#fde047">🎉 BIG WIN! +${won.toLocaleString()} COINS (${matches}x ${first})</span>`;
+          sound.fanfare(won);
+          celebration.burst('win', 70);
+
+          // Highlight winning symbols
+          for (let i = 0; i < matches; i++) {
+            const symEl = container.querySelector(`#sym-${i}-1`);
+            if (symEl) symEl.classList.add('winning-symbol-glow');
+          }
+
+          const tier = won >= bet * 25 ? 'SENSATIONAL!' : (won >= bet * 10 ? 'MEGA WIN!' : 'BIG WIN!');
+          elBanner.innerHTML = `<span style="color:#fde047; font-weight:800;">🎉 ${tier} +${won.toLocaleString()} COINS (${matches}x MATCH)</span>`;
+          window.CasinoEngine.showBanner(tier, `+${won.toLocaleString()} COINS`);
         } else {
           sound.lose();
-          elBanner.innerHTML = `<span style="color:#94a3b8">No match. Spin again!</span>`;
+          elBanner.innerHTML = `<span style="color:#94a3b8">No match. Pull again for the jackpot!</span>`;
         }
       }
     };
@@ -1370,6 +1860,10 @@
       shell.style.display = 'none';
       shell.innerHTML = `
         <div class="theater-box">
+          <div class="win-celebration-banner" id="th-celebration-banner">
+            <div class="win-celebration-title" id="th-celebration-title">BIG WIN!</div>
+            <div class="win-celebration-amount" id="th-celebration-amount">+5,000 COINS</div>
+          </div>
           <div class="theater-head">
             <div class="theater-brand">
               <span class="theater-game-icon" id="th-game-icon">🎰</span>
@@ -1394,6 +1888,8 @@
       document.body.appendChild(shell);
       this.modal = shell;
 
+      celebration.init(shell.querySelector('.theater-box'));
+
       // Event handlers
       shell.querySelector('#th-btn-close').onclick = () => this.close();
       shell.querySelector('#th-btn-mute').onclick = (e) => {
@@ -1410,12 +1906,26 @@
       });
     }
 
+    showCelebration(title, subtitle) {
+      const banner = document.getElementById('th-celebration-banner');
+      const t = document.getElementById('th-celebration-title');
+      const s = document.getElementById('th-celebration-amount');
+      if (!banner || !t || !s) return;
+
+      t.textContent = title;
+      s.textContent = subtitle;
+      banner.classList.add('active');
+
+      setTimeout(() => {
+        banner.classList.remove('active');
+      }, 2600);
+    }
+
     open(gameId) {
       if (typeof ARCADE_GAMES === 'undefined') return;
       const gameDef = ARCADE_GAMES.find(g => g.id === gameId);
       if (!gameDef) return;
 
-      // If game has a dedicated external URL, redirect directly
       if (gameDef.directUrl) {
         window.location.href = gameDef.directUrl;
         return;
@@ -1432,7 +1942,6 @@
       const viewport = document.getElementById('theater-viewport');
       viewport.innerHTML = '';
 
-      // Route to engine builder
       if (['blackjack', 'single_deck_bj', 'pontoon', 'spanish21'].includes(gameDef.id)) {
         buildBlackjack(gameDef, viewport);
       } else if (['baccarat', 'dragon_baccarat'].includes(gameDef.id)) {
@@ -1448,7 +1957,6 @@
       } else if (gameDef.id.startsWith('slot_') || gameDef.category === 'slots') {
         buildGenericSlot(gameDef, viewport);
       } else {
-        // Fallback card or table game
         buildBlackjack(gameDef, viewport);
       }
 
@@ -1469,7 +1977,8 @@
     wallet,
     theater: new UniversalTheater(),
     openGame(id) { this.theater.open(id); },
-    closeGame() { this.theater.close(); }
+    closeGame() { this.theater.close(); },
+    showBanner(title, sub) { this.theater.showCelebration(title, sub); }
   };
 
 })();
