@@ -600,10 +600,24 @@
       this.saveBalance();
     }
 
+    getAyudaCooldownRemaining() {
+      const COOLDOWN_MS = 60 * 60 * 1000; // 1 hour cooldown
+      const last = parseInt(localStorage.getItem('arcade_last_ayuda_timestamp') || localStorage.getItem('jtrash_last_ayuda_timestamp') || '0', 10);
+      const elapsed = Date.now() - last;
+      return Math.max(0, COOLDOWN_MS - elapsed);
+    }
+
     claimAyuda() {
+      const rem = this.getAyudaCooldownRemaining();
+      if (rem > 0) {
+        return { success: false, remainingMs: rem, balance: this.balance };
+      }
+      const now = Date.now();
+      localStorage.setItem('arcade_last_ayuda_timestamp', now.toString());
+      localStorage.setItem('jtrash_last_ayuda_timestamp', now.toString());
       this.add(2000);
       sound.win();
-      return this.balance;
+      return { success: true, remainingMs: 0, balance: this.balance };
     }
   }
 
@@ -4586,9 +4600,38 @@
         const isMuted = sound.toggleMute();
         e.target.textContent = isMuted ? '🔇' : '🔊';
       };
-      shell.querySelector('#th-btn-ayuda').onclick = () => {
-        wallet.claimAyuda();
+      const ayudaBtn = shell.querySelector('#th-btn-ayuda');
+      const updateTheaterAyudaBtn = () => {
+        if (!ayudaBtn) return;
+        const rem = wallet.getAyudaCooldownRemaining();
+        if (rem > 0) {
+          const mins = Math.floor(rem / 60000);
+          const secs = Math.floor((rem % 60000) / 1000);
+          ayudaBtn.textContent = `⏳ ${mins}m ${secs}s`;
+          ayudaBtn.style.opacity = '0.75';
+          ayudaBtn.title = `Next Ayuda in ${mins}m ${secs}s`;
+        } else {
+          ayudaBtn.textContent = '🎁 Ayuda';
+          ayudaBtn.style.opacity = '1';
+          ayudaBtn.title = 'Claim 2,000 Free Coins';
+        }
       };
+
+      ayudaBtn.onclick = () => {
+        const res = wallet.claimAyuda();
+        if (!res.success) {
+          const mins = Math.floor(res.remainingMs / 60000);
+          const secs = Math.floor((res.remainingMs % 60000) / 1000);
+          sound.lose();
+          this.showCelebration('⏳ COOLDOWN ACTIVE', `Next refill in ${mins}m ${secs}s`);
+        } else {
+          this.showCelebration('🎁 AYUDA CLAIMED', '+2,000 Free Coins (1 hr cooldown)');
+        }
+        updateTheaterAyudaBtn();
+      };
+
+      setInterval(updateTheaterAyudaBtn, 1000);
+      updateTheaterAyudaBtn();
 
       wallet.subscribe((bal) => {
         const el = document.getElementById('th-balance-val');

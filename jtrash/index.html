@@ -1973,7 +1973,7 @@
 
       // 5. Ayuda Hourly Timestamp
       const cookieAyuda = getPersistentCookie(STORAGE_KEY_AYUDA);
-      const savedAyuda = cookieAyuda !== null ? cookieAyuda : localStorage.getItem(STORAGE_KEY_AYUDA);
+      const savedAyuda = cookieAyuda !== null ? cookieAyuda : (localStorage.getItem(STORAGE_KEY_AYUDA) || localStorage.getItem('arcade_last_ayuda_timestamp'));
       state.lastAyudaTime = (savedAyuda && !isNaN(parseInt(savedAyuda, 10))) ? parseInt(savedAyuda, 10) : 0;
 
       // 6. Transactions Log
@@ -2836,6 +2836,7 @@
       state.walletBalance += ayudaAmount;
       state.lastAyudaTime = now;
       localStorage.setItem(STORAGE_KEY_AYUDA, now);
+      localStorage.setItem('arcade_last_ayuda_timestamp', now);
       setPersistentCookie(STORAGE_KEY_AYUDA, now, 365);
       saveState();
 

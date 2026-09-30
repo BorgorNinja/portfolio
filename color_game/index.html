@@ -1841,10 +1841,48 @@
     document.getElementById('btn-drop').onclick = triggerDropCubes;
     document.getElementById('btn-bots').onclick = toggleBots;
 
+    const AYUDA_COOLDOWN_MS = 60 * 60 * 1000; // 1 hour cooldown
+
+    function getAyudaCooldownRemaining() {
+      const last = parseInt(localStorage.getItem('arcade_last_ayuda_timestamp') || localStorage.getItem('jtrash_last_ayuda_timestamp') || '0', 10);
+      const elapsed = Date.now() - last;
+      return Math.max(0, AYUDA_COOLDOWN_MS - elapsed);
+    }
+
+    function updateAyudaBtnTimer() {
+      const btn = document.getElementById('btn-ayuda');
+      if (!btn) return;
+      const rem = getAyudaCooldownRemaining();
+      if (rem > 0) {
+        const mins = Math.floor(rem / 60000);
+        const secs = Math.floor((rem % 60000) / 1000);
+        btn.textContent = `⏳ ${mins}m ${secs}s`;
+        btn.style.opacity = '0.75';
+        btn.title = `Next Ayuda in ${mins}m ${secs}s`;
+      } else {
+        btn.textContent = '🎁 Ayuda';
+        btn.style.opacity = '1';
+        btn.title = 'Claim ₱2,000 Ayuda Refill';
+      }
+    }
+
     document.getElementById('btn-ayuda').onclick = () => {
+      const rem = getAyudaCooldownRemaining();
+      if (rem > 0) {
+        const mins = Math.floor(rem / 60000);
+        const secs = Math.floor((rem % 60000) / 1000);
+        showBanner(`⏳ Ayuda cooldown active! Next refill in ${mins}m ${secs}s.`);
+        sound.woodClack(0.6);
+        updateAyudaBtnTimer();
+        return;
+      }
+      const now = Date.now();
+      localStorage.setItem('arcade_last_ayuda_timestamp', now.toString());
+      localStorage.setItem('jtrash_last_ayuda_timestamp', now.toString());
       wallet.add(2000);
       sound.fanfare(1);
-      showBanner('🎁 ₱2,000 Free Ayuda Coins claimed!');
+      showBanner('🎁 ₱2,000 Free Ayuda Coins claimed! Next claim in 1 hour.');
+      updateAyudaBtnTimer();
     };
 
     document.getElementById('btn-sfx').onclick = (e) => {
@@ -1874,6 +1912,8 @@
     updateStakesUI();
     setInterval(syncRoomHeartbeat, 2500);
     setTimeout(syncRoomHeartbeat, 250);
+    setInterval(updateAyudaBtnTimer, 1000);
+    updateAyudaBtnTimer();
 
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
