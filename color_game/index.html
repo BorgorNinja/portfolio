@@ -142,10 +142,124 @@
       z-index: 1;
     }
 
+    /* Multi-Player Seat Ribbon (Up to 4 Players) */
+    .seats-container {
+      position: absolute;
+      top: 58px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 24px);
+      max-width: 960px;
+      z-index: 30;
+    }
+    .seats-ribbon {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .seat-card {
+      background: linear-gradient(180deg, rgba(17, 24, 39, 0.92) 0%, rgba(10, 14, 26, 0.95) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+      user-select: none;
+    }
+    .seat-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(250, 204, 21, 0.5);
+      background: linear-gradient(180deg, rgba(31, 41, 55, 0.95) 0%, rgba(17, 24, 39, 0.98) 100%);
+    }
+    .seat-card.active-user {
+      border-color: #f59e0b;
+      background: linear-gradient(180deg, rgba(40, 32, 12, 0.95) 0%, rgba(20, 16, 8, 0.98) 100%);
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.35);
+    }
+    .seat-card.open-seat {
+      opacity: 0.65;
+      border-style: dashed;
+    }
+    .seat-card.open-seat:hover {
+      opacity: 1;
+      border-style: solid;
+    }
+    .seat-card.winner-glow {
+      border-color: #4ade80 !important;
+      box-shadow: 0 0 20px rgba(74, 222, 128, 0.6) !important;
+      animation: seatPulse 0.6s infinite alternate;
+    }
+    @keyframes seatPulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.03); }
+    }
+    .seat-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .seat-avatar {
+      font-size: 1.15rem;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .seat-name {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #f8fafc;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100px;
+    }
+    .seat-status {
+      font-size: 0.66rem;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+    .seat-card.active-user .seat-status {
+      color: #facc15;
+    }
+    .seat-bet-val {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      font-weight: 800;
+      color: #94a3b8;
+      text-align: right;
+    }
+    .seat-card.active-user .seat-bet-val {
+      color: #38bdf8;
+    }
+    .seat-chip-dots {
+      display: flex;
+      gap: 3px;
+      margin-top: 2px;
+      justify-content: flex-end;
+    }
+    .chip-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
     /* Center Toast Banner */
     .center-banner {
       position: absolute;
-      top: 68px;
+      top: 116px;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(10, 15, 29, 0.88);
@@ -168,7 +282,7 @@
     /* Pull Rope Floating Visual Hint */
     .rope-hint-tag {
       position: absolute;
-      top: 195px;
+      top: 220px;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(239, 68, 68, 0.85);
@@ -373,6 +487,12 @@
       margin-top: 4px;
     }
 
+    @media (max-width: 768px) {
+      .seats-ribbon { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+      .seats-container { top: 54px; }
+      .center-banner { top: 154px; font-size: 0.78rem; padding: 5px 14px; }
+      .rope-hint-tag { top: 235px; }
+    }
     @media (max-width: 640px) {
       .game-logo-title { font-size: 0.9rem; }
       .brand-left .btn-nav-back span { display: none; }
@@ -395,12 +515,18 @@
         <span>💰</span>
         <span id="display-wallet">25,000</span>
       </div>
+      <button class="btn-hud-icon" id="btn-bots" title="Toggle AI Fiesta Patrons">👥 Bots: OFF</button>
       <button class="btn-hud-icon" id="btn-ayuda" title="Claim ₱2,000 Ayuda Refill">🎁 Ayuda</button>
       <button class="btn-hud-icon" id="btn-bgm" title="Toggle Fiesta Carnival Music">🎵 Music</button>
       <button class="btn-hud-icon" id="btn-sfx" title="Toggle Sound Effects">🔊</button>
       <button class="btn-hud-icon" id="btn-cam" title="Toggle 3D Camera Angle">🎥 View</button>
     </div>
   </header>
+
+  <!-- Multi-Player Seat Ribbon (Up to 4 Players) -->
+  <div class="seats-container">
+    <div class="seats-ribbon" id="seats-ribbon"></div>
+  </div>
 
   <!-- Banner & Floating Rope Label -->
   <div class="center-banner" id="status-banner">
@@ -629,10 +755,38 @@
     ];
 
     let currentChip = 50;
-    let bets = { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 };
     let isRolling = false;
     let currentRollColors = [];
     let rollEvaluated = false;
+
+    /* --- Multi-Player 4-Seat Architecture --- */
+    const userRef = localStorage.getItem('perya_color_game_ref') || ('p_' + Math.random().toString(36).substr(2, 8));
+    localStorage.setItem('perya_color_game_ref', userRef);
+    const userName = localStorage.getItem('perya_player_name') || localStorage.getItem('jtrash_username') || localStorage.getItem('borgor_user_name') || 'Player 1';
+
+    const SEAT_TEMPLATES = [
+      { seat: 0, defaultName: 'Player 1', avatar: '👑', color: '#f59e0b' },
+      { seat: 1, defaultName: 'Player 2', avatar: '⚡', color: '#06b6d4' },
+      { seat: 2, defaultName: 'Player 3', avatar: '🍀', color: '#10b981' },
+      { seat: 3, defaultName: 'Player 4', avatar: '🔥', color: '#ec4899' }
+    ];
+
+    let activeSeat = 0; // Default: user seated at Seat 0 (Player 1)
+    const savedSeat = sessionStorage.getItem('perya_color_seat');
+    if (savedSeat !== null && !isNaN(parseInt(savedSeat, 10))) {
+      const s = parseInt(savedSeat, 10);
+      if (s >= 0 && s < 4) activeSeat = s;
+      else if (s === -1) activeSeat = -1;
+    }
+
+    let botsActive = false; // Toggle bot fiesta patrons
+
+    let players = [
+      { seat: 0, isUser: (activeSeat === 0), isBot: false, ref: (activeSeat === 0 ? userRef : null), name: (activeSeat === 0 ? userName : 'Open Seat'), avatar: '👑', balance: (activeSeat === 0 ? wallet.get() : 0), bets: { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 } },
+      { seat: 1, isUser: (activeSeat === 1), isBot: false, ref: (activeSeat === 1 ? userRef : null), name: (activeSeat === 1 ? userName : 'Open Seat'), avatar: '⚡', balance: (activeSeat === 1 ? wallet.get() : 0), bets: { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 } },
+      { seat: 2, isUser: (activeSeat === 2), isBot: false, ref: (activeSeat === 2 ? userRef : null), name: (activeSeat === 2 ? userName : 'Open Seat'), avatar: '🍀', balance: (activeSeat === 2 ? wallet.get() : 0), bets: { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 } },
+      { seat: 3, isUser: (activeSeat === 3), isBot: false, ref: (activeSeat === 3 ? userRef : null), name: (activeSeat === 3 ? userName : 'Open Seat'), avatar: '🔥', balance: (activeSeat === 3 ? wallet.get() : 0), bets: { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 } }
+    ];
 
     /* --- Three.js 3D Scene Setup --- */
     const container = document.getElementById('webgl-container');
@@ -991,26 +1145,48 @@
     const chipStacks = { red: [], yellow: [], blue: [], green: [], white: [], pink: [] };
     const chipGeom = new THREE.CylinderGeometry(0.24, 0.24, 0.065, 24);
 
-    function addChipTo3DTable(colorId, chipVal) {
+    // Distinct quadrant offsets per seat so chips from different players land in their own zones
+    const SEAT_OFFSETS = [
+      { x: -0.28, z: -0.28 }, // Seat 0 (Player 1 - Gold)
+      { x:  0.28, z: -0.28 }, // Seat 1 (Player 2 - Cyan)
+      { x: -0.28, z:  0.28 }, // Seat 2 (Player 3 - Emerald)
+      { x:  0.28, z:  0.28 }  // Seat 3 (Player 4 - Pink)
+    ];
+
+    function addChipTo3DTable(colorId, chipVal, seatIdx = activeSeat) {
       const padConfig = PERYA_COLORS.find(c => c.id === colorId);
       if (!padConfig) return;
 
       const stack = chipStacks[colorId];
-      const chipMat = new THREE.MeshStandardMaterial({
+      const validSeat = (seatIdx >= 0 && seatIdx < 4) ? seatIdx : 0;
+      const seatHex = SEAT_TEMPLATES[validSeat].color;
+
+      // Multi-material: rim shows player's seat theme color, top/bottom show color pad theme
+      const rimMat = new THREE.MeshStandardMaterial({
+        color: new THREE.Color(seatHex),
+        roughness: 0.25,
+        metalness: 0.35
+      });
+      const faceMat = new THREE.MeshStandardMaterial({
         color: padConfig.threeColor,
         roughness: 0.25,
-        metalness: 0.2
+        metalness: 0.1
       });
-      const chipMesh = new THREE.Mesh(chipGeom, chipMat);
-      chipMesh.castShadow = true;
-      chipMesh.receiveShadow = true;
 
-      // Jitter & stack altitude
-      const stackHeight = stack.length * 0.07;
-      const jitterX = (Math.random() - 0.5) * 0.22;
-      const jitterZ = (Math.random() - 0.5) * 0.22;
+      const chipMesh = new THREE.Mesh(chipGeom, [rimMat, faceMat, faceMat]);
+      chipMesh.castShadow = false;
+      chipMesh.receiveShadow = false;
 
-      chipMesh.position.set(padConfig.x + jitterX, 0.12 + stackHeight, padConfig.z + jitterZ);
+      const offset = SEAT_OFFSETS[validSeat];
+      const stackHeight = stack.length * 0.055;
+      const jitterX = (Math.random() - 0.5) * 0.16;
+      const jitterZ = (Math.random() - 0.5) * 0.16;
+
+      chipMesh.position.set(
+        padConfig.x + offset.x + jitterX,
+        0.12 + stackHeight,
+        padConfig.z + offset.z + jitterZ
+      );
       padsGroup.add(chipMesh);
       stack.push(chipMesh);
     }
@@ -1022,6 +1198,243 @@
       });
     }
 
+    function rebuildAll3DChips() {
+      clear3DChips();
+      players.forEach((p, sIdx) => {
+        if ((p.isUser || p.isBot || p.ref) && p.bets) {
+          Object.keys(p.bets).forEach(colId => {
+            const amt = p.bets[colId] || 0;
+            if (amt > 0) {
+              const chipCount = Math.min(Math.max(1, Math.floor(amt / 100)), 5);
+              for (let i = 0; i < chipCount; i++) {
+                addChipTo3DTable(colId, amt, sIdx);
+              }
+            }
+          });
+        }
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[m]);
+    }
+
+    /* --- Multi-Player Seats Rendering & Interaction --- */
+    function renderSeats() {
+      const ribbonEl = document.getElementById('seats-ribbon');
+      if (!ribbonEl) return;
+      ribbonEl.innerHTML = '';
+
+      players.forEach((p, idx) => {
+        const tmpl = SEAT_TEMPLATES[idx];
+        const cardEl = document.createElement('div');
+        cardEl.className = 'seat-card';
+        cardEl.id = `seat-card-${idx}`;
+
+        const isLocalUser = (idx === activeSeat && activeSeat !== -1);
+        const isOccupied = (p.ref && !isLocalUser) || p.isBot;
+
+        if (isLocalUser) {
+          cardEl.classList.add('active-user');
+        } else if (isOccupied) {
+          cardEl.classList.add('occupied');
+        } else {
+          cardEl.classList.add('open-seat');
+        }
+
+        const avatar = isLocalUser ? (p.avatar || tmpl.avatar) : (isOccupied ? (p.avatar || tmpl.avatar) : '💺');
+        const name = isLocalUser ? userName : (isOccupied ? p.name : 'Open Seat');
+
+        let totalBet = 0;
+        const betDots = [];
+        if (p.bets) {
+          Object.keys(p.bets).forEach(colId => {
+            const amt = p.bets[colId] || 0;
+            if (amt > 0) {
+              totalBet += amt;
+              const colHex = PERYA_COLORS.find(c => c.id === colId)?.hex || '#fff';
+              betDots.push(`<span class="chip-dot" style="background:${colHex};" title="${colId}: ₱${amt}"></span>`);
+            }
+          });
+        }
+
+        let statusText = '';
+        if (isLocalUser) {
+          statusText = isRolling ? 'Rolling...' : (totalBet > 0 ? `₱${p.balance.toLocaleString()} • Click to Stand` : `₱${p.balance.toLocaleString()} • Seated`);
+        } else if (isOccupied) {
+          statusText = p.isBot ? `₱${p.balance.toLocaleString()} • AI Patron` : `₱${p.balance.toLocaleString()} • Online`;
+        } else {
+          statusText = 'Click to Sit';
+        }
+
+        cardEl.innerHTML = `
+          <div class="seat-meta">
+            <div class="seat-avatar" style="border: 2px solid ${tmpl.color}">${avatar}</div>
+            <div>
+              <div class="seat-name" style="color: ${tmpl.color}">${escapeHtml(name)}</div>
+              <div class="seat-status">${statusText}</div>
+            </div>
+          </div>
+          <div>
+            <div class="seat-bet-val" style="color: ${totalBet > 0 ? tmpl.color : '#94a3b8'}">${totalBet > 0 ? '₱' + totalBet.toLocaleString() : (isOccupied || isLocalUser ? 'No Bet' : 'Empty')}</div>
+            <div class="seat-chip-dots">${betDots.join('')}</div>
+          </div>
+        `;
+
+        cardEl.onclick = () => {
+          if (isRolling) return;
+          if (isLocalUser) {
+            standUpFromSeat();
+          } else if (!isOccupied || p.isBot) {
+            switchPlayerSeat(idx);
+          }
+        };
+
+        ribbonEl.appendChild(cardEl);
+      });
+    }
+
+    function switchPlayerSeat(seatIdx) {
+      if (isRolling) return;
+      if (seatIdx < 0 || seatIdx >= 4) return;
+      if (activeSeat === seatIdx) return;
+
+      let carriedBets = { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 };
+      if (activeSeat !== -1 && players[activeSeat]) {
+        carriedBets = Object.assign({}, players[activeSeat].bets);
+        players[activeSeat].isUser = false;
+        players[activeSeat].ref = null;
+        players[activeSeat].name = 'Open Seat';
+        players[activeSeat].bets = { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 };
+        players[activeSeat].balance = 0;
+      }
+
+      activeSeat = seatIdx;
+      const tmpl = SEAT_TEMPLATES[seatIdx];
+      players[seatIdx] = {
+        seat: seatIdx,
+        isUser: true,
+        isBot: false,
+        ref: userRef,
+        name: userName,
+        avatar: tmpl.avatar,
+        balance: wallet.get(),
+        bets: carriedBets
+      };
+
+      try {
+        sessionStorage.setItem('perya_color_seat', seatIdx.toString());
+      } catch (e) {}
+
+      sound.chip();
+      renderSeats();
+      updateStakesUI();
+      rebuildAll3DChips();
+      syncRoomHeartbeat();
+      showBanner(`Seated at ${tmpl.defaultName}! Place chips on colored pads.`);
+    }
+
+    function standUpFromSeat() {
+      if (isRolling) return;
+      if (activeSeat === -1) return;
+
+      let totalRefund = 0;
+      if (players[activeSeat] && players[activeSeat].bets) {
+        Object.keys(players[activeSeat].bets).forEach(k => {
+          totalRefund += players[activeSeat].bets[k] || 0;
+          players[activeSeat].bets[k] = 0;
+        });
+      }
+      if (totalRefund > 0) {
+        wallet.add(totalRefund);
+      }
+
+      players[activeSeat].isUser = false;
+      players[activeSeat].ref = null;
+      players[activeSeat].name = 'Open Seat';
+      players[activeSeat].bets = { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 };
+      players[activeSeat].balance = 0;
+      activeSeat = -1;
+
+      try {
+        sessionStorage.setItem('perya_color_seat', '-1');
+      } catch (e) {}
+
+      sound.woodClack(0.9);
+      renderSeats();
+      updateStakesUI();
+      rebuildAll3DChips();
+      syncRoomHeartbeat();
+      showBanner('Spectating mode. Click any open seat to join the game!');
+    }
+
+    /* --- Bot Fiesta Patrons --- */
+    const BOT_PROFILES = [
+      { name: 'Mang Boy', avatar: '⚡', balance: 50000 },
+      { name: 'Aling Tess', avatar: '🍀', balance: 45000 },
+      { name: 'Kuya Jojo', avatar: '🔥', balance: 60000 },
+      { name: 'Ate Beth', avatar: '✨', balance: 35000 }
+    ];
+
+    function toggleBots() {
+      botsActive = !botsActive;
+      const btn = document.getElementById('btn-bots');
+      if (btn) {
+        btn.textContent = botsActive ? '👥 Bots: ON' : '👥 Bots: OFF';
+        btn.style.borderColor = botsActive ? '#10b981' : 'rgba(255,255,255,0.2)';
+        btn.style.color = botsActive ? '#4ade80' : '#f8fafc';
+      }
+
+      if (botsActive) {
+        players.forEach((p, idx) => {
+          if (idx !== activeSeat && (!p.ref || p.isBot)) {
+            const bot = BOT_PROFILES[idx % BOT_PROFILES.length];
+            p.isUser = false;
+            p.isBot = true;
+            p.ref = 'bot_' + idx;
+            p.name = bot.name;
+            p.avatar = bot.avatar;
+            p.balance = bot.balance;
+            p.bets = { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 };
+            placeBotBets(idx);
+          }
+        });
+        sound.chip();
+        showBanner('👥 AI Fiesta Patrons joined the table!');
+      } else {
+        players.forEach((p, idx) => {
+          if (idx !== activeSeat && p.isBot) {
+            p.isUser = false;
+            p.isBot = false;
+            p.ref = null;
+            p.name = 'Open Seat';
+            p.avatar = SEAT_TEMPLATES[idx].avatar;
+            p.balance = 0;
+            p.bets = { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 };
+          }
+        });
+        showBanner('👥 AI Fiesta Patrons left the table.');
+      }
+      rebuildAll3DChips();
+      renderSeats();
+    }
+
+    function placeBotBets(seatIdx) {
+      const p = players[seatIdx];
+      if (!p || !p.isBot || isRolling) return;
+      Object.keys(p.bets).forEach(k => p.bets[k] = 0);
+
+      const shuffledColors = [...PERYA_COLORS].sort(() => Math.random() - 0.5);
+      const numChoices = 1 + Math.floor(Math.random() * 2);
+      const chipSizes = [50, 100, 200, 500];
+
+      for (let i = 0; i < numChoices; i++) {
+        const col = shuffledColors[i];
+        const betAmt = chipSizes[Math.floor(Math.random() * chipSizes.length)];
+        p.bets[col.id] = betAmt;
+      }
+    }
+
     /* --- Raycasting for 3D Table & Rope Interaction --- */
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
@@ -1029,7 +1442,7 @@
     function onPointerDown(e) {
       if (isRolling) return;
       // Exclude clicks on UI elements
-      if (e.target.closest('.carnival-controls-deck') || e.target.closest('header')) return;
+      if (e.target.closest('.carnival-controls-deck') || e.target.closest('header') || e.target.closest('.seats-container')) return;
 
       mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
@@ -1053,11 +1466,19 @@
     /* --- Betting Logic --- */
     function placeBet(colorId) {
       if (isRolling) return;
+      if (activeSeat === -1 || !players[activeSeat]) {
+        showBanner('⚠️ Click an open seat in the top bar to sit down and play!');
+        sound.woodClack(0.6);
+        return;
+      }
       if (wallet.deduct(currentChip)) {
-        bets[colorId] += currentChip;
+        players[activeSeat].bets[colorId] = (players[activeSeat].bets[colorId] || 0) + currentChip;
+        players[activeSeat].balance = wallet.get();
         sound.chip();
-        addChipTo3DTable(colorId, currentChip);
+        addChipTo3DTable(colorId, currentChip, activeSeat);
         updateStakesUI();
+        renderSeats();
+        syncRoomHeartbeat();
 
         // Flash pad emissive
         const padMesh = padMeshes.find(p => p.userData.colorId === colorId);
@@ -1073,41 +1494,53 @@
 
     function updateStakesUI() {
       let total = 0;
+      const userBets = (activeSeat !== -1 && players[activeSeat]) ? players[activeSeat].bets : {};
       PERYA_COLORS.forEach(c => {
-        const v = bets[c.id];
+        const v = userBets[c.id] || 0;
         total += v;
         const el = document.getElementById(`val-${c.id}`);
         if (el) el.textContent = v.toLocaleString();
       });
-      document.getElementById('total-staked-val').textContent = total.toLocaleString();
+      const totalEl = document.getElementById('total-staked-val');
+      if (totalEl) totalEl.textContent = total.toLocaleString();
     }
 
     function clearBets() {
       if (isRolling) return;
+      if (activeSeat === -1 || !players[activeSeat]) return;
       let totalRefund = 0;
-      Object.keys(bets).forEach(k => {
-        totalRefund += bets[k];
-        bets[k] = 0;
+      Object.keys(players[activeSeat].bets).forEach(k => {
+        totalRefund += players[activeSeat].bets[k] || 0;
+        players[activeSeat].bets[k] = 0;
       });
-      wallet.add(totalRefund);
-      clear3DChips();
+      if (totalRefund > 0) {
+        wallet.add(totalRefund);
+        players[activeSeat].balance = wallet.get();
+      }
+      rebuildAll3DChips();
       updateStakesUI();
+      renderSeats();
+      syncRoomHeartbeat();
       sound.chip();
     }
 
     function doubleBets() {
       if (isRolling) return;
-      const total = Object.values(bets).reduce((a,b) => a+b, 0);
+      if (activeSeat === -1 || !players[activeSeat]) return;
+      const total = Object.values(players[activeSeat].bets).reduce((a, b) => a + b, 0);
       if (total <= 0) return;
       if (wallet.deduct(total)) {
-        Object.keys(bets).forEach(k => {
-          if (bets[k] > 0) {
-            bets[k] *= 2;
-            addChipTo3DTable(k, currentChip);
+        Object.keys(players[activeSeat].bets).forEach(k => {
+          if (players[activeSeat].bets[k] > 0) {
+            players[activeSeat].bets[k] *= 2;
           }
         });
+        players[activeSeat].balance = wallet.get();
+        rebuildAll3DChips();
         sound.chip();
         updateStakesUI();
+        renderSeats();
+        syncRoomHeartbeat();
       } else {
         showBanner('❌ Not enough coins to double current bets!');
       }
@@ -1119,8 +1552,13 @@
     /* --- Drop 3D Cubes (Hilahin ang Lubid) --- */
     function triggerDropCubes() {
       if (isRolling) return;
-      const totalStaked = Object.values(bets).reduce((a,b) => a+b, 0);
-      if (totalStaked <= 0) {
+      let anyBetPlaced = false;
+      players.forEach(p => {
+        if (p.bets && Object.values(p.bets).some(v => v > 0)) {
+          anyBetPlaced = true;
+        }
+      });
+      if (!anyBetPlaced) {
         showBanner('⚠️ Place chips on at least one color before pulling the rope!');
         sound.woodClack(0.6);
         return;
@@ -1150,19 +1588,16 @@
 
       // Spawn cubes inside the top chute hopper with randomized downward drops and chaotic tumble torques
       diceState.forEach((d, i) => {
-        // Reset position inside chute
         d.body.position.set(
           -1.1 + i * 1.1 + (Math.random() - 0.5) * 0.3,
           3.6 + i * 0.3,
           -0.5 + (Math.random() - 0.5) * 0.3
         );
-        // Random tumble rotation
         d.body.quaternion.setFromEuler(
           Math.random() * Math.PI * 2,
           Math.random() * Math.PI * 2,
           Math.random() * Math.PI * 2
         );
-        // Initial downward tumble impulse + spread
         d.body.velocity.set(
           (Math.random() - 0.5) * 1.8,
           -3.0 - Math.random() * 1.5,
@@ -1179,57 +1614,204 @@
     function finishPhysicalRoll() {
       if (rollEvaluated) return;
       rollEvaluated = true;
-      // Read the actual physical top face of each die
       const winningColors = diceState.map(d => getPhysicalTopColor(d.body));
       evaluateRoll(winningColors);
     }
 
     function evaluateRoll(winningColors) {
-
       const counts = {};
       winningColors.forEach(c => counts[c] = (counts[c] || 0) + 1);
 
-      let totalWon = 0;
-      let winningPads = [];
+      const colorNames = winningColors.map(id => PERYA_COLORS.find(c => c.id === id).name.split(' ')[0]).join(' • ');
+      const maxMatch = Math.max(...Object.values(counts));
 
-      Object.keys(bets).forEach(id => {
-        if (counts[id] && bets[id] > 0) {
-          // 1 match = stake returned + 1x. 2 matches = stake + 2x. 3 matches = stake + 3x!
-          const winMultiplier = 1 + counts[id];
-          totalWon += bets[id] * winMultiplier;
-          winningPads.push({ id, count: counts[id] });
+      let userWon = 0;
+      let multiWinners = [];
+
+      // Payout calculation for each player (Seats 0 to 3)
+      players.forEach((p, idx) => {
+        if ((p.isUser || p.isBot || p.ref) && p.bets) {
+          let seatWon = 0;
+          Object.keys(p.bets).forEach(colId => {
+            if (counts[colId] && p.bets[colId] > 0) {
+              // Traditional Perya Color Game payout:
+              // 1 match = stake returned + 1x. 2 matches = stake + 2x. 3 matches = stake + 3x!
+              const winMultiplier = 1 + counts[colId];
+              seatWon += p.bets[colId] * winMultiplier;
+            }
+          });
+
+          if (seatWon > 0) {
+            p.balance += seatWon;
+            if (p.isUser && idx === activeSeat) {
+              userWon = seatWon;
+              wallet.add(seatWon);
+            }
+            multiWinners.push({ name: p.name, won: seatWon, seatIdx: idx });
+
+            // Highlight winning seat card
+            const card = document.getElementById(`seat-card-${idx}`);
+            if (card) {
+              card.classList.add('winner-glow');
+              setTimeout(() => card.classList.remove('winner-glow'), 3200);
+            }
+          }
         }
       });
 
-      const colorNames = winningColors.map(id => PERYA_COLORS.find(c => c.id === id).name.split(' ')[0]).join(' • ');
-
-      if (totalWon > 0) {
-        wallet.add(totalWon);
-        const maxMatch = Math.max(...Object.values(counts));
-        sound.fanfare(maxMatch);
-        showCelebration(maxMatch >= 3 ? '🎉 TRIPLE FIESTA JACKPOT!' : (maxMatch === 2 ? '🔥 DOUBLE COLOR WIN!' : '✨ WINNER!'), `+₱${totalWon.toLocaleString()}`);
-        showBanner(`🏆 WON ₱${totalWon.toLocaleString()}! (${colorNames})`);
-
-        // Glow winning 3D table pads
-        winningPads.forEach(wp => {
-          const pad = padMeshes.find(p => p.userData.colorId === wp.id);
+      // Glow winning 3D table pads
+      PERYA_COLORS.forEach(c => {
+        if (counts[c.id]) {
+          const pad = padMeshes.find(p => p.userData.colorId === c.id);
           if (pad) {
             pad.material.emissiveIntensity = 0.9;
             setTimeout(() => pad.material.emissiveIntensity = 0.08, 1600);
           }
-        });
+        }
+      });
+
+      // User celebration & audio
+      if (userWon > 0) {
+        sound.fanfare(maxMatch);
+        showCelebration(
+          maxMatch >= 3 ? '🎉 TRIPLE FIESTA JACKPOT!' : (maxMatch === 2 ? '🔥 DOUBLE COLOR WIN!' : '✨ WINNER!'),
+          `+₱${userWon.toLocaleString()}`
+        );
+        showBanner(`🏆 YOU WON ₱${userWon.toLocaleString()}! Outcome: (${colorNames})`);
+      } else if (multiWinners.length > 0) {
+        sound.fanfare(1);
+        const winList = multiWinners.map(w => `${w.name} (+₱${w.won.toLocaleString()})`).join(', ');
+        showBanner(`Outcome: (${colorNames}) — Winners: ${winList}`);
       } else {
         sound.woodClack(0.7);
-        showBanner(`Outcome: ${colorNames} — No match. Better luck next roll!`);
+        showBanner(`Outcome: ${colorNames} — No match this round. Hilahin ulit!`);
       }
 
-      // Reset active bets
-      Object.keys(bets).forEach(k => bets[k] = 0);
+      broadcastRollResult(winningColors);
+
+      // Clear bets across all players
+      players.forEach(p => {
+        if (p.bets) {
+          Object.keys(p.bets).forEach(k => p.bets[k] = 0);
+        }
+      });
       clear3DChips();
       updateStakesUI();
+      renderSeats();
 
       isRolling = false;
       document.getElementById('btn-drop').disabled = false;
+
+      // If bots are active, have them place bets for the next round
+      if (botsActive) {
+        setTimeout(() => {
+          if (botsActive && !isRolling) {
+            players.forEach((p, idx) => {
+              if (p.isBot && idx !== activeSeat) {
+                placeBotBets(idx);
+              }
+            });
+            rebuildAll3DChips();
+            renderSeats();
+          }
+        }, 1800);
+      }
+    }
+
+    let lastSeenRollId = 0;
+
+    async function broadcastRollResult(winningColors) {
+      try {
+        const puller = (activeSeat !== -1 && players[activeSeat]) ? players[activeSeat].name : 'Spectator';
+        await fetch('/color_game/api.php?action=broadcast_roll', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            winning_colors: winningColors,
+            puller_name: puller,
+            roll_id: Date.now()
+          })
+        });
+      } catch (e) {}
+    }
+
+    async function syncRoomHeartbeat() {
+      try {
+        const localBets = (activeSeat !== -1 && players[activeSeat]) ? players[activeSeat].bets : {};
+        const payload = {
+          ref: userRef,
+          name: userName,
+          avatar: (activeSeat !== -1 && players[activeSeat]) ? players[activeSeat].avatar : '👑',
+          seat: activeSeat,
+          bets: localBets,
+          balance: wallet.get()
+        };
+
+        const res = await fetch('/color_game/api.php?action=join_or_heartbeat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data && data.seats && Array.isArray(data.seats)) {
+          let remoteChanged = false;
+          data.seats.forEach((serverSeat, idx) => {
+            if (idx === activeSeat && activeSeat !== -1) {
+              players[idx].ref = userRef;
+              players[idx].name = userName;
+              players[idx].isUser = true;
+              players[idx].balance = wallet.get();
+            } else if (serverSeat && serverSeat.ref) {
+              if (serverSeat.ref === userRef && idx !== activeSeat) {
+                if (!botsActive) {
+                  players[idx].ref = null;
+                  players[idx].name = 'Open Seat';
+                  players[idx].avatar = SEAT_TEMPLATES[idx].avatar;
+                  players[idx].isUser = false;
+                  players[idx].isBot = false;
+                  players[idx].bets = { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 };
+                  players[idx].balance = 0;
+                  remoteChanged = true;
+                }
+              } else {
+                players[idx].ref = serverSeat.ref;
+                players[idx].name = serverSeat.name;
+                players[idx].avatar = serverSeat.avatar || SEAT_TEMPLATES[idx].avatar;
+                players[idx].isUser = false;
+                players[idx].isBot = false;
+                players[idx].balance = serverSeat.balance || 0;
+                players[idx].bets = serverSeat.bets || { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 };
+                remoteChanged = true;
+              }
+            } else if (!botsActive && idx !== activeSeat) {
+              if (players[idx].ref !== null) {
+                players[idx].ref = null;
+                players[idx].name = 'Open Seat';
+                players[idx].avatar = SEAT_TEMPLATES[idx].avatar;
+                players[idx].isUser = false;
+                players[idx].isBot = false;
+                players[idx].bets = { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 };
+                players[idx].balance = 0;
+                remoteChanged = true;
+              }
+            }
+          });
+          renderSeats();
+          if (remoteChanged && !isRolling) {
+            rebuildAll3DChips();
+          }
+        }
+
+        if (data && data.last_roll && data.last_roll.roll_id) {
+          if (lastSeenRollId === 0) {
+            lastSeenRollId = data.last_roll.roll_id;
+          } else if (data.last_roll.roll_id !== lastSeenRollId && !isRolling) {
+            lastSeenRollId = data.last_roll.roll_id;
+            showBanner(`🎪 ${data.last_roll.puller_name} rolled: ${data.last_roll.winning_colors.join(' • ')}`);
+          }
+        }
+      } catch (e) {}
     }
 
     function showBanner(msg) {
@@ -1257,6 +1839,7 @@
     document.getElementById('btn-clear').onclick = clearBets;
     document.getElementById('btn-double').onclick = doubleBets;
     document.getElementById('btn-drop').onclick = triggerDropCubes;
+    document.getElementById('btn-bots').onclick = toggleBots;
 
     document.getElementById('btn-ayuda').onclick = () => {
       wallet.add(2000);
@@ -1285,6 +1868,12 @@
         controls.target.set(0, 1.2, 0);
       }
     };
+
+    // Initial render & room heartbeat polling
+    renderSeats();
+    updateStakesUI();
+    setInterval(syncRoomHeartbeat, 2500);
+    setTimeout(syncRoomHeartbeat, 250);
 
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
