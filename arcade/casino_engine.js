@@ -622,7 +622,7 @@
           deck.push({
             suit: s,
             rank: r,
-            color: (s === '♥' || s === '♦') ? '#ef4444' : '#f8fafc',
+            color: (s === '♥' || s === '♦') ? '#dc2626' : '#0f172a',
             val: getCardValue(r)
           });
         }
@@ -650,18 +650,27 @@
     if (hidden) {
       return `
         <div class="casino-card card-back">
-          <div class="card-back-pattern">🛡️</div>
+          <div class="card-back-pattern">
+            <svg viewBox="0 0 50 70" style="width:75%; height:75%;">
+              <rect x="3" y="3" width="44" height="64" rx="4" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,2"/>
+              <circle cx="25" cy="35" r="13" fill="#090d16" stroke="#fef08a" stroke-width="1.5"/>
+              <text x="25" y="40" font-family="'Cinzel', serif" font-size="13" font-weight="900" fill="#fde047" text-anchor="middle">👑</text>
+            </svg>
+          </div>
         </div>
       `;
     }
-    const isRoyal = ['J', 'Q', 'K', 'A'].includes(card.rank);
+    const isRoyal = ['J', 'Q', 'K'].includes(card.rank);
+    const isAce = card.rank === 'A';
     return `
-      <div class="casino-card ${isRoyal ? 'card-royal' : ''}" style="color: ${card.color};">
+      <div class="casino-card ${isRoyal ? 'card-royal' : ''} ${isAce ? 'card-ace' : ''}" style="color: ${card.color};">
         <div class="card-corner top-left">
           <span>${card.rank}</span>
           <span class="suit-icon">${card.suit}</span>
         </div>
-        <div class="card-center">${card.suit}</div>
+        <div class="card-center">
+          ${isAce ? `<span style="font-size: 2.2rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">${card.suit}</span>` : `<span style="font-size: 1.5rem;">${card.suit}</span>`}
+        </div>
         <div class="card-corner bottom-right">
           <span>${card.rank}</span>
           <span class="suit-icon">${card.suit}</span>
@@ -713,6 +722,12 @@
             <input type="number" id="input-bet" class="bet-number-input" value="${bet}" min="10" max="10000" step="50">
             <button class="btn-ctrl-sub" id="btn-bet-double">2x</button>
             <button class="btn-ctrl-sub" id="btn-bet-max">MAX</button>
+            <div class="chip-rack-selector">
+              <button class="casino-chip-btn chip-10" id="chip-add-10" title="Add 10">10</button>
+              <button class="casino-chip-btn chip-50" id="chip-add-50" title="Add 50">50</button>
+              <button class="casino-chip-btn chip-100" id="chip-add-100" title="Add 100">100</button>
+              <button class="casino-chip-btn chip-500" id="chip-add-500" title="Add 500">500</button>
+            </div>
           </div>
 
           <div class="action-buttons-group">
@@ -744,6 +759,10 @@
     container.querySelector('#btn-bet-half').onclick = () => updateBet(bet / 2);
     container.querySelector('#btn-bet-double').onclick = () => updateBet(bet * 2);
     container.querySelector('#btn-bet-max').onclick = () => updateBet(wallet.get());
+    container.querySelector('#chip-add-10').onclick = () => { updateBet(bet + 10); sound.chip(); };
+    container.querySelector('#chip-add-50').onclick = () => { updateBet(bet + 50); sound.chip(); };
+    container.querySelector('#chip-add-100').onclick = () => { updateBet(bet + 100); sound.chip(); };
+    container.querySelector('#chip-add-500').onclick = () => { updateBet(bet + 500); sound.chip(); };
     elBet.onchange = (e) => updateBet(e.target.value);
 
     function startDeal() {
@@ -871,12 +890,17 @@
         winAmt = Math.floor(bet * 2.5);
         wallet.add(winAmt);
         sound.bigWin();
-        elStatus.innerHTML = `<span style="color:#fde047">💥 NATURAL BLACKJACK! +${winAmt.toLocaleString()} COINS</span>`;
+        celebration.burst('win', 90);
+        window.CasinoEngine.showBanner('NATURAL BLACKJACK!', `+${winAmt.toLocaleString()} COINS`);
+        elStatus.innerHTML = `<span style="color:#fde047; font-weight:800;">💥 NATURAL BLACKJACK! +${winAmt.toLocaleString()} COINS</span>`;
       } else if (outcome === 'player_win' || outcome === 'dealer_bust') {
         winAmt = bet * 2;
         wallet.add(winAmt);
         sound.win();
-        elStatus.innerHTML = `<span style="color:#10b981">🎉 YOU WIN! +${winAmt.toLocaleString()} COINS</span>`;
+        celebration.burst('win', 60);
+        const winTitle = outcome === 'dealer_bust' ? 'DEALER BUST!' : 'PLAYER WINS!';
+        window.CasinoEngine.showBanner(winTitle, `+${winAmt.toLocaleString()} COINS`);
+        elStatus.innerHTML = `<span style="color:#10b981; font-weight:800;">🎉 ${winTitle} +${winAmt.toLocaleString()} COINS</span>`;
       } else if (outcome === 'push') {
         wallet.add(bet);
         sound.click();
@@ -1063,7 +1087,10 @@
       if (win) {
         wallet.add(payout);
         sound.win();
-        elStatus.innerHTML = `<span style="color:#10b981">🎉 ${outcome.toUpperCase()} WINS! +${payout.toLocaleString()} COINS</span>`;
+        celebration.burst('win', 70);
+        const bannerTitle = isDragon7 ? '🐉 DRAGON 7 40:1 WIN!' : `${outcome.toUpperCase()} WINS!`;
+        window.CasinoEngine.showBanner(bannerTitle, `+${payout.toLocaleString()} COINS`);
+        elStatus.innerHTML = `<span style="color:#10b981; font-weight:800;">🎉 ${bannerTitle} +${payout.toLocaleString()} COINS</span>`;
       } else if (payout === bet) {
         wallet.add(payout);
         sound.click();
