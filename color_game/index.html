@@ -889,23 +889,24 @@
     });
     physicsWorld.addContactMaterial(woodContactMat);
 
-    // Table deck collider
-    const tableBody = new CANNON.Body({ mass: 0, material: woodPhysicsMat });
-    tableBody.addShape(new CANNON.Box(new CANNON.Vec3(4.1, 0.2, 2.6)));
-    tableBody.position.set(0, -0.12, 0.1);
-    physicsWorld.addBody(tableBody);
+    // Infinite solid table surface plane (mathematically impossible to tunnel or fall through)
+    const groundBody = new CANNON.Body({ mass: 0, material: woodPhysicsMat });
+    groundBody.addShape(new CANNON.Plane());
+    groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+    groundBody.position.set(0, 0.08, 0);
+    physicsWorld.addBody(groundBody);
 
-    // Rim retainers (walls) so dice stay on the table
-    function addRimCollider(x, y, z, hx, hy, hz) {
+    // Tall 4.5m boundary walls around the table perimeter so cubes cannot jump over rails
+    function addRimCollider(x, z, hx, hz) {
       const b = new CANNON.Body({ mass: 0, material: woodPhysicsMat });
-      b.addShape(new CANNON.Box(new CANNON.Vec3(hx, hy, hz)));
-      b.position.set(x, y, z);
+      b.addShape(new CANNON.Box(new CANNON.Vec3(hx, 2.25, hz)));
+      b.position.set(x, 2.25, z);
       physicsWorld.addBody(b);
     }
-    addRimCollider(0, 0.35, 2.7, 4.2, 0.35, 0.15); // Front wall
-    addRimCollider(0, 0.45, -2.5, 4.2, 0.45, 0.15); // Back wall
-    addRimCollider(-4.2, 0.35, 0.1, 0.15, 0.35, 2.7); // Left wall
-    addRimCollider(4.2, 0.35, 0.1, 0.15, 0.35, 2.7); // Right wall
+    addRimCollider(0, 2.65, 4.2, 0.2); // Front retaining wall
+    addRimCollider(0, -2.45, 4.2, 0.2); // Back retaining wall
+    addRimCollider(-4.15, 0.1, 0.2, 2.6); // Left retaining wall
+    addRimCollider(4.15, 0.1, 0.2, 2.6); // Right retaining wall
 
     /* --- The 3 Large 3D Wooden Perya Blocks (Cubes) --- */
     const cubesGroup = new THREE.Group();
@@ -1151,9 +1152,9 @@
       diceState.forEach((d, i) => {
         // Reset position inside chute
         d.body.position.set(
-          -1.2 + i * 1.2 + (Math.random() - 0.5) * 0.4,
-          3.8 + i * 0.35,
-          -0.6 + (Math.random() - 0.5) * 0.4
+          -1.1 + i * 1.1 + (Math.random() - 0.5) * 0.3,
+          3.6 + i * 0.3,
+          -0.5 + (Math.random() - 0.5) * 0.3
         );
         // Random tumble rotation
         d.body.quaternion.setFromEuler(
@@ -1163,14 +1164,14 @@
         );
         // Initial downward tumble impulse + spread
         d.body.velocity.set(
-          (Math.random() - 0.5) * 2.5,
-          -3.5 - Math.random() * 2.0,
-          1.2 + (Math.random() - 0.5) * 1.8
+          (Math.random() - 0.5) * 1.8,
+          -3.0 - Math.random() * 1.5,
+          0.5 + (Math.random() - 0.5) * 1.2
         );
         d.body.angularVelocity.set(
-          (Math.random() - 0.5) * 28,
-          (Math.random() - 0.5) * 28,
-          (Math.random() - 0.5) * 28
+          (Math.random() - 0.5) * 22,
+          (Math.random() - 0.5) * 22,
+          (Math.random() - 0.5) * 22
         );
       });
     }
@@ -1300,11 +1301,15 @@
 
       controls.update();
 
-      // Step Cannon.js Physics
-      physicsWorld.step(delta);
+      // Step Cannon.js Physics with fixed sub-stepping to prevent tunneling
+      physicsWorld.step(1 / 60, delta, 8);
 
-      // Synchronize Three.js visual meshes with physical bodies
+      // Floor safety clamp: keep cubes on the table
       diceState.forEach(d => {
+        if (d.body.position.y < 0.46) {
+          d.body.position.y = 0.54;
+          if (d.body.velocity.y < 0) d.body.velocity.y = 0;
+        }
         d.mesh.position.copy(d.body.position);
         d.mesh.quaternion.copy(d.body.quaternion);
       });
