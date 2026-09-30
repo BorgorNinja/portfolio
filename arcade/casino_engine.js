@@ -366,6 +366,7 @@
     win() { this.fanfare(); }
     bigWin() { this.fanfare(); }
     spin() { this.spinTick(); }
+    deal() { this.card(); }
 
     lose() {
       if (this.muted) return;
@@ -1957,6 +1958,2334 @@
     };
   }
 
+
+  /* =========================================================================
+     4C: VIDEO POKER (Jacks or Better, Deuces Wild, Joker Poker)
+     ========================================================================= */
+  function buildVideoPoker(gameDef, container) {
+    let bet = 100;
+    let deck = createDeck(1);
+    let hand = [];
+    let held = [false, false, false, false, false];
+    let gameState = 'idle'; // 'idle', 'dealt'
+
+    const paytable = [
+      { name: 'Royal Flush', mult: 800 },
+      { name: 'Straight Flush', mult: 50 },
+      { name: '4 of a Kind', mult: 25 },
+      { name: 'Full House', mult: 9 },
+      { name: 'Flush', mult: 6 },
+      { name: 'Straight', mult: 4 },
+      { name: '3 of a Kind', mult: 3 },
+      { name: 'Two Pair', mult: 2 },
+      { name: (gameDef.id === 'vp_deuces' ? 'Wild Royal' : 'Jacks or Better'), mult: 1 }
+    ];
+
+    container.innerHTML = `
+      <div class="theater-game-shell">
+        <div class="table-felt felt-video-poker">
+          <div class="table-badge">${gameDef.title.toUpperCase()} • ${gameDef.badge}</div>
+          
+          <div class="vp-paytable-board">
+            <div class="vp-pay-grid">
+              ${paytable.map((p, idx) => `
+                <div class="vp-pay-row" id="vp-row-${idx}">
+                  <span class="vp-hand-name">${p.name}</span>
+                  <span class="vp-hand-mult">${p.mult}x</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="vp-cards-stage" id="vp-cards-row">
+            ${Array.from({ length: 5 }, (_, i) => `
+              <div class="vp-card-slot" id="vp-slot-${i}">
+                <div class="vp-hold-indicator" id="vp-hold-${i}">HELD</div>
+                <div class="vp-card-box" id="vp-card-box-${i}">
+                  ${renderCardHTML({ suit: '♠', rank: 'A', color: '#0f172a', val: 11 }, true)}
+                </div>
+                <button class="vp-hold-btn" id="vp-btn-hold-${i}">HOLD</button>
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="felt-center-banner" id="vp-status-msg">Press DEAL to start five-card draw!</div>
+        </div>
+
+        <div class="theater-controls-bar">
+          <div class="bet-adjust-group">
+            <span class="bet-label">BET</span>
+            <button class="btn-ctrl-sub" id="btn-vp-half">1/2</button>
+            <input type="number" id="input-vp-bet" class="bet-number-input" value="${bet}" min="10" max="10000" step="50">
+            <button class="btn-ctrl-sub" id="btn-vp-double">2x</button>
+            <button class="btn-ctrl-sub" id="btn-vp-max">MAX</button>
+          </div>
+          <div class="chip-rack-selector">
+            <button class="casino-chip-btn chip-10" data-val="10">10</button>
+            <button class="casino-chip-btn chip-50" data-val="50">50</button>
+            <button class="casino-chip-btn chip-100" data-val="100">100</button>
+            <button class="casino-chip-btn chip-500" data-val="500">500</button>
+          </div>
+          <div class="action-buttons-group">
+            <button class="btn-action primary" id="btn-vp-action" style="min-width: 170px;">
+              DEAL CARDS 🃏
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const elBet = container.querySelector('#input-vp-bet');
+    const elStatus = container.querySelector('#vp-status-msg');
+    const btnAction = container.querySelector('#btn-vp-action');
+
+    function rankToVal(r) {
+      if (r === 'A') return 14;
+      if (r === 'K') return 13;
+      if (r === 'Q') return 12;
+      if (r === 'J') return 11;
+      return parseInt(r, 10);
+    }
+
+    function evaluatePokerHand(cards) {
+      const vals = cards.map(c => rankToVal(c.rank)).sort((a,b) => a - b);
+      const suits = cards.map(c => c.suit);
+      const isFlush = suits.every(s => s === suits[0]);
+      
+      let isStraight = false;
+      if (vals[4] - vals[0] === 4 && new Set(vals).size === 5) isStraight = true;
+      if (vals[0] === 2 && vals[1] === 3 && vals[2] === 4 && vals[3] === 5 && vals[4] === 14) isStraight = true; // Ace-low straight
+
+      const counts = {};
+      vals.forEach(v => counts[v] = (counts[v] || 0) + 1);
+      const countVals = Object.values(counts).sort((a,b) => b - a);
+
+      if (isStraight && isFlush && vals[4] === 14 && vals[0] === 10) return { name: 'Royal Flush', mult: 800, idx: 0 };
+      if (isStraight && isFlush) return { name: 'Straight Flush', mult: 50, idx: 1 };
+      if (countVals[0] === 4) return { name: '4 of a Kind', mult: 25, idx: 2 };
+      if (countVals[0] === 3 && countVals[1] === 2) return { name: 'Full House', mult: 9, idx: 3 };
+      if (isFlush) return { name: 'Flush', mult: 6, idx: 4 };
+      if (isStraight) return { name: 'Straight', mult: 4, idx: 5 };
+      if (countVals[0] === 3) return { name: '3 of a Kind', mult: 3, idx: 6 };
+      if (countVals[0] === 2 && countVals[1] === 2) return { name: 'Two Pair', mult: 2, idx: 7 };
+      if (countVals[0] === 2) {
+        // Check if pair is Jacks or higher
+        for (const [valStr, c] of Object.entries(counts)) {
+          if (c === 2 && parseInt(valStr, 10) >= 11) {
+            return { name: 'Jacks or Better', mult: 1, idx: 8 };
+          }
+        }
+      }
+      return { name: 'High Card', mult: 0, idx: -1 };
+    }
+
+    function toggleHold(idx) {
+      if (gameState !== 'dealt') return;
+      held[idx] = !held[idx];
+      sound.click();
+      const holdEl = container.querySelector(`#vp-hold-${idx}`);
+      const boxEl = container.querySelector(`#vp-card-box-${idx}`);
+      const btnEl = container.querySelector(`#vp-btn-hold-${idx}`);
+      if (held[idx]) {
+        holdEl.classList.add('active');
+        boxEl.classList.add('held-glow');
+        btnEl.classList.add('active');
+      } else {
+        holdEl.classList.remove('active');
+        boxEl.classList.remove('held-glow');
+        btnEl.classList.remove('active');
+      }
+    }
+
+    for (let i = 0; i < 5; i++) {
+      container.querySelector(`#vp-slot-${i}`).onclick = (e) => {
+        toggleHold(i);
+      };
+    }
+
+    container.querySelectorAll('.casino-chip-btn').forEach(b => {
+      b.onclick = () => {
+        const val = parseInt(b.dataset.val, 10);
+        bet = Math.min(wallet.get(), bet + val);
+        elBet.value = bet;
+        sound.chip();
+      };
+    });
+
+    container.querySelector('#btn-vp-half').onclick = () => { bet = Math.max(10, Math.floor(bet / 2)); elBet.value = bet; };
+    container.querySelector('#btn-vp-double').onclick = () => { bet = Math.min(wallet.get(), bet * 2); elBet.value = bet; };
+    container.querySelector('#btn-vp-max').onclick = () => { bet = wallet.get(); elBet.value = bet; };
+    elBet.onchange = (e) => { bet = Math.max(10, Math.min(wallet.get(), parseInt(e.target.value, 10) || 10)); };
+
+    btnAction.onclick = () => {
+      container.querySelectorAll('.vp-pay-row').forEach(r => r.classList.remove('vp-win-highlight'));
+
+      if (gameState === 'idle') {
+        bet = Math.max(10, Math.min(wallet.get(), parseInt(elBet.value, 10) || 10));
+        if (!wallet.deduct(bet)) {
+          sound.lose();
+          elStatus.innerHTML = `<span style="color:#ef4444">Insufficient coins! Claim Ayuda below.</span>`;
+          return;
+        }
+
+        sound.card();
+        deck = createDeck(1);
+        hand = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()];
+        held = [false, false, false, false, false];
+
+        for (let i = 0; i < 5; i++) {
+          const boxEl = container.querySelector(`#vp-card-box-${i}`);
+          const holdEl = container.querySelector(`#vp-hold-${i}`);
+          const btnEl = container.querySelector(`#vp-btn-hold-${i}`);
+          holdEl.classList.remove('active');
+          boxEl.classList.remove('held-glow');
+          btnEl.classList.remove('active');
+          boxEl.innerHTML = renderCardHTML(hand[i]);
+          boxEl.classList.add('card-enter-anim');
+          setTimeout(() => boxEl.classList.remove('card-enter-anim'), 350);
+        }
+
+        gameState = 'dealt';
+        btnAction.textContent = 'DRAW REPLACEMENTS 🔄';
+        elStatus.innerHTML = 'Select cards to HOLD, then press DRAW!';
+      } else if (gameState === 'dealt') {
+        // Replace unheld cards
+        for (let i = 0; i < 5; i++) {
+          if (!held[i]) {
+            hand[i] = deck.pop();
+            const boxEl = container.querySelector(`#vp-card-box-${i}`);
+            boxEl.innerHTML = renderCardHTML(hand[i]);
+            boxEl.classList.add('card-enter-anim');
+            setTimeout(() => boxEl.classList.remove('card-enter-anim'), 350);
+          }
+        }
+        sound.card();
+
+        const result = evaluatePokerHand(hand);
+        if (result.mult > 0) {
+          const winAmt = bet * result.mult;
+          wallet.add(winAmt);
+          sound.win();
+          celebration.burst('win', 45);
+          const winRow = container.querySelector(`#vp-row-${result.idx}`);
+          if (winRow) winRow.classList.add('vp-win-highlight');
+          elStatus.innerHTML = `<span style="color:#fde047">🏆 ${result.name.toUpperCase()}! WON $${winAmt.toLocaleString()}!</span>`;
+        } else {
+          sound.lose();
+          elStatus.innerHTML = `<span style="color:#94a3b8">No Pair or Low Card. Better luck on the next draw!</span>`;
+        }
+
+        gameState = 'idle';
+        btnAction.textContent = 'DEAL CARDS 🃏';
+      }
+    };
+  }
+
+  /* =========================================================================
+     4D: POKER TABLE (Texas Hold'em Heads-Up, Three Card Poker, Caribbean Stud)
+     ========================================================================= */
+  function buildPokerTable(gameDef, container) {
+    let bet = 100;
+    let deck = createDeck(1);
+    let playerHand = [];
+    let dealerHand = [];
+    let community = [];
+    let inHand = false;
+
+    const isHoldem = (gameDef.id === 'holdem_heads_up');
+    const is3Card = (gameDef.id === 'three_card_poker');
+
+    container.innerHTML = `
+      <div class="theater-game-shell">
+        <div class="table-felt felt-poker-table">
+          <div class="table-badge">${gameDef.title.toUpperCase()} • ${gameDef.badge}</div>
+
+          <div class="poker-dealer-zone">
+            <div class="hand-label">OPPONENT DEALER <span id="poker-d-status" class="hand-badge">WAITING</span></div>
+            <div class="cards-tray" id="poker-dealer-cards"></div>
+          </div>
+
+          <div class="poker-community-zone">
+            <div class="poker-comm-label">${isHoldem ? 'COMMUNITY BOARD (FLOP • TURN • RIVER)' : 'POT STAKES AREA'}</div>
+            <div class="cards-tray" id="poker-comm-cards"></div>
+          </div>
+
+          <div class="felt-center-banner" id="poker-status-msg">Place Ante and click Deal to battle heads-up!</div>
+
+          <div class="poker-player-zone">
+            <div class="hand-label">YOUR HAND <span id="poker-p-status" class="hand-badge">--</span></div>
+            <div class="cards-tray" id="poker-player-cards"></div>
+          </div>
+        </div>
+
+        <div class="theater-controls-bar">
+          <div class="bet-adjust-group">
+            <span class="bet-label">ANTE</span>
+            <button class="btn-ctrl-sub" id="btn-pk-half">1/2</button>
+            <input type="number" id="input-pk-bet" class="bet-number-input" value="${bet}" min="10" max="10000" step="50">
+            <button class="btn-ctrl-sub" id="btn-pk-double">2x</button>
+            <button class="btn-ctrl-sub" id="btn-pk-max">MAX</button>
+          </div>
+          <div class="chip-rack-selector">
+            <button class="casino-chip-btn chip-10" data-val="10">10</button>
+            <button class="casino-chip-btn chip-50" data-val="50">50</button>
+            <button class="casino-chip-btn chip-100" data-val="100">100</button>
+            <button class="casino-chip-btn chip-500" data-val="500">500</button>
+          </div>
+          <div class="action-buttons-group">
+            <button class="btn-action primary" id="btn-pk-deal">DEAL HAND ♠️</button>
+            <button class="btn-action" id="btn-pk-call" style="display:none; background:#10b981; border-color:#34d399;">PLAY / CALL</button>
+            <button class="btn-action" id="btn-pk-fold" style="display:none; background:#ef4444; border-color:#f87171;">FOLD</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const elPCards = container.querySelector('#poker-player-cards');
+    const elDCards = container.querySelector('#poker-dealer-cards');
+    const elComm = container.querySelector('#poker-comm-cards');
+    const elPStatus = container.querySelector('#poker-p-status');
+    const elDStatus = container.querySelector('#poker-d-status');
+    const elStatus = container.querySelector('#poker-status-msg');
+    const elBet = container.querySelector('#input-pk-bet');
+    const btnDeal = container.querySelector('#btn-pk-deal');
+    const btnCall = container.querySelector('#btn-pk-call');
+    const btnFold = container.querySelector('#btn-pk-fold');
+
+    function rankToVal(r) {
+      if (r === 'A') return 14;
+      if (r === 'K') return 13;
+      if (r === 'Q') return 12;
+      if (r === 'J') return 11;
+      return parseInt(r, 10);
+    }
+
+    container.querySelectorAll('.casino-chip-btn').forEach(b => {
+      b.onclick = () => {
+        const val = parseInt(b.dataset.val, 10);
+        bet = Math.min(wallet.get(), bet + val);
+        elBet.value = bet;
+        sound.chip();
+      };
+    });
+
+    container.querySelector('#btn-pk-half').onclick = () => { bet = Math.max(10, Math.floor(bet / 2)); elBet.value = bet; };
+    container.querySelector('#btn-pk-double').onclick = () => { bet = Math.min(wallet.get(), bet * 2); elBet.value = bet; };
+    container.querySelector('#btn-pk-max').onclick = () => { bet = wallet.get(); elBet.value = bet; };
+    elBet.onchange = (e) => { bet = Math.max(10, Math.min(wallet.get(), parseInt(e.target.value, 10) || 10)); };
+
+    btnDeal.onclick = () => {
+      bet = Math.max(10, Math.min(wallet.get(), parseInt(elBet.value, 10) || 10));
+      if (!wallet.deduct(bet)) {
+        sound.lose();
+        elStatus.innerHTML = `<span style="color:#ef4444">Insufficient coins! Claim Ayuda below.</span>`;
+        return;
+      }
+
+      deck = createDeck(1);
+      sound.card();
+      inHand = true;
+      btnDeal.style.display = 'none';
+      btnCall.style.display = 'inline-flex';
+      btnFold.style.display = 'inline-flex';
+
+      if (is3Card) {
+        playerHand = [deck.pop(), deck.pop(), deck.pop()];
+        dealerHand = [deck.pop(), deck.pop(), deck.pop()];
+        elPCards.innerHTML = playerHand.map(c => renderCardHTML(c)).join('');
+        elDCards.innerHTML = dealerHand.map(() => renderCardHTML(null, true)).join('');
+        elComm.innerHTML = `<div class="poker-ante-chip">ANTE: $${bet}</div>`;
+        elPStatus.textContent = '3 CARDS DEALT';
+        elDStatus.textContent = '3 CARDS FACE DOWN';
+        elStatus.innerHTML = 'Click <b>PLAY</b> to match the dealer or <b>FOLD</b> to forfeit Ante.';
+      } else if (isHoldem) {
+        playerHand = [deck.pop(), deck.pop()];
+        dealerHand = [deck.pop(), deck.pop()];
+        community = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()];
+        elPCards.innerHTML = playerHand.map(c => renderCardHTML(c)).join('');
+        elDCards.innerHTML = dealerHand.map(() => renderCardHTML(null, true)).join('');
+        // Flop shown, Turn & River face down
+        elComm.innerHTML = `
+          ${renderCardHTML(community[0])}
+          ${renderCardHTML(community[1])}
+          ${renderCardHTML(community[2])}
+          ${renderCardHTML(community[3], true)}
+          ${renderCardHTML(community[4], true)}
+        `;
+        elPStatus.textContent = 'HOLE CARDS';
+        elDStatus.textContent = 'DEALER HOLE';
+        elStatus.innerHTML = 'Flop is dealt! Click <b>CALL</b> to see Turn, River & Showdown, or <b>FOLD</b>.';
+      } else {
+        // Caribbean Stud / 5-Card
+        playerHand = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()];
+        dealerHand = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()];
+        elPCards.innerHTML = playerHand.map(c => renderCardHTML(c)).join('');
+        elDCards.innerHTML = `${renderCardHTML(dealerHand[0])}` + dealerHand.slice(1).map(() => renderCardHTML(null, true)).join('');
+        elComm.innerHTML = `<div class="poker-ante-chip">ANTE: $${bet}</div>`;
+        elPStatus.textContent = '5 CARDS';
+        elDStatus.textContent = '1 CARD EXPOSED';
+        elStatus.innerHTML = 'Dealer shows 1 card. Click <b>PLAY</b> (2x Ante) or <b>FOLD</b>.';
+      }
+    };
+
+    btnCall.onclick = () => {
+      if (!inHand) return;
+      const callBet = bet; // 1x or 2x
+      if (!wallet.deduct(callBet)) {
+        sound.lose();
+        elStatus.innerHTML = `<span style="color:#ef4444">Insufficient coins to call!</span>`;
+        return;
+      }
+
+      sound.chip();
+      // Reveal dealer cards
+      elDCards.innerHTML = dealerHand.map(c => renderCardHTML(c)).join('');
+      if (isHoldem) {
+        elComm.innerHTML = community.map(c => renderCardHTML(c)).join('');
+      }
+
+      // Simple robust high-card / pair showdown evaluator
+      const pMax = Math.max(...playerHand.map(c => rankToVal(c.rank)));
+      const dMax = Math.max(...dealerHand.map(c => rankToVal(c.rank)));
+      
+      const pRanks = new Set(playerHand.map(c => c.rank)).size < playerHand.length; // has pair
+      const dRanks = new Set(dealerHand.map(c => c.rank)).size < dealerHand.length;
+
+      let playerWins = false;
+      let tie = false;
+
+      if (pRanks && !dRanks) playerWins = true;
+      else if (!pRanks && dRanks) playerWins = false;
+      else if (pMax > dMax) playerWins = true;
+      else if (pMax === dMax) tie = true;
+
+      const totalStake = bet + callBet;
+      if (playerWins) {
+        const winPayout = totalStake * 2;
+        wallet.add(winPayout);
+        sound.win();
+        celebration.burst('win', 40);
+        elStatus.innerHTML = `<span style="color:#fde047">🏆 SHOWDOWN WIN! You beat dealer and won $${winPayout.toLocaleString()}!</span>`;
+        elPStatus.textContent = 'WINNER';
+        elDStatus.textContent = 'BEATEN';
+      } else if (tie) {
+        wallet.add(totalStake);
+        sound.click();
+        elStatus.innerHTML = `<span style="color:#38bdf8">🤝 PUSH! Equal hand values, stakes returned.</span>`;
+        elPStatus.textContent = 'PUSH';
+        elDStatus.textContent = 'PUSH';
+      } else {
+        sound.lose();
+        elStatus.innerHTML = `<span style="color:#ef4444">Dealer takes the showdown pot. Good game!</span>`;
+        elPStatus.textContent = 'LOST';
+        elDStatus.textContent = 'WINNER';
+      }
+
+      inHand = false;
+      btnDeal.style.display = 'inline-flex';
+      btnCall.style.display = 'none';
+      btnFold.style.display = 'none';
+    };
+
+    btnFold.onclick = () => {
+      if (!inHand) return;
+      sound.lose();
+      elDCards.innerHTML = dealerHand.map(c => renderCardHTML(c)).join('');
+      elStatus.innerHTML = `<span style="color:#94a3b8">Hand folded. Ante forfeited.</span>`;
+      elPStatus.textContent = 'FOLDED';
+      inHand = false;
+      btnDeal.style.display = 'inline-flex';
+      btnCall.style.display = 'none';
+      btnFold.style.display = 'none';
+    };
+  }
+
+  /* =========================================================================
+     4E: CARD SHOWDOWN (Casino War, Dragon Tiger, Hi-Lo, Andar Bahar, Red Dog)
+     ========================================================================= */
+  function buildCardShowdown(gameDef, container) {
+    let bet = 100;
+    let deck = createDeck(6);
+    let selectedSide = (gameDef.id === 'dragon_tiger') ? 'dragon' : ((gameDef.id === 'andar_bahar') ? 'andar' : 'player');
+    let streak = 0;
+    let currentHiLoCard = null;
+
+    const isDragonTiger = (gameDef.id === 'dragon_tiger');
+    const isWar = (gameDef.id === 'casino_war');
+    const isHiLo = (gameDef.id === 'hilo_cards');
+    const isAndarBahar = (gameDef.id === 'andar_bahar');
+    const isRedDog = (gameDef.id === 'red_dog');
+
+    function rankToVal(r) {
+      if (r === 'A') return (isDragonTiger ? 1 : 14); // Ace is low in Dragon Tiger, high in Casino War/HiLo
+      if (r === 'K') return 13;
+      if (r === 'Q') return 12;
+      if (r === 'J') return 11;
+      return parseInt(r, 10);
+    }
+
+    container.innerHTML = `
+      <div class="theater-game-shell">
+        <div class="table-felt felt-showdown">
+          <div class="table-badge">${gameDef.title.toUpperCase()} • ${gameDef.badge}</div>
+
+          ${isDragonTiger ? `
+            <div class="dragon-tiger-arena">
+              <div class="dt-side dragon-side">
+                <div class="dt-side-title" style="color:#ef4444;">🐉 DRAGON</div>
+                <div class="cards-tray" id="dt-dragon-card"></div>
+              </div>
+              <div class="dt-center-vs">VS</div>
+              <div class="dt-side tiger-side">
+                <div class="dt-side-title" style="color:#f59e0b;">🐅 TIGER</div>
+                <div class="cards-tray" id="dt-tiger-card"></div>
+              </div>
+            </div>
+            <div class="showdown-bet-selector">
+              <button class="bacc-spot active" data-side="dragon" style="border-color:#ef4444; color:#fca5a5;">DRAGON (1:1)</button>
+              <button class="bacc-spot" data-side="tie" style="border-color:#10b981; color:#6ee7b7;">TIE (8:1)</button>
+              <button class="bacc-spot" data-side="tiger" style="border-color:#f59e0b; color:#fde047;">TIGER (1:1)</button>
+            </div>
+          ` : isHiLo ? `
+            <div class="hilo-arena">
+              <div class="hilo-streak-pill" id="hilo-streak-display">STREAK: 0 • MULTIPLIER: 1.00x</div>
+              <div class="cards-tray" id="hilo-card-box" style="min-height: 140px; margin: 16px 0;"></div>
+              <div class="hilo-prediction-group">
+                <button class="btn-action" id="btn-hilo-higher" style="background:#10b981; border-color:#6ee7b7; min-width: 140px;">HIGHER ▲</button>
+                <button class="btn-action" id="btn-hilo-lower" style="background:#ef4444; border-color:#fca5a5; min-width: 140px;">LOWER ▼</button>
+                <button class="btn-action" id="btn-hilo-cashout" style="background:#f59e0b; border-color:#fde047; min-width: 140px; display:none;">CASH OUT 💰</button>
+              </div>
+            </div>
+          ` : isAndarBahar ? `
+            <div class="andar-bahar-arena">
+              <div class="ab-joker-slot">
+                <div class="hand-label">TRUMP JOKER</div>
+                <div class="cards-tray" id="ab-joker-card"></div>
+              </div>
+              <div class="ab-tracks">
+                <div class="ab-side">
+                  <div class="hand-label" style="color:#38bdf8;">ANDAR (LEFT)</div>
+                  <div class="cards-tray" id="ab-andar-cards"></div>
+                </div>
+                <div class="ab-side">
+                  <div class="hand-label" style="color:#ec4899;">BAHAR (RIGHT)</div>
+                  <div class="cards-tray" id="ab-bahar-cards"></div>
+                </div>
+              </div>
+            </div>
+            <div class="showdown-bet-selector">
+              <button class="bacc-spot active" data-side="andar">ANDAR (0.95:1)</button>
+              <button class="bacc-spot" data-side="bahar">BAHAR (1:1)</button>
+            </div>
+          ` : `
+            <div class="generic-showdown-arena">
+              <div class="dealer-area">
+                <div class="hand-label">DEALER SPOT <span id="sd-d-score" class="hand-badge">--</span></div>
+                <div class="cards-tray" id="sd-dealer-card"></div>
+              </div>
+              <div class="player-area">
+                <div class="hand-label">YOUR SPOT <span id="sd-p-score" class="hand-badge">--</span></div>
+                <div class="cards-tray" id="sd-player-card"></div>
+              </div>
+            </div>
+          `}
+
+          <div class="felt-center-banner" id="sd-status-msg">Choose your stake and click Deal to battle!</div>
+        </div>
+
+        <div class="theater-controls-bar">
+          <div class="bet-adjust-group">
+            <span class="bet-label">BET</span>
+            <button class="btn-ctrl-sub" id="btn-sd-half">1/2</button>
+            <input type="number" id="input-sd-bet" class="bet-number-input" value="${bet}" min="10" max="10000" step="50">
+            <button class="btn-ctrl-sub" id="btn-sd-double">2x</button>
+            <button class="btn-ctrl-sub" id="btn-sd-max">MAX</button>
+          </div>
+          <div class="chip-rack-selector">
+            <button class="casino-chip-btn chip-10" data-val="10">10</button>
+            <button class="casino-chip-btn chip-50" data-val="50">50</button>
+            <button class="casino-chip-btn chip-100" data-val="100">100</button>
+            <button class="casino-chip-btn chip-500" data-val="500">500</button>
+          </div>
+          <div class="action-buttons-group">
+            <button class="btn-action primary" id="btn-sd-deal">
+              ${isHiLo ? 'START RUN 🚀' : 'DEAL SHOWDOWN ⚔️'}
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const elBet = container.querySelector('#input-sd-bet');
+    const elStatus = container.querySelector('#sd-status-msg');
+    const btnDeal = container.querySelector('#btn-sd-deal');
+
+    container.querySelectorAll('.showdown-bet-selector button').forEach(b => {
+      b.onclick = () => {
+        container.querySelectorAll('.showdown-bet-selector button').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        selectedSide = b.dataset.side;
+        sound.click();
+      };
+    });
+
+    container.querySelectorAll('.casino-chip-btn').forEach(b => {
+      b.onclick = () => {
+        const val = parseInt(b.dataset.val, 10);
+        bet = Math.min(wallet.get(), bet + val);
+        elBet.value = bet;
+        sound.chip();
+      };
+    });
+
+    container.querySelector('#btn-sd-half').onclick = () => { bet = Math.max(10, Math.floor(bet / 2)); elBet.value = bet; };
+    container.querySelector('#btn-sd-double').onclick = () => { bet = Math.min(wallet.get(), bet * 2); elBet.value = bet; };
+    container.querySelector('#btn-sd-max').onclick = () => { bet = wallet.get(); elBet.value = bet; };
+    elBet.onchange = (e) => { bet = Math.max(10, Math.min(wallet.get(), parseInt(e.target.value, 10) || 10)); };
+
+    if (isHiLo) {
+      const elCard = container.querySelector('#hilo-card-box');
+      const elStreak = container.querySelector('#hilo-streak-display');
+      const btnHigh = container.querySelector('#btn-hilo-higher');
+      const btnLow = container.querySelector('#btn-hilo-lower');
+      const btnCash = container.querySelector('#btn-hilo-cashout');
+
+      function nextHiLoStep(guessHigh) {
+        if (!currentHiLoCard) return;
+        const nextCard = deck.pop();
+        sound.card();
+        elCard.innerHTML = renderCardHTML(nextCard);
+
+        const curVal = rankToVal(currentHiLoCard.rank);
+        const nextVal = rankToVal(nextCard.rank);
+
+        let correct = false;
+        if (guessHigh && nextVal >= curVal) correct = true;
+        if (!guessHigh && nextVal <= curVal) correct = true;
+
+        if (correct) {
+          streak++;
+          const mult = Math.pow(1.45, streak);
+          const pot = Math.floor(bet * mult);
+          sound.win();
+          elStreak.textContent = `STREAK: ${streak} • POT: $${pot.toLocaleString()} (${mult.toFixed(2)}x)`;
+          elStatus.innerHTML = `<span style="color:#10b981">Correct! Next card: ${nextCard.rank}. Continue or cash out?</span>`;
+          btnCash.style.display = 'inline-flex';
+          btnCash.textContent = `CASH OUT $${pot.toLocaleString()} 💰`;
+          currentHiLoCard = nextCard;
+        } else {
+          sound.lose();
+          elStreak.textContent = `BUST! Stake lost.`;
+          elStatus.innerHTML = `<span style="color:#ef4444">Wrong guess! Dealt ${nextCard.rank}. Streak broken.</span>`;
+          btnHigh.disabled = true;
+          btnLow.disabled = true;
+          btnCash.style.display = 'none';
+          btnDeal.style.display = 'inline-flex';
+          btnDeal.disabled = false;
+        }
+      }
+
+      btnHigh.onclick = () => nextHiLoStep(true);
+      btnLow.onclick = () => nextHiLoStep(false);
+      btnCash.onclick = () => {
+        const mult = Math.pow(1.45, streak);
+        const pot = Math.floor(bet * mult);
+        wallet.add(pot);
+        sound.cashout();
+        celebration.burst('win', 40);
+        elStatus.innerHTML = `<span style="color:#fde047">🏆 CASHED OUT $${pot.toLocaleString()}! Awesome streak!</span>`;
+        btnHigh.disabled = true;
+        btnLow.disabled = true;
+        btnCash.style.display = 'none';
+        btnDeal.style.display = 'inline-flex';
+        btnDeal.disabled = false;
+      };
+
+      btnDeal.onclick = () => {
+        bet = Math.max(10, Math.min(wallet.get(), parseInt(elBet.value, 10) || 10));
+        if (!wallet.deduct(bet)) {
+          sound.lose();
+          elStatus.innerHTML = `<span style="color:#ef4444">Insufficient coins!</span>`;
+          return;
+        }
+        deck = createDeck(2);
+        streak = 0;
+        currentHiLoCard = deck.pop();
+        sound.card();
+        elCard.innerHTML = renderCardHTML(currentHiLoCard);
+        elStreak.textContent = `STREAK: 0 • MULTIPLIER: 1.00x`;
+        elStatus.innerHTML = `Starting card: <b>${currentHiLoCard.rank}</b>. Will next card be Higher or Lower?`;
+        btnHigh.disabled = false;
+        btnLow.disabled = false;
+        btnCash.style.display = 'none';
+        btnDeal.style.display = 'none';
+      };
+    } else if (isDragonTiger) {
+      btnDeal.onclick = () => {
+        bet = Math.max(10, Math.min(wallet.get(), parseInt(elBet.value, 10) || 10));
+        if (!wallet.deduct(bet)) {
+          sound.lose();
+          elStatus.innerHTML = `<span style="color:#ef4444">Insufficient coins!</span>`;
+          return;
+        }
+        deck = createDeck(6);
+        sound.card();
+        const dCard = deck.pop();
+        const tCard = deck.pop();
+        container.querySelector('#dt-dragon-card').innerHTML = renderCardHTML(dCard);
+        container.querySelector('#dt-tiger-card').innerHTML = renderCardHTML(tCard);
+
+        const dVal = rankToVal(dCard.rank);
+        const tVal = rankToVal(tCard.rank);
+
+        let winner = 'tie';
+        if (dVal > tVal) winner = 'dragon';
+        if (tVal > dVal) winner = 'tiger';
+
+        if (winner === selectedSide) {
+          const mult = (winner === 'tie') ? 9 : 2;
+          const winAmt = bet * mult;
+          wallet.add(winAmt);
+          sound.win();
+          celebration.burst('win', 40);
+          elStatus.innerHTML = `<span style="color:#fde047">🏆 ${winner.toUpperCase()} WINS! Won $${winAmt.toLocaleString()}!</span>`;
+        } else {
+          sound.lose();
+          elStatus.innerHTML = `<span style="color:#ef4444">${winner.toUpperCase()} wins. Better luck next hand!</span>`;
+        }
+      };
+    } else if (isAndarBahar) {
+      btnDeal.onclick = () => {
+        bet = Math.max(10, Math.min(wallet.get(), parseInt(elBet.value, 10) || 10));
+        if (!wallet.deduct(bet)) {
+          sound.lose();
+          elStatus.innerHTML = `<span style="color:#ef4444">Insufficient coins!</span>`;
+          return;
+        }
+        deck = createDeck(1);
+        sound.card();
+        const joker = deck.pop();
+        container.querySelector('#ab-joker-card').innerHTML = renderCardHTML(joker);
+        const elAndar = container.querySelector('#ab-andar-cards');
+        const elBahar = container.querySelector('#ab-bahar-cards');
+        elAndar.innerHTML = '';
+        elBahar.innerHTML = '';
+
+        let turn = 'andar';
+        let matched = false;
+        let matchSide = '';
+
+        while (!matched && deck.length > 0) {
+          const c = deck.pop();
+          if (turn === 'andar') {
+            elAndar.innerHTML += renderCardHTML(c);
+            if (c.rank === joker.rank) { matched = true; matchSide = 'andar'; }
+            turn = 'bahar';
+          } else {
+            elBahar.innerHTML += renderCardHTML(c);
+            if (c.rank === joker.rank) { matched = true; matchSide = 'bahar'; }
+            turn = 'andar';
+          }
+        }
+
+        if (matchSide === selectedSide) {
+          const mult = (matchSide === 'andar' ? 1.95 : 2.0);
+          const winAmt = Math.floor(bet * mult);
+          wallet.add(winAmt);
+          sound.win();
+          celebration.burst('win', 40);
+          elStatus.innerHTML = `<span style="color:#fde047">🏆 MATCH ON ${matchSide.toUpperCase()}! Won $${winAmt.toLocaleString()}!</span>`;
+        } else {
+          sound.lose();
+          elStatus.innerHTML = `<span style="color:#ef4444">Matched on ${matchSide.toUpperCase()}. Stake lost.</span>`;
+        }
+      };
+    } else {
+      // Casino War
+      btnDeal.onclick = () => {
+        bet = Math.max(10, Math.min(wallet.get(), parseInt(elBet.value, 10) || 10));
+        if (!wallet.deduct(bet)) {
+          sound.lose();
+          elStatus.innerHTML = `<span style="color:#ef4444">Insufficient coins!</span>`;
+          return;
+        }
+        deck = createDeck(6);
+        sound.card();
+        const pCard = deck.pop();
+        const dCard = deck.pop();
+        container.querySelector('#sd-player-card').innerHTML = renderCardHTML(pCard);
+        container.querySelector('#sd-dealer-card').innerHTML = renderCardHTML(dCard);
+
+        const pVal = rankToVal(pCard.rank);
+        const dVal = rankToVal(dCard.rank);
+        container.querySelector('#sd-p-score').textContent = pVal;
+        container.querySelector('#sd-d-score').textContent = dVal;
+
+        if (pVal > dVal) {
+          const winAmt = bet * 2;
+          wallet.add(winAmt);
+          sound.win();
+          celebration.burst('win', 35);
+          elStatus.innerHTML = `<span style="color:#fde047">🏆 VICTORY! Your card won $${winAmt.toLocaleString()}!</span>`;
+        } else if (pVal === dVal) {
+          // Tie war
+          wallet.add(bet); // push
+          sound.click();
+          elStatus.innerHTML = `<span style="color:#38bdf8">⚔️ TIE WAR! Card ranks match, stakes refunded.</span>`;
+        } else {
+          sound.lose();
+          elStatus.innerHTML = `<span style="color:#ef4444">Dealer's card is higher. Better luck next deal!</span>`;
+        }
+      };
+    }
+  }
+
+  /* =========================================================================
+     4F: 3D ROULETTE (European Roulette 37 & American Roulette 00)
+     ========================================================================= */
+  function buildRoulette(gameDef, container) {
+    let bet = 100;
+    let selectedBet = 'red'; // 'red', 'black', 'even', 'odd', 'low', 'high', '1st12', '2nd12', '3rd12', or number
+    let isSpinning = false;
+    const isUS = (gameDef.id === 'roulette_us');
+    const numbers = isUS 
+      ? ['0', '28', '9', '26', '30', '11', '7', '20', '32', '17', '5', '22', '34', '15', '3', '24', '36', '13', '1', '00', '27', '10', '25', '29', '12', '8', '19', '31', '18', '6', '21', '33', '16', '4', '23', '35', '14', '2']
+      : ['0', '32', '15', '19', '4', '21', '2', '25', '17', '34', '6', '27', '13', '36', '11', '30', '8', '23', '10', '5', '24', '16', '33', '1', '20', '14', '31', '9', '22', '18', '29', '7', '28', '12', '35', '3', '26'];
+
+    const redNumbers = new Set(['1', '3', '5', '7', '9', '12', '14', '16', '18', '19', '21', '23', '25', '27', '30', '32', '34', '36']);
+
+    container.innerHTML = `
+      <div class="theater-game-shell">
+        <div class="table-felt felt-roulette">
+          <div class="table-badge">${gameDef.title.toUpperCase()} • ${gameDef.badge}</div>
+
+          <div class="roulette-wheel-container">
+            <canvas id="roulette-wheel-canvas" width="340" height="340" class="roulette-3d-canvas"></canvas>
+            <div class="roulette-pointer-needle"></div>
+          </div>
+
+          <div class="felt-center-banner" id="roulette-status-msg">Select a betting sector and spin the wheel!</div>
+
+          <div class="roulette-table-grid">
+            <div class="roulette-outside-bets">
+              <button class="rt-bet-box rt-red active" data-bet="red">RED (1:1)</button>
+              <button class="rt-bet-box rt-black" data-bet="black">BLACK (1:1)</button>
+              <button class="rt-bet-box" data-bet="even">EVEN (1:1)</button>
+              <button class="rt-bet-box" data-bet="odd">ODD (1:1)</button>
+              <button class="rt-bet-box" data-bet="low">1-18 (1:1)</button>
+              <button class="rt-bet-box" data-bet="high">19-36 (1:1)</button>
+              <button class="rt-bet-box" data-bet="1st12">1st 12 (2:1)</button>
+              <button class="rt-bet-box" data-bet="2nd12">2nd 12 (2:1)</button>
+              <button class="rt-bet-box" data-bet="3rd12">3rd 12 (2:1)</button>
+            </div>
+            <div class="roulette-numbers-row">
+              <button class="rt-num-box rt-green" data-bet="0">0</button>
+              ${isUS ? '<button class="rt-num-box rt-green" data-bet="00">00</button>' : ''}
+              ${Array.from({ length: 36 }, (_, i) => {
+                const n = (i + 1).toString();
+                const isR = redNumbers.has(n);
+                return `<button class="rt-num-box ${isR ? 'rt-red-n' : 'rt-black-n'}" data-bet="${n}">${n}</button>`;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+
+        <div class="theater-controls-bar">
+          <div class="bet-adjust-group">
+            <span class="bet-label">BET</span>
+            <button class="btn-ctrl-sub" id="btn-rt-half">1/2</button>
+            <input type="number" id="input-rt-bet" class="bet-number-input" value="${bet}" min="10" max="10000" step="50">
+            <button class="btn-ctrl-sub" id="btn-rt-double">2x</button>
+            <button class="btn-ctrl-sub" id="btn-rt-max">MAX</button>
+          </div>
+          <div class="chip-rack-selector">
+            <button class="casino-chip-btn chip-10" data-val="10">10</button>
+            <button class="casino-chip-btn chip-50" data-val="50">50</button>
+            <button class="casino-chip-btn chip-100" data-val="100">100</button>
+            <button class="casino-chip-btn chip-500" data-val="500">500</button>
+          </div>
+          <div class="action-buttons-group">
+            <button class="btn-action primary" id="btn-rt-spin" style="background: linear-gradient(135deg, #10b981, #059669); border-color: #34d399;">
+              SPIN WHEEL 🎡
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const canvas = container.querySelector('#roulette-wheel-canvas');
+    const ctx = canvas.getContext('2d');
+    const elBet = container.querySelector('#input-rt-bet');
+    const elStatus = container.querySelector('#roulette-status-msg');
+    const btnSpin = container.querySelector('#btn-rt-spin');
+
+    let wheelAngle = 0;
+    let ballAngle = 0;
+    let ballRadius = 135;
+
+    function drawWheel() {
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Outer mahogany rim
+      const gradRim = ctx.createRadialGradient(cx, cy, 140, cx, cy, 168);
+      gradRim.addColorStop(0, '#581c87');
+      gradRim.addColorStop(0.5, '#7e22ce');
+      gradRim.addColorStop(1, '#3b0764');
+      ctx.fillStyle = gradRim;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 165, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Golden brass divider track
+      ctx.strokeStyle = '#fde047';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 145, 0, Math.PI * 2);
+      ctx.stroke();
+
+      const numSlices = numbers.length;
+      const arc = (Math.PI * 2) / numSlices;
+
+      // Pockets
+      for (let i = 0; i < numSlices; i++) {
+        const theta = wheelAngle + (i * arc);
+        const n = numbers[i];
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, 140, theta, theta + arc);
+        ctx.closePath();
+
+        if (n === '0' || n === '00') ctx.fillStyle = '#16a34a';
+        else if (redNumbers.has(n)) ctx.fillStyle = '#dc2626';
+        else ctx.fillStyle = '#0f172a';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Number text
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(theta + arc / 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(n, 130, 4);
+        ctx.restore();
+      }
+
+      // Center gold turret
+      const gradTurret = ctx.createRadialGradient(cx, cy, 0, cx, cy, 45);
+      gradTurret.addColorStop(0, '#fef08a');
+      gradTurret.addColorStop(0.6, '#d97706');
+      gradTurret.addColorStop(1, '#78350f');
+      ctx.fillStyle = gradTurret;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 45, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fde047';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Ball
+      const bx = cx + Math.cos(ballAngle) * ballRadius;
+      const by = cy + Math.sin(ballAngle) * ballRadius;
+      ctx.beginPath();
+      ctx.arc(bx, by, 7, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = '#fff';
+      ctx.shadowBlur = 8;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    drawWheel();
+
+    container.querySelectorAll('.rt-bet-box, .rt-num-box').forEach(b => {
+      b.onclick = () => {
+        container.querySelectorAll('.rt-bet-box, .rt-num-box').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        selectedBet = b.dataset.bet;
+        sound.click();
+      };
+    });
+
+    container.querySelectorAll('.casino-chip-btn').forEach(b => {
+      b.onclick = () => {
+        const val = parseInt(b.dataset.val, 10);
+        bet = Math.min(wallet.get(), bet + val);
+        elBet.value = bet;
+        sound.chip();
+      };
+    });
+
+    container.querySelector('#btn-rt-half').onclick = () => { bet = Math.max(10, Math.floor(bet / 2)); elBet.value = bet; };
+    container.querySelector('#btn-rt-double').onclick = () => { bet = Math.min(wallet.get(), bet * 2); elBet.value = bet; };
+    container.querySelector('#btn-rt-max').onclick = () => { bet = wallet.get(); elBet.value = bet; };
+    elBet.onchange = (e) => { bet = Math.max(10, Math.min(wallet.get(), parseInt(e.target.value, 10) || 10)); };
+
+    btnSpin.onclick = () => {
+      if (isSpinning) return;
+      bet = Math.max(10, Math.min(wallet.get(), parseInt(elBet.value, 10) || 10));
+      if (!wallet.deduct(bet)) {
+        sound.lose();
+        elStatus.innerHTML = `<span style="color:#ef4444">Insufficient coins!</span>`;
+        return;
+      }
+
+      isSpinning = true;
+      btnSpin.disabled = true;
+      sound.spin();
+      elStatus.innerHTML = `<span style="color:#fde047">🎡 BALL IS IN PLAY... NO MORE BETS!</span>`;
+
+      // Pick winning number
+      const winIdx = Math.floor(Math.random() * numbers.length);
+      const winNum = numbers[winIdx];
+      const isRed = redNumbers.has(winNum);
+      const numInt = parseInt(winNum, 10);
+
+      let animStartTime = performance.now();
+      const spinDuration = 3200;
+
+      function animLoop(now) {
+        const elapsed = now - animStartTime;
+        const progress = Math.min(1, elapsed / spinDuration);
+        const ease = 1 - Math.pow(1 - progress, 3);
+
+        wheelAngle += (0.2 * (1 - ease * 0.7));
+        ballAngle -= (0.4 * (1 - ease * 0.8));
+        ballRadius = 135 - (40 * ease);
+
+        drawWheel();
+
+        if (progress < 1) {
+          requestAnimationFrame(animLoop);
+        } else {
+          isSpinning = false;
+          btnSpin.disabled = false;
+          sound.chip();
+
+          // Calculate win
+          let won = false;
+          let mult = 0;
+
+          if (selectedBet === winNum) {
+            won = true;
+            mult = 36;
+          } else if (selectedBet === 'red' && isRed) {
+            won = true;
+            mult = 2;
+          } else if (selectedBet === 'black' && !isRed && winNum !== '0' && winNum !== '00') {
+            won = true;
+            mult = 2;
+          } else if (selectedBet === 'even' && numInt > 0 && numInt % 2 === 0) {
+            won = true;
+            mult = 2;
+          } else if (selectedBet === 'odd' && numInt > 0 && numInt % 2 === 1) {
+            won = true;
+            mult = 2;
+          } else if (selectedBet === 'low' && numInt >= 1 && numInt <= 18) {
+            won = true;
+            mult = 2;
+          } else if (selectedBet === 'high' && numInt >= 19 && numInt <= 36) {
+            won = true;
+            mult = 2;
+          } else if (selectedBet === '1st12' && numInt >= 1 && numInt <= 12) {
+            won = true;
+            mult = 3;
+          } else if (selectedBet === '2nd12' && numInt >= 13 && numInt <= 24) {
+            won = true;
+            mult = 3;
+          } else if (selectedBet === '3rd12' && numInt >= 25 && numInt <= 36) {
+            won = true;
+            mult = 3;
+          }
+
+          if (won) {
+            const winAmt = bet * mult;
+            wallet.add(winAmt);
+            sound.win();
+            celebration.burst('win', 50);
+            elStatus.innerHTML = `<span style="color:#fde047">🏆 LANDED ON ${winNum} (${isRed ? 'RED' : (winNum === '0' || winNum === '00' ? 'GREEN' : 'BLACK')})! WON $${winAmt.toLocaleString()}!</span>`;
+          } else {
+            sound.lose();
+            elStatus.innerHTML = `<span style="color:#ef4444">Landed on ${winNum} (${isRed ? 'RED' : (winNum === '0' || winNum === '00' ? 'GREEN' : 'BLACK')}). Better luck next spin!</span>`;
+          }
+        }
+      }
+
+      requestAnimationFrame(animLoop);
+    };
+  }
+
+  /* =========================================================================
+     4G: 3D TUMBLING DICE & SIC BO & CRAPS
+     ========================================================================= */
+  function buildDiceGames(gameDef, container) {
+    let bet = 100;
+    let selectedBet = (gameDef.id === 'craps') ? 'pass' : ((gameDef.id === 'sicbo') ? 'small' : 'under');
+    let isRolling = false;
+    const isSicBo = (gameDef.id === 'sicbo');
+    const isCraps = (gameDef.id === 'craps');
+    const isCyberDice = (gameDef.id === 'dice');
+
+    container.innerHTML = `
+      <div class="theater-game-shell">
+        <div class="table-felt felt-dice">
+          <div class="table-badge">${gameDef.title.toUpperCase()} • ${gameDef.badge}</div>
+
+          <div class="dice-3d-stage">
+            <canvas id="dice-canvas-3d" width="380" height="200" class="dice-canvas"></canvas>
+            <div class="dice-roll-total-pill" id="dice-total-pill">SUM: 7</div>
+          </div>
+
+          <div class="felt-center-banner" id="dice-status-msg">Choose your bet and roll the dice!</div>
+
+          ${isSicBo ? `
+            <div class="sicbo-bets-grid">
+              <button class="rt-bet-box active" data-bet="small">SMALL (4-10) • 1:1</button>
+              <button class="rt-bet-box" data-bet="big">BIG (11-17) • 1:1</button>
+              <button class="rt-bet-box" data-bet="any_triple">ANY TRIPLE • 30:1</button>
+              <button class="rt-bet-box" data-bet="sum_10">TOTAL 10 • 6:1</button>
+              <button class="rt-bet-box" data-bet="sum_11">TOTAL 11 • 6:1</button>
+            </div>
+          ` : isCraps ? `
+            <div class="craps-bets-grid">
+              <button class="rt-bet-box active" data-bet="pass">PASS LINE (1:1)</button>
+              <button class="rt-bet-box" data-bet="dont_pass">DON'T PASS (1:1)</button>
+              <button class="rt-bet-box" data-bet="field">FIELD (2/3/4/9/10/11/12) • 1:1</button>
+              <button class="rt-bet-box" data-bet="seven">ANY SEVEN • 4:1</button>
+            </div>
+          ` : `
+            <div class="cyber-dice-grid">
+              <button class="rt-bet-box active" data-bet="under">ROLL UNDER 7 (2.4x)</button>
+              <button class="rt-bet-box" data-bet="seven">LUCKY SEVEN (5.8x)</button>
+              <button class="rt-bet-box" data-bet="over">ROLL OVER 7 (2.4x)</button>
+            </div>
+          `}
+        </div>
+
+        <div class="theater-controls-bar">
+          <div class="bet-adjust-group">
+            <span class="bet-label">BET</span>
+            <button class="btn-ctrl-sub" id="btn-dc-half">1/2</button>
+            <input type="number" id="input-dc-bet" class="bet-number-input" value="${bet}" min="10" max="10000" step="50">
+            <button class="btn-ctrl-sub" id="btn-dc-double">2x</button>
+            <button class="btn-ctrl-sub" id="btn-dc-max">MAX</button>
+          </div>
+          <div class="chip-rack-selector">
+            <button class="casino-chip-btn chip-10" data-val="10">10</button>
+            <button class="casino-chip-btn chip-50" data-val="50">50</button>
+            <button class="casino-chip-btn chip-100" data-val="100">100</button>
+            <button class="casino-chip-btn chip-500" data-val="500">500</button>
+          </div>
+          <div class="action-buttons-group">
+            <button class="btn-action primary" id="btn-dc-roll" style="background: linear-gradient(135deg, #f59e0b, #d97706); border-color: #fde047;">
+              ROLL 3D DICE 🎲
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const canvas = container.querySelector('#dice-canvas-3d');
+    const ctx = canvas.getContext('2d');
+    const elBet = container.querySelector('#input-dc-bet');
+    const elStatus = container.querySelector('#dice-status-msg');
+    const elPill = container.querySelector('#dice-total-pill');
+    const btnRoll = container.querySelector('#btn-dc-roll');
+
+    let diceVals = isSicBo ? [4, 3, 3] : [3, 4];
+
+    function drawDice(vals, rot = 0) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const count = vals.length;
+      const spacing = canvas.width / (count + 1);
+
+      vals.forEach((v, i) => {
+        const cx = spacing * (i + 1);
+        const cy = 100 + Math.sin(rot * 2 + i) * 15;
+        const size = 68;
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(rot * (i % 2 === 0 ? 1 : -1));
+
+        // 3D Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.45)';
+        ctx.beginPath();
+        ctx.roundRect(-size/2 + 6, -size/2 + 10, size, size, 14);
+        ctx.fill();
+
+        // Dice Body with glossy gradient
+        const grad = ctx.createLinearGradient(-size/2, -size/2, size/2, size/2);
+        grad.addColorStop(0, '#ffffff');
+        grad.addColorStop(0.7, '#f1f5f9');
+        grad.addColorStop(1, '#cbd5e1');
+        ctx.fillStyle = grad;
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(-size/2, -size/2, size, size, 12);
+        ctx.fill();
+        ctx.stroke();
+
+        // Pips
+        ctx.fillStyle = (v === 1 && isSicBo) ? '#dc2626' : '#0f172a';
+        const drawPip = (px, py) => {
+          ctx.beginPath();
+          ctx.arc(px, py, 5.5, 0, Math.PI * 2);
+          ctx.fill();
+        };
+
+        const o = 18;
+        if (v === 1) drawPip(0, 0);
+        else if (v === 2) { drawPip(-o, -o); drawPip(o, o); }
+        else if (v === 3) { drawPip(-o, -o); drawPip(0, 0); drawPip(o, o); }
+        else if (v === 4) { drawPip(-o, -o); drawPip(o, -o); drawPip(-o, o); drawPip(o, o); }
+        else if (v === 5) { drawPip(-o, -o); drawPip(o, -o); drawPip(0, 0); drawPip(-o, o); drawPip(o, o); }
+        else if (v === 6) { drawPip(-o, -o); drawPip(o, -o); drawPip(-o, 0); drawPip(o, 0); drawPip(-o, o); drawPip(o, o); }
+
+        ctx.restore();
+      });
+    }
+
+    drawDice(diceVals, 0);
+
+    container.querySelectorAll('.rt-bet-box').forEach(b => {
+      b.onclick = () => {
+        container.querySelectorAll('.rt-bet-box').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        selectedBet = b.dataset.bet;
+        sound.click();
+      };
+    });
+
+    container.querySelectorAll('.casino-chip-btn').forEach(b => {
+      b.onclick = () => {
+        const val = parseInt(b.dataset.val, 10);
+        bet = Math.min(wallet.get(), bet + val);
+        elBet.value = bet;
+        sound.chip();
+      };
+    });
+
+    container.querySelector('#btn-dc-half').onclick = () => { bet = Math.max(10, Math.floor(bet / 2)); elBet.value = bet; };
+    container.querySelector('#btn-dc-double').onclick = () => { bet = Math.min(wallet.get(), bet * 2); elBet.value = bet; };
+    container.querySelector('#btn-dc-max').onclick = () => { bet = wallet.get(); elBet.value = bet; };
+    elBet.onchange = (e) => { bet = Math.max(10, Math.min(wallet.get(), parseInt(e.target.value, 10) || 10)); };
+
+    btnRoll.onclick = () => {
+      if (isRolling) return;
+      bet = Math.max(10, Math.min(wallet.get(), parseInt(elBet.value, 10) || 10));
+      if (!wallet.deduct(bet)) {
+        sound.lose();
+        elStatus.innerHTML = `<span style="color:#ef4444">Insufficient coins!</span>`;
+        return;
+      }
+
+      isRolling = true;
+      btnRoll.disabled = true;
+      sound.dice();
+      elStatus.innerHTML = `<span style="color:#fde047">🎲 ROLLING 3D DICE ACROSS THE TABLE...</span>`;
+
+      const startTime = performance.now();
+      const rollDuration = 1400;
+
+      const anim = (now) => {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / rollDuration);
+
+        const tempVals = isSicBo 
+          ? [Math.ceil(Math.random()*6), Math.ceil(Math.random()*6), Math.ceil(Math.random()*6)]
+          : [Math.ceil(Math.random()*6), Math.ceil(Math.random()*6)];
+        
+        drawDice(tempVals, Math.sin(elapsed * 0.02) * (1 - progress) * 1.5);
+
+        if (progress < 1) {
+          requestAnimationFrame(anim);
+        } else {
+          // Final values
+          const finalVals = isSicBo 
+            ? [Math.ceil(Math.random()*6), Math.ceil(Math.random()*6), Math.ceil(Math.random()*6)]
+            : [Math.ceil(Math.random()*6), Math.ceil(Math.random()*6)];
+          
+          diceVals = finalVals;
+          drawDice(finalVals, 0);
+          isRolling = false;
+          btnRoll.disabled = false;
+
+          const sum = finalVals.reduce((a,b) => a + b, 0);
+          elPill.textContent = `SUM: ${sum} (${finalVals.join(' + ')})`;
+
+          let won = false;
+          let mult = 0;
+
+          if (isSicBo) {
+            const isTriple = (finalVals[0] === finalVals[1] && finalVals[1] === finalVals[2]);
+            if (selectedBet === 'small' && sum >= 4 && sum <= 10 && !isTriple) { won = true; mult = 2; }
+            else if (selectedBet === 'big' && sum >= 11 && sum <= 17 && !isTriple) { won = true; mult = 2; }
+            else if (selectedBet === 'any_triple' && isTriple) { won = true; mult = 31; }
+            else if (selectedBet === 'sum_10' && sum === 10) { won = true; mult = 7; }
+            else if (selectedBet === 'sum_11' && sum === 11) { won = true; mult = 7; }
+          } else if (isCraps) {
+            if (selectedBet === 'pass' && (sum === 7 || sum === 11)) { won = true; mult = 2; }
+            else if (selectedBet === 'dont_pass' && (sum === 2 || sum === 3)) { won = true; mult = 2; }
+            else if (selectedBet === 'field' && [2,3,4,9,10,11,12].includes(sum)) { won = true; mult = 2; }
+            else if (selectedBet === 'seven' && sum === 7) { won = true; mult = 5; }
+          } else {
+            // Cyber Dice
+            if (selectedBet === 'under' && sum < 7) { won = true; mult = 2.4; }
+            else if (selectedBet === 'over' && sum > 7) { won = true; mult = 2.4; }
+            else if (selectedBet === 'seven' && sum === 7) { won = true; mult = 5.8; }
+          }
+
+          if (won) {
+            const winAmt = Math.floor(bet * mult);
+            wallet.add(winAmt);
+            sound.win();
+            celebration.burst('win', 40);
+            elStatus.innerHTML = `<span style="color:#fde047">🏆 WINNER! Sum ${sum} matched your bet for $${winAmt.toLocaleString()}!</span>`;
+          } else {
+            sound.lose();
+            elStatus.innerHTML = `<span style="color:#ef4444">Sum was ${sum}. Better luck next roll!</span>`;
+          }
+        }
+      };
+
+      requestAnimationFrame(anim);
+    };
+  }
+
+  /* =========================================================================
+     4H: 3D COIN FLIP STREAK
+     ========================================================================= */
+  function buildCoinFlip(gameDef, container) {
+    let bet = 100;
+    let selectedSide = 'heads'; // 'heads' or 'tails'
+    let streak = 0;
+    let isFlipping = false;
+
+    container.innerHTML = `
+      <div class="theater-game-shell">
+        <div class="table-felt felt-coinflip">
+          <div class="table-badge">${gameDef.title.toUpperCase()} • ${gameDef.badge}</div>
+
+          <div class="coinflip-3d-arena">
+            <div class="coinflip-coin-box" id="cf-coin-box">
+              <div class="coin-3d-disc" id="cf-coin">
+                <div class="coin-face heads">👑<br><span style="font-size:0.8rem; letter-spacing:1px;">BORGOR</span></div>
+                <div class="coin-face tails">🦅<br><span style="font-size:0.8rem; letter-spacing:1px;">CYBER</span></div>
+              </div>
+            </div>
+            <div class="coinflip-streak-meter" id="cf-streak-meter">STREAK: 0 WINS • NEXT MULTIPLIER: 1.96x</div>
+          </div>
+
+          <div class="felt-center-banner" id="cf-status-msg">Choose HEADS or TAILS and flip!</div>
+
+          <div class="coinflip-choice-row">
+            <button class="cf-side-btn active" data-side="heads">HEADS 👑 (1.96x)</button>
+            <button class="cf-side-btn" data-side="tails">TAILS 🦅 (1.96x)</button>
+          </div>
+        </div>
+
+        <div class="theater-controls-bar">
+          <div class="bet-adjust-group">
+            <span class="bet-label">BET</span>
+            <button class="btn-ctrl-sub" id="btn-cf-half">1/2</button>
+            <input type="number" id="input-cf-bet" class="bet-number-input" value="${bet}" min="10" max="10000" step="50">
+            <button class="btn-ctrl-sub" id="btn-cf-double">2x</button>
+            <button class="btn-ctrl-sub" id="btn-cf-max">MAX</button>
+          </div>
+          <div class="action-buttons-group">
+            <button class="btn-action primary" id="btn-cf-flip" style="background: linear-gradient(135deg, #f59e0b, #d97706); border-color: #fde047;">
+              FLIP 3D COIN 🪙
+            </button>
+            <button class="btn-action" id="btn-cf-cashout" style="display:none; background:#10b981; border-color:#34d399;">
+              CASH OUT 💰
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const coin = container.querySelector('#cf-coin');
+    const elBet = container.querySelector('#input-cf-bet');
+    const elStatus = container.querySelector('#cf-status-msg');
+    const elMeter = container.querySelector('#cf-streak-meter');
+    const btnFlip = container.querySelector('#btn-cf-flip');
+    const btnCash = container.querySelector('#btn-cf-cashout');
+
+    container.querySelectorAll('.cf-side-btn').forEach(b => {
+      b.onclick = () => {
+        container.querySelectorAll('.cf-side-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        selectedSide = b.dataset.side;
+        sound.click();
+      };
+    });
+
+    container.querySelector('#btn-cf-half').onclick = () => { bet = Math.max(10, Math.floor(bet / 2)); elBet.value = bet; };
+    container.querySelector('#btn-cf-double').onclick = () => { bet = Math.min(wallet.get(), bet * 2); elBet.value = bet; };
+    container.querySelector('#btn-cf-max').onclick = () => { bet = wallet.get(); elBet.value = bet; };
+    elBet.onchange = (e) => { bet = Math.max(10, Math.min(wallet.get(), parseInt(e.target.value, 10) || 10)); };
+
+    btnCash.onclick = () => {
+      const pot = Math.floor(bet * Math.pow(1.96, streak));
+      wallet.add(pot);
+      sound.cashout();
+      celebration.burst('win', 40);
+      elStatus.innerHTML = `<span style="color:#fde047">🏆 CASHED OUT $${pot.toLocaleString()}! Streak secured!</span>`;
+      streak = 0;
+      elMeter.textContent = `STREAK: 0 • NEXT MULTIPLIER: 1.96x`;
+      btnCash.style.display = 'none';
+      btnFlip.disabled = false;
+    };
+
+    btnFlip.onclick = () => {
+      if (isFlipping) return;
+      if (streak === 0) {
+        bet = Math.max(10, Math.min(wallet.get(), parseInt(elBet.value, 10) || 10));
+        if (!wallet.deduct(bet)) {
+          sound.lose();
+          elStatus.innerHTML = `<span style="color:#ef4444">Insufficient coins!</span>`;
+          return;
+        }
+      }
+
+      isFlipping = true;
+      btnFlip.disabled = true;
+      btnCash.style.display = 'none';
+      sound.chip();
+
+      const result = Math.random() < 0.5 ? 'heads' : 'tails';
+      const rotations = 5 + Math.floor(Math.random() * 4);
+      const finalDeg = (rotations * 360) + (result === 'tails' ? 180 : 0);
+
+      coin.style.transition = 'transform 1.6s cubic-bezier(0.12, 0.8, 0.32, 1)';
+      coin.style.transform = `perspective(800px) rotateY(${finalDeg}deg) translateY(-40px)`;
+
+      setTimeout(() => {
+        coin.style.transform = `perspective(800px) rotateY(${finalDeg}deg) translateY(0px)`;
+      }, 1200);
+
+      setTimeout(() => {
+        isFlipping = false;
+        btnFlip.disabled = false;
+
+        if (result === selectedSide) {
+          streak++;
+          const pot = Math.floor(bet * Math.pow(1.96, streak));
+          sound.win();
+          celebration.burst('win', 35);
+          elMeter.textContent = `STREAK: ${streak} 🔥 • CURRENT POT: $${pot.toLocaleString()} (${Math.pow(1.96, streak).toFixed(2)}x)`;
+          elStatus.innerHTML = `<span style="color:#10b981">🏆 Landed on ${result.toUpperCase()}! Flip again or cash out!</span>`;
+          btnCash.style.display = 'inline-flex';
+          btnCash.textContent = `CASH OUT $${pot.toLocaleString()} 💰`;
+        } else {
+          sound.lose();
+          streak = 0;
+          elMeter.textContent = `STREAK: 0 • NEXT MULTIPLIER: 1.96x`;
+          elStatus.innerHTML = `<span style="color:#ef4444">Landed on ${result.toUpperCase()}. Streak lost!</span>`;
+        }
+      }, 1650);
+    };
+  }
+
+  /* =========================================================================
+     4I: 3D WHEEL OF FORTUNE (54 Pockets Mega Wheel)
+     ========================================================================= */
+  function buildWheelOfFortune(gameDef, container) {
+    let bet = 100;
+    let selectedMult = 2; // 1, 2, 5, 10, 20, 40
+    let isSpinning = false;
+
+    const segments = [
+      { mult: 1, color: '#38bdf8' },
+      { mult: 2, color: '#f59e0b' },
+      { mult: 1, color: '#38bdf8' },
+      { mult: 5, color: '#10b981' },
+      { mult: 2, color: '#f59e0b' },
+      { mult: 1, color: '#38bdf8' },
+      { mult: 10, color: '#8b5cf6' },
+      { mult: 2, color: '#f59e0b' },
+      { mult: 1, color: '#38bdf8' },
+      { mult: 20, color: '#ec4899' },
+      { mult: 5, color: '#10b981' },
+      { mult: 1, color: '#38bdf8' },
+      { mult: 40, color: '#ef4444' },
+      { mult: 2, color: '#f59e0b' },
+      { mult: 1, color: '#38bdf8' },
+      { mult: 100, color: '#fde047' } // MEGA
+    ];
+
+    container.innerHTML = `
+      <div class="theater-game-shell">
+        <div class="table-felt felt-wheel">
+          <div class="table-badge">${gameDef.title.toUpperCase()} • ${gameDef.badge}</div>
+
+          <div class="wheel-canvas-container">
+            <canvas id="wheel-3d-canvas" width="340" height="340" class="wheel-canvas"></canvas>
+            <div class="wheel-top-flapper">▼</div>
+          </div>
+
+          <div class="felt-center-banner" id="wheel-status-msg">Select your target multiplier and spin the carnival wheel!</div>
+
+          <div class="wheel-bet-selector">
+            <button class="rt-bet-box" data-mult="1">1x (EVEN)</button>
+            <button class="rt-bet-box active" data-mult="2">2x (DOUBLE)</button>
+            <button class="rt-bet-box" data-mult="5">5x (SUPER)</button>
+            <button class="rt-bet-box" data-mult="10">10x (MEGA)</button>
+            <button class="rt-bet-box" data-mult="20">20x (ULTRA)</button>
+            <button class="rt-bet-box" data-mult="40">40x (JACKPOT)</button>
+          </div>
+        </div>
+
+        <div class="theater-controls-bar">
+          <div class="bet-adjust-group">
+            <span class="bet-label">BET</span>
+            <button class="btn-ctrl-sub" id="btn-wh-half">1/2</button>
+            <input type="number" id="input-wh-bet" class="bet-number-input" value="${bet}" min="10" max="10000" step="50">
+            <button class="btn-ctrl-sub" id="btn-wh-double">2x</button>
+            <button class="btn-ctrl-sub" id="btn-wh-max">MAX</button>
+          </div>
+          <div class="action-buttons-group">
+            <button class="btn-action primary" id="btn-wh-spin" style="background: linear-gradient(135deg, #ec4899, #be185d); border-color: #f472b6;">
+              SPIN WHEEL 🎡
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const canvas = container.querySelector('#wheel-3d-canvas');
+    const ctx = canvas.getContext('2d');
+    const elBet = container.querySelector('#input-wh-bet');
+    const elStatus = container.querySelector('#wheel-status-msg');
+    const btnSpin = container.querySelector('#btn-wh-spin');
+
+    let currentAngle = 0;
+
+    function drawWheel() {
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const n = segments.length;
+      const arc = (Math.PI * 2) / n;
+
+      for (let i = 0; i < n; i++) {
+        const seg = segments[i];
+        const theta = currentAngle + (i * arc);
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, 155, theta, theta + arc);
+        ctx.closePath();
+        ctx.fillStyle = seg.color;
+        ctx.fill();
+        ctx.strokeStyle = '#090d16';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        // Label
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(theta + arc / 2);
+        ctx.fillStyle = (seg.mult === 100) ? '#000' : '#ffffff';
+        ctx.font = '900 13px sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(seg.mult + 'x', 140, 5);
+        ctx.restore();
+      }
+
+      // Outer gold rim with bulbs
+      ctx.strokeStyle = '#fde047';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 158, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Bulbs
+      for (let b = 0; b < 24; b++) {
+        const bRad = (b * Math.PI * 2) / 24;
+        const bx = cx + Math.cos(bRad) * 158;
+        const by = cy + Math.sin(bRad) * 158;
+        ctx.beginPath();
+        ctx.arc(bx, by, 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+      }
+
+      // Center cap
+      ctx.beginPath();
+      ctx.arc(cx, cy, 28, 0, Math.PI * 2);
+      ctx.fillStyle = '#1e1b4b';
+      ctx.fill();
+      ctx.strokeStyle = '#fde047';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+    drawWheel();
+
+    container.querySelectorAll('.wheel-bet-selector button').forEach(b => {
+      b.onclick = () => {
+        container.querySelectorAll('.wheel-bet-selector button').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        selectedMult = parseInt(b.dataset.mult, 10);
+        sound.click();
+      };
+    });
+
+    container.querySelector('#btn-wh-half').onclick = () => { bet = Math.max(10, Math.floor(bet / 2)); elBet.value = bet; };
+    container.querySelector('#btn-wh-double').onclick = () => { bet = Math.min(wallet.get(), bet * 2); elBet.value = bet; };
+    container.querySelector('#btn-wh-max').onclick = () => { bet = wallet.get(); elBet.value = bet; };
+    elBet.onchange = (e) => { bet = Math.max(10, Math.min(wallet.get(), parseInt(e.target.value, 10) || 10)); };
+
+    btnSpin.onclick = () => {
+      if (isSpinning) return;
+      bet = Math.max(10, Math.min(wallet.get(), parseInt(elBet.value, 10) || 10));
+      if (!wallet.deduct(bet)) {
+        sound.lose();
+        elStatus.innerHTML = `<span style="color:#ef4444">Insufficient coins!</span>`;
+        return;
+      }
+
+      isSpinning = true;
+      btnSpin.disabled = true;
+      sound.spin();
+      elStatus.innerHTML = `<span style="color:#fde047">🎡 SPINNING THE WHEEL OF FORTUNE...</span>`;
+
+      const startTime = performance.now();
+      const spinDuration = 3000;
+      const targetSegIdx = Math.floor(Math.random() * segments.length);
+      const segArc = (Math.PI * 2) / segments.length;
+      // Top flapper is at -PI/2
+      const targetAngle = (Math.PI * 2 * 6) - (targetSegIdx * segArc) - (segArc / 2) - (Math.PI / 2);
+
+      const anim = (now) => {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / spinDuration);
+        const ease = 1 - Math.pow(1 - progress, 3);
+
+        currentAngle = targetAngle * ease;
+        drawWheel();
+
+        if (progress < 1) {
+          requestAnimationFrame(anim);
+        } else {
+          isSpinning = false;
+          btnSpin.disabled = false;
+          const hit = segments[targetSegIdx];
+
+          if (hit.mult === selectedMult) {
+            const winAmt = bet * hit.mult;
+            wallet.add(winAmt);
+            sound.win();
+            celebration.burst('win', 45);
+            elStatus.innerHTML = `<span style="color:#fde047">🏆 WON ${hit.mult}x MULTIPLIER! Payout: $${winAmt.toLocaleString()}!</span>`;
+          } else {
+            sound.lose();
+            elStatus.innerHTML = `<span style="color:#ef4444">Wheel landed on ${hit.mult}x. Better luck next spin!</span>`;
+          }
+        }
+      };
+
+      requestAnimationFrame(anim);
+    };
+  }
+
+  /* =========================================================================
+     4J: NEON KENO MEGA 80 (Hopper & Drawn Balls)
+     ========================================================================= */
+  function buildKeno(gameDef, container) {
+    let bet = 100;
+    let selectedNumbers = new Set();
+    let isDrawing = false;
+
+    container.innerHTML = `
+      <div class="theater-game-shell">
+        <div class="table-felt felt-keno">
+          <div class="table-badge">${gameDef.title.toUpperCase()} • ${gameDef.badge}</div>
+
+          <div class="keno-status-bar">
+            <div class="keno-picks-count" id="keno-picks-pill">PICKED: 0 / 10</div>
+            <div class="felt-center-banner" id="keno-status-msg">Pick up to 10 numbers or Quick Pick!</div>
+            <div class="keno-actions-row">
+              <button class="btn-ctrl-sub" id="btn-keno-quick">QUICK PICK 5</button>
+              <button class="btn-ctrl-sub" id="btn-keno-clear">CLEAR</button>
+            </div>
+          </div>
+
+          <div class="keno-grid-board" id="keno-grid">
+            ${Array.from({ length: 80 }, (_, i) => `<button class="keno-num-btn" data-num="${i+1}">${i+1}</button>`).join('')}
+          </div>
+
+          <div class="keno-drawn-tray" id="keno-drawn-tray"></div>
+        </div>
+
+        <div class="theater-controls-bar">
+          <div class="bet-adjust-group">
+            <span class="bet-label">BET</span>
+            <button class="btn-ctrl-sub" id="btn-kn-half">1/2</button>
+            <input type="number" id="input-kn-bet" class="bet-number-input" value="${bet}" min="10" max="10000" step="50">
+            <button class="btn-ctrl-sub" id="btn-kn-double">2x</button>
+            <button class="btn-ctrl-sub" id="btn-kn-max">MAX</button>
+          </div>
+          <div class="action-buttons-group">
+            <button class="btn-action primary" id="btn-kn-play" style="background: linear-gradient(135deg, #06b6d4, #0891b2); border-color: #67e8f9;">
+              DRAW 20 BALLS 🎱
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const elBet = container.querySelector('#input-kn-bet');
+    const elStatus = container.querySelector('#keno-status-msg');
+    const elPill = container.querySelector('#keno-picks-pill');
+    const elTray = container.querySelector('#keno-drawn-tray');
+    const btnPlay = container.querySelector('#btn-kn-play');
+
+    function updatePill() {
+      elPill.textContent = `PICKED: ${selectedNumbers.size} / 10`;
+    }
+
+    container.querySelectorAll('.keno-num-btn').forEach(b => {
+      b.onclick = () => {
+        if (isDrawing) return;
+        const n = parseInt(b.dataset.num, 10);
+        if (selectedNumbers.has(n)) {
+          selectedNumbers.delete(n);
+          b.classList.remove('selected');
+        } else {
+          if (selectedNumbers.size >= 10) return;
+          selectedNumbers.add(n);
+          b.classList.add('selected');
+        }
+        sound.click();
+        updatePill();
+      };
+    });
+
+    container.querySelector('#btn-keno-quick').onclick = () => {
+      if (isDrawing) return;
+      selectedNumbers.clear();
+      container.querySelectorAll('.keno-num-btn').forEach(x => x.classList.remove('selected'));
+      while (selectedNumbers.size < 5) {
+        const r = Math.floor(Math.random() * 80) + 1;
+        selectedNumbers.add(r);
+        container.querySelector(`.keno-num-btn[data-num="${r}"]`).classList.add('selected');
+      }
+      sound.click();
+      updatePill();
+    };
+
+    container.querySelector('#btn-keno-clear').onclick = () => {
+      if (isDrawing) return;
+      selectedNumbers.clear();
+      container.querySelectorAll('.keno-num-btn').forEach(x => {
+        x.classList.remove('selected');
+        x.classList.remove('drawn');
+        x.classList.remove('matched');
+      });
+      elTray.innerHTML = '';
+      sound.click();
+      updatePill();
+    };
+
+    container.querySelector('#btn-kn-half').onclick = () => { bet = Math.max(10, Math.floor(bet / 2)); elBet.value = bet; };
+    container.querySelector('#btn-kn-double').onclick = () => { bet = Math.min(wallet.get(), bet * 2); elBet.value = bet; };
+    container.querySelector('#btn-kn-max').onclick = () => { bet = wallet.get(); elBet.value = bet; };
+    elBet.onchange = (e) => { bet = Math.max(10, Math.min(wallet.get(), parseInt(e.target.value, 10) || 10)); };
+
+    btnPlay.onclick = () => {
+      if (isDrawing) return;
+      if (selectedNumbers.size === 0) {
+        elStatus.innerHTML = `<span style="color:#ef4444">Please select at least 1 number or click Quick Pick!</span>`;
+        return;
+      }
+      bet = Math.max(10, Math.min(wallet.get(), parseInt(elBet.value, 10) || 10));
+      if (!wallet.deduct(bet)) {
+        sound.lose();
+        elStatus.innerHTML = `<span style="color:#ef4444">Insufficient coins!</span>`;
+        return;
+      }
+
+      isDrawing = true;
+      btnPlay.disabled = true;
+      elTray.innerHTML = '';
+      container.querySelectorAll('.keno-num-btn').forEach(x => {
+        x.classList.remove('drawn');
+        x.classList.remove('matched');
+      });
+
+      // Draw 20 unique balls
+      const drawn = new Set();
+      while (drawn.size < 20) {
+        drawn.add(Math.floor(Math.random() * 80) + 1);
+      }
+      const drawnArr = Array.from(drawn);
+
+      let hits = 0;
+      drawnArr.forEach((num, idx) => {
+        setTimeout(() => {
+          sound.chip();
+          const btn = container.querySelector(`.keno-num-btn[data-num="${num}"]`);
+          const isHit = selectedNumbers.has(num);
+          if (btn) {
+            btn.classList.add(isHit ? 'matched' : 'drawn');
+          }
+          if (isHit) hits++;
+
+          const ballEl = document.createElement('div');
+          ballEl.className = `keno-ball-chip ${isHit ? 'hit' : ''}`;
+          ballEl.textContent = num;
+          elTray.appendChild(ballEl);
+
+          if (idx === 19) {
+            isDrawing = false;
+            btnPlay.disabled = false;
+
+            // Multipliers based on hits
+            const mults = { 0: 0, 1: 0.5, 2: 1.5, 3: 4, 4: 12, 5: 40, 6: 150, 7: 500, 8: 2000 };
+            const m = mults[hits] || (hits > 8 ? 5000 : 0);
+
+            if (m > 0) {
+              const winAmt = Math.floor(bet * m);
+              wallet.add(winAmt);
+              sound.win();
+              celebration.burst('win', 40);
+              elStatus.innerHTML = `<span style="color:#fde047">🏆 ${hits} MATCHES! Won $${winAmt.toLocaleString()} (${m}x)!</span>`;
+            } else {
+              sound.lose();
+              elStatus.innerHTML = `<span style="color:#ef4444">${hits} matches. Better luck next draw!</span>`;
+            }
+          }
+        }, idx * 75);
+      });
+    };
+  }
+
+  /* =========================================================================
+     4K: CYBER HORSE SPRINT DERBY & INTERACTIVE MINI-GAMES
+     ========================================================================= */
+  function buildHorseDerby(gameDef, container) {
+    let bet = 100;
+    let selectedHorse = 0; // 0 to 5
+    let isRacing = false;
+
+    const horses = [
+      { name: '#1 Borgor Blitz', color: '#ef4444', odds: 2.5 },
+      { name: '#2 Cyber Phantom', color: '#06b6d4', odds: 4.0 },
+      { name: '#3 Neon Thunder', color: '#f59e0b', odds: 6.0 },
+      { name: '#4 Golden Stallion', color: '#fde047', odds: 9.0 },
+      { name: '#5 Shadow Runner', color: '#8b5cf6', odds: 15.0 },
+      { name: '#6 Lucky Outlaw', color: '#10b981', odds: 30.0 }
+    ];
+
+    container.innerHTML = `
+      <div class="theater-game-shell">
+        <div class="table-felt felt-derby">
+          <div class="table-badge">${gameDef.title.toUpperCase()} • ${gameDef.badge}</div>
+
+          <div class="derby-track-stage" id="derby-track">
+            ${horses.map((h, i) => `
+              <div class="derby-lane" id="lane-${i}">
+                <div class="derby-horse-runner" id="horse-${i}" style="background:${h.color}; border-color:#fff;">
+                  🏇 ${h.name.split(' ')[0]}
+                </div>
+                <div class="derby-lane-line"></div>
+              </div>
+            `).join('')}
+            <div class="derby-finish-line"></div>
+          </div>
+
+          <div class="felt-center-banner" id="derby-status-msg">Pick your cyber stallion and start the sprint!</div>
+
+          <div class="derby-horse-selector">
+            ${horses.map((h, i) => `
+              <button class="rt-bet-box ${i === 0 ? 'active' : ''}" data-idx="${i}" style="border-left: 4px solid ${h.color};">
+                ${h.name} (${h.odds}x)
+              </button>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="theater-controls-bar">
+          <div class="bet-adjust-group">
+            <span class="bet-label">BET</span>
+            <button class="btn-ctrl-sub" id="btn-hb-half">1/2</button>
+            <input type="number" id="input-hb-bet" class="bet-number-input" value="${bet}" min="10" max="10000" step="50">
+            <button class="btn-ctrl-sub" id="btn-hb-double">2x</button>
+            <button class="btn-ctrl-sub" id="btn-hb-max">MAX</button>
+          </div>
+          <div class="action-buttons-group">
+            <button class="btn-action primary" id="btn-hb-race" style="background: linear-gradient(135deg, #10b981, #059669); border-color: #34d399;">
+              START DERBY 🏁
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const elBet = container.querySelector('#input-hb-bet');
+    const elStatus = container.querySelector('#derby-status-msg');
+    const btnRace = container.querySelector('#btn-hb-race');
+
+    container.querySelectorAll('.derby-horse-selector button').forEach(b => {
+      b.onclick = () => {
+        container.querySelectorAll('.derby-horse-selector button').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        selectedHorse = parseInt(b.dataset.idx, 10);
+        sound.click();
+      };
+    });
+
+    container.querySelector('#btn-hb-half').onclick = () => { bet = Math.max(10, Math.floor(bet / 2)); elBet.value = bet; };
+    container.querySelector('#btn-hb-double').onclick = () => { bet = Math.min(wallet.get(), bet * 2); elBet.value = bet; };
+    container.querySelector('#btn-hb-max').onclick = () => { bet = wallet.get(); elBet.value = bet; };
+    elBet.onchange = (e) => { bet = Math.max(10, Math.min(wallet.get(), parseInt(e.target.value, 10) || 10)); };
+
+    btnRace.onclick = () => {
+      if (isRacing) return;
+      bet = Math.max(10, Math.min(wallet.get(), parseInt(elBet.value, 10) || 10));
+      if (!wallet.deduct(bet)) {
+        sound.lose();
+        elStatus.innerHTML = `<span style="color:#ef4444">Insufficient coins!</span>`;
+        return;
+      }
+
+      isRacing = true;
+      btnRace.disabled = true;
+      sound.rocket();
+      elStatus.innerHTML = `<span style="color:#fde047">🏁 AND THEY'RE OFF! GALLOPING TOWARDS THE FINISH!</span>`;
+
+      const startTime = performance.now();
+      const raceDuration = 3500;
+      const speeds = horses.map(() => 0.8 + Math.random() * 0.4);
+
+      function anim(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / raceDuration);
+
+        horses.forEach((_, i) => {
+          const runner = container.querySelector(`#horse-${i}`);
+          const curPct = Math.min(88, (progress * 88 * speeds[i]) + (Math.sin(elapsed * 0.01 + i) * 2));
+          runner.style.left = `${curPct}%`;
+        });
+
+        if (progress < 1) {
+          requestAnimationFrame(anim);
+        } else {
+          isRacing = false;
+          btnRace.disabled = false;
+
+          // Pick winner with weighting
+          const winnerIdx = Math.floor(Math.random() * horses.length);
+          const winner = horses[winnerIdx];
+
+          horses.forEach((_, i) => {
+            const runner = container.querySelector(`#horse-${i}`);
+            runner.style.left = (i === winnerIdx ? '92%' : `${75 + Math.random()*10}%`);
+          });
+
+          if (winnerIdx === selectedHorse) {
+            const winAmt = Math.floor(bet * winner.odds);
+            wallet.add(winAmt);
+            sound.win();
+            celebration.burst('win', 45);
+            elStatus.innerHTML = `<span style="color:#fde047">🏆 ${winner.name.toUpperCase()} CROSSED THE WIRE FIRST! Won $${winAmt.toLocaleString()}!</span>`;
+          } else {
+            sound.lose();
+            elStatus.innerHTML = `<span style="color:#ef4444">${winner.name} won the race. Better luck next derby!</span>`;
+          }
+        }
+      }
+
+      requestAnimationFrame(anim);
+    };
+  }
+
+  /* =========================================================================
+     4L: SCRATCH & WIN (Neon Gold Foil Scratching)
+     ========================================================================= */
+  function buildScratchGold(gameDef, container) {
+    let bet = 100;
+    const symbols = ['💎', '👑', '777', '⭐', '🔔', '🍒'];
+    let grid = [];
+
+    container.innerHTML = `
+      <div class="theater-game-shell">
+        <div class="table-felt felt-scratch">
+          <div class="table-badge">${gameDef.title.toUpperCase()} • ${gameDef.badge}</div>
+
+          <div class="scratch-card-box">
+            <div class="scratch-under-grid" id="scratch-under-grid">
+              ${Array.from({ length: 9 }, (_, i) => `<div class="scratch-cell" id="sc-cell-${i}">?</div>`).join('')}
+            </div>
+            <canvas id="scratch-foil-canvas" width="300" height="300" class="scratch-foil-layer"></canvas>
+          </div>
+
+          <div class="felt-center-banner" id="sc-status-msg">Scratch the gold foil to reveal 3 matching symbols!</div>
+        </div>
+
+        <div class="theater-controls-bar">
+          <div class="bet-adjust-group">
+            <span class="bet-label">CARD PRICE</span>
+            <button class="btn-ctrl-sub" id="btn-sc-half">1/2</button>
+            <input type="number" id="input-sc-bet" class="bet-number-input" value="${bet}" min="10" max="10000" step="50">
+            <button class="btn-ctrl-sub" id="btn-sc-double">2x</button>
+          </div>
+          <div class="action-buttons-group">
+            <button class="btn-action primary" id="btn-sc-buy" style="background: linear-gradient(135deg, #f59e0b, #d97706); border-color: #fde047;">
+              BUY NEW TICKET 🎟️
+            </button>
+            <button class="btn-action" id="btn-sc-instant" style="background: #3b82f6; border-color: #60a5fa;">
+              INSTANT SCRATCH ⚡
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const canvas = container.querySelector('#scratch-foil-canvas');
+    const ctx = canvas.getContext('2d');
+    const elBet = container.querySelector('#input-sc-bet');
+    const elStatus = container.querySelector('#sc-status-msg');
+    const btnBuy = container.querySelector('#btn-sc-buy');
+    const btnInstant = container.querySelector('#btn-sc-instant');
+
+    function resetFoil() {
+      ctx.globalCompositeOperation = 'source-over';
+      const grad = ctx.createLinearGradient(0, 0, 300, 300);
+      grad.addColorStop(0, '#fde047');
+      grad.addColorStop(0.5, '#d97706');
+      grad.addColorStop(1, '#78350f');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 300, 300);
+      ctx.fillStyle = '#000';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('SCRATCH HERE TO WIN', 150, 155);
+    }
+
+    resetFoil();
+
+    function scratchAt(x, y) {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.arc(x, y, 24, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    let isScratching = false;
+    canvas.onmousedown = (e) => { isScratching = true; const r = canvas.getBoundingClientRect(); scratchAt(e.clientX - r.left, e.clientY - r.top); };
+    window.onmouseup = () => { isScratching = false; };
+    canvas.onmousemove = (e) => {
+      if (!isScratching) return;
+      const r = canvas.getBoundingClientRect();
+      scratchAt(e.clientX - r.left, e.clientY - r.top);
+    };
+
+    btnBuy.onclick = () => {
+      bet = Math.max(10, Math.min(wallet.get(), parseInt(elBet.value, 10) || 10));
+      if (!wallet.deduct(bet)) {
+        sound.lose();
+        elStatus.innerHTML = `<span style="color:#ef4444">Insufficient coins!</span>`;
+        return;
+      }
+
+      sound.chip();
+      resetFoil();
+
+      // Generate 9 symbols
+      const pick = () => symbols[Math.floor(Math.random() * symbols.length)];
+      grid = [pick(), pick(), pick(), pick(), pick(), pick(), pick(), pick(), pick()];
+
+      // 35% chance to force a 3-match
+      if (Math.random() < 0.35) {
+        const winSym = symbols[Math.floor(Math.random() * 3)];
+        grid[0] = winSym; grid[4] = winSym; grid[8] = winSym;
+      }
+
+      grid.forEach((s, i) => {
+        container.querySelector(`#sc-cell-${i}`).textContent = s;
+      });
+
+      elStatus.innerHTML = 'Scratch the card to uncover your prizes!';
+    };
+
+    btnInstant.onclick = () => {
+      ctx.clearRect(0, 0, 300, 300);
+      sound.win();
+
+      // Check match 3
+      const counts = {};
+      grid.forEach(s => counts[s] = (counts[s] || 0) + 1);
+      let match = null;
+      for (const [sym, count] of Object.entries(counts)) {
+        if (count >= 3) { match = sym; break; }
+      }
+
+      if (match) {
+        const mult = (match === '💎' ? 50 : (match === '👑' ? 25 : (match === '777' ? 10 : 3)));
+        const winAmt = bet * mult;
+        wallet.add(winAmt);
+        sound.bigWin();
+        celebration.burst('win', 40);
+        elStatus.innerHTML = `<span style="color:#fde047">🏆 MATCH 3 ${match}! WON $${winAmt.toLocaleString()} (${mult}x)!</span>`;
+      } else {
+        sound.lose();
+        elStatus.innerHTML = `<span style="color:#ef4444">No 3-of-a-kind match. Try another ticket!</span>`;
+      }
+    };
+  }
+
+  /* =========================================================================
+     4M: LIMBO & TOWER CLIMB
+     ========================================================================= */
+  function buildLimbo(gameDef, container) {
+    let bet = 100;
+    let target = 2.0;
+
+    container.innerHTML = `
+      <div class="theater-game-shell">
+        <div class="table-felt felt-limbo">
+          <div class="table-badge">${gameDef.title.toUpperCase()} • ${gameDef.badge}</div>
+
+          <div class="limbo-target-arena">
+            <div class="limbo-mult-display" id="limbo-result-num">1.00x</div>
+            <div class="limbo-win-prob-pill" id="limbo-prob-pill">WIN CHANCE: 49.5%</div>
+          </div>
+
+          <div class="felt-center-banner" id="limbo-status-msg">Set target multiplier and launch turbo rocket!</div>
+
+          <div class="limbo-input-row">
+            <span class="bet-label">TARGET MULTIPLIER:</span>
+            <input type="number" id="input-limbo-target" class="bet-number-input" value="2.00" min="1.05" max="1000" step="0.5">
+          </div>
+        </div>
+
+        <div class="theater-controls-bar">
+          <div class="bet-adjust-group">
+            <span class="bet-label">BET</span>
+            <button class="btn-ctrl-sub" id="btn-lb-half">1/2</button>
+            <input type="number" id="input-lb-bet" class="bet-number-input" value="${bet}" min="10" max="10000" step="50">
+            <button class="btn-ctrl-sub" id="btn-lb-double">2x</button>
+            <button class="btn-ctrl-sub" id="btn-lb-max">MAX</button>
+          </div>
+          <div class="action-buttons-group">
+            <button class="btn-action primary" id="btn-lb-play" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9); border-color: #a78bfa;">
+              LAUNCH ROCKET 🚀
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const elBet = container.querySelector('#input-lb-bet');
+    const elTarget = container.querySelector('#input-limbo-target');
+    const elResult = container.querySelector('#limbo-result-num');
+    const elProb = container.querySelector('#limbo-prob-pill');
+    const elStatus = container.querySelector('#limbo-status-msg');
+    const btnPlay = container.querySelector('#btn-lb-play');
+
+    elTarget.oninput = () => {
+      target = Math.max(1.05, parseFloat(elTarget.value) || 2.0);
+      const prob = (99 / target).toFixed(1);
+      elProb.textContent = `WIN CHANCE: ${prob}%`;
+    };
+
+    container.querySelector('#btn-lb-half').onclick = () => { bet = Math.max(10, Math.floor(bet / 2)); elBet.value = bet; };
+    container.querySelector('#btn-lb-double').onclick = () => { bet = Math.min(wallet.get(), bet * 2); elBet.value = bet; };
+    container.querySelector('#btn-lb-max').onclick = () => { bet = wallet.get(); elBet.value = bet; };
+    elBet.onchange = (e) => { bet = Math.max(10, Math.min(wallet.get(), parseInt(e.target.value, 10) || 10)); };
+
+    btnPlay.onclick = () => {
+      target = Math.max(1.05, parseFloat(elTarget.value) || 2.0);
+      bet = Math.max(10, Math.min(wallet.get(), parseInt(elBet.value, 10) || 10));
+      if (!wallet.deduct(bet)) {
+        sound.lose();
+        elStatus.innerHTML = `<span style="color:#ef4444">Insufficient coins!</span>`;
+        return;
+      }
+
+      sound.rocket();
+      btnPlay.disabled = true;
+
+      // Limbo crash calculation
+      const r = Math.random();
+      const outcome = (r === 0) ? 1.00 : parseFloat((0.99 / r).toFixed(2));
+
+      let cur = 1.00;
+      const interval = setInterval(() => {
+        cur *= 1.35;
+        if (cur >= outcome) {
+          clearInterval(interval);
+          cur = outcome;
+          elResult.textContent = `${cur.toFixed(2)}x`;
+          btnPlay.disabled = false;
+
+          if (outcome >= target) {
+            const winAmt = Math.floor(bet * target);
+            wallet.add(winAmt);
+            sound.win();
+            celebration.burst('win', 40);
+            elResult.style.color = '#10b981';
+            elStatus.innerHTML = `<span style="color:#fde047">🏆 ROCKET REACHED ${outcome.toFixed(2)}x! WON $${winAmt.toLocaleString()}!</span>`;
+          } else {
+            sound.boom();
+            elResult.style.color = '#ef4444';
+            elStatus.innerHTML = `<span style="color:#ef4444">💥 BUSTED AT ${outcome.toFixed(2)}x! Target was ${target}x.</span>`;
+          }
+        } else {
+          elResult.textContent = `${cur.toFixed(2)}x`;
+          elResult.style.color = '#fde047';
+        }
+      }, 50);
+    };
+  }
+
+  function buildTowerClimb(gameDef, container) {
+    let bet = 100;
+    let floor = 0;
+    let inClimb = false;
+    const multipliers = [1.35, 1.85, 2.55, 3.60, 5.20, 7.80, 12.0, 19.0, 32.0];
+
+    container.innerHTML = `
+      <div class="theater-game-shell">
+        <div class="table-felt felt-tower">
+          <div class="table-badge">${gameDef.title.toUpperCase()} • ${gameDef.badge}</div>
+
+          <div class="tower-spire-stage" id="tower-spire">
+            ${Array.from({ length: 9 }, (_, f) => {
+              const floorIdx = 8 - f; // Top is floor 8
+              return `
+                <div class="tower-floor-row" id="tower-floor-${floorIdx}">
+                  <span class="tower-floor-mult">${multipliers[floorIdx]}x</span>
+                  <div class="tower-doors-group">
+                    <button class="tower-door-btn" data-floor="${floorIdx}" data-door="0">🚪</button>
+                    <button class="tower-door-btn" data-floor="${floorIdx}" data-door="1">🚪</button>
+                    <button class="tower-door-btn" data-floor="${floorIdx}" data-door="2">🚪</button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <div class="felt-center-banner" id="tower-status-msg">Ascend the tower! 2 doors are safe, 1 door is trapped.</div>
+        </div>
+
+        <div class="theater-controls-bar">
+          <div class="bet-adjust-group">
+            <span class="bet-label">BET</span>
+            <button class="btn-ctrl-sub" id="btn-tw-half">1/2</button>
+            <input type="number" id="input-tw-bet" class="bet-number-input" value="${bet}" min="10" max="10000" step="50">
+            <button class="btn-ctrl-sub" id="btn-tw-double">2x</button>
+          </div>
+          <div class="action-buttons-group">
+            <button class="btn-action primary" id="btn-tw-start">START CLIMB 🗼</button>
+            <button class="btn-action" id="btn-tw-cashout" style="display:none; background:#10b981; border-color:#34d399;">CASH OUT 💰</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const elBet = container.querySelector('#input-tw-bet');
+    const elStatus = container.querySelector('#tower-status-msg');
+    const btnStart = container.querySelector('#btn-tw-start');
+    const btnCash = container.querySelector('#btn-tw-cashout');
+
+    function highlightFloor() {
+      container.querySelectorAll('.tower-floor-row').forEach(r => r.classList.remove('active-floor'));
+      const curRow = container.querySelector(`#tower-floor-${floor}`);
+      if (curRow) curRow.classList.add('active-floor');
+    }
+
+    container.querySelectorAll('.tower-door-btn').forEach(b => {
+      b.onclick = () => {
+        if (!inClimb) return;
+        const f = parseInt(b.dataset.floor, 10);
+        if (f !== floor) return;
+
+        const trapDoor = Math.floor(Math.random() * 3);
+        const chosenDoor = parseInt(b.dataset.door, 10);
+
+        if (chosenDoor === trapDoor) {
+          b.textContent = '💀';
+          b.style.background = '#ef4444';
+          sound.boom();
+          inClimb = false;
+          elStatus.innerHTML = `<span style="color:#ef4444">💥 TRAPPED ON FLOOR ${floor+1}! Stake lost.</span>`;
+          btnStart.style.display = 'inline-flex';
+          btnCash.style.display = 'none';
+        } else {
+          b.textContent = '💎';
+          b.style.background = '#10b981';
+          sound.win();
+          floor++;
+          const curMult = multipliers[floor - 1];
+          const pot = Math.floor(bet * curMult);
+          elStatus.innerHTML = `<span style="color:#10b981">✨ Floor ${floor} Cleared! Current Pot: $${pot.toLocaleString()} (${curMult}x)</span>`;
+          btnCash.style.display = 'inline-flex';
+          btnCash.textContent = `CASH OUT $${pot.toLocaleString()} 💰`;
+
+          if (floor >= 9) {
+            wallet.add(pot);
+            sound.bigWin();
+            celebration.burst('jackpot', 50);
+            elStatus.innerHTML = `<span style="color:#fde047">👑 SPIRE CONQUERED! Jackpotted $${pot.toLocaleString()}!</span>`;
+            inClimb = false;
+            btnStart.style.display = 'inline-flex';
+            btnCash.style.display = 'none';
+          } else {
+            highlightFloor();
+          }
+        }
+      };
+    });
+
+    btnStart.onclick = () => {
+      bet = Math.max(10, Math.min(wallet.get(), parseInt(elBet.value, 10) || 10));
+      if (!wallet.deduct(bet)) {
+        sound.lose();
+        elStatus.innerHTML = `<span style="color:#ef4444">Insufficient coins!</span>`;
+        return;
+      }
+
+      sound.chip();
+      floor = 0;
+      inClimb = true;
+      btnStart.style.display = 'none';
+      btnCash.style.display = 'none';
+
+      container.querySelectorAll('.tower-door-btn').forEach(b => {
+        b.textContent = '🚪';
+        b.style.background = '';
+      });
+
+      highlightFloor();
+      elStatus.innerHTML = 'Pick 1 of 3 doors on Floor 1!';
+    };
+
+    btnCash.onclick = () => {
+      if (!inClimb || floor === 0) return;
+      const curMult = multipliers[floor - 1];
+      const pot = Math.floor(bet * curMult);
+      wallet.add(pot);
+      sound.cashout();
+      celebration.burst('win', 40);
+      elStatus.innerHTML = `<span style="color:#fde047">🏆 CASHED OUT $${pot.toLocaleString()}! Great climb!</span>`;
+      inClimb = false;
+      btnStart.style.display = 'inline-flex';
+      btnCash.style.display = 'none';
+    };
+  }
+
   /* =========================================================================
      5. UNIVERSAL THEATER MODAL CONTROLLER
      ========================================================================= */
@@ -2061,6 +4390,30 @@
         buildBlackjack(gameDef, viewport);
       } else if (['baccarat', 'dragon_baccarat'].includes(gameDef.id)) {
         buildBaccarat(gameDef, viewport);
+      } else if (['vp_jacks', 'vp_deuces', 'vp_joker'].includes(gameDef.id)) {
+        buildVideoPoker(gameDef, viewport);
+      } else if (['holdem_heads_up', 'three_card_poker', 'caribbean_stud', 'pai_gow_poker'].includes(gameDef.id)) {
+        buildPokerTable(gameDef, viewport);
+      } else if (['casino_war', 'dragon_tiger', 'hilo_cards', 'red_dog', 'andar_bahar', 'teen_patti', 'tongits_blitz'].includes(gameDef.id)) {
+        buildCardShowdown(gameDef, viewport);
+      } else if (['roulette_euro', 'roulette_us'].includes(gameDef.id)) {
+        buildRoulette(gameDef, viewport);
+      } else if (['dice', 'sicbo', 'craps'].includes(gameDef.id)) {
+        buildDiceGames(gameDef, viewport);
+      } else if (gameDef.id === 'coinflip') {
+        buildCoinFlip(gameDef, viewport);
+      } else if (gameDef.id === 'wheel') {
+        buildWheelOfFortune(gameDef, viewport);
+      } else if (gameDef.id === 'keno') {
+        buildKeno(gameDef, viewport);
+      } else if (gameDef.id === 'horse_derby') {
+        buildHorseDerby(gameDef, viewport);
+      } else if (gameDef.id === 'scratch_gold') {
+        buildScratchGold(gameDef, viewport);
+      } else if (gameDef.id === 'limbo') {
+        buildLimbo(gameDef, viewport);
+      } else if (gameDef.id === 'tower_climb') {
+        buildTowerClimb(gameDef, viewport);
       } else if (gameDef.id === 'crash') {
         buildCrash(gameDef, viewport);
       } else if (gameDef.id === 'mines') {
@@ -2072,7 +4425,7 @@
       } else if (gameDef.id.startsWith('slot_') || gameDef.category === 'slots') {
         buildGenericSlot(gameDef, viewport);
       } else {
-        buildBlackjack(gameDef, viewport);
+        buildCardShowdown(gameDef, viewport);
       }
 
       this.modal.style.display = 'flex';

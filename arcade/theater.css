@@ -1108,3 +1108,811 @@
 .chip-100 { background: #10b981; color: #fff; border-color: #6ee7b7; }
 .chip-500 { background: #8b5cf6; color: #fff; border-color: #c4b5fd; }
 .chip-1k { background: #f59e0b; color: #000; border-color: #fef08a; }
+
+/* =========================================================================
+   6. DEDICATED FELT THEMES & 3D CASINO ENGINES STYLES
+   ========================================================================= */
+
+/* Video Poker */
+.felt-video-poker {
+  background: radial-gradient(circle at 50% 30%, #1e1b4b 0%, #0f172a 80%, #030712 100%) !important;
+  border-color: #6366f1 !important;
+}
+.felt-video-poker::before {
+  content: 'RETRO VEGAS VIDEO POKER  •  ROYAL FLUSH PAYS 800 TO 1' !important;
+}
+.vp-paytable-board {
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  border-radius: 12px;
+  padding: 8px 14px;
+  margin-bottom: 12px;
+}
+.vp-pay-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 6px 12px;
+}
+.vp-pay-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.02);
+  transition: all 0.2s;
+}
+.vp-pay-row.vp-win-highlight {
+  background: linear-gradient(90deg, #f59e0b, #d97706) !important;
+  color: #000 !important;
+  font-weight: 900 !important;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.8);
+  transform: scale(1.05);
+}
+.vp-cards-stage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  flex-wrap: wrap;
+}
+.vp-card-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.vp-hold-indicator {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: transparent;
+  padding: 2px 10px;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+.vp-hold-indicator.active {
+  background: #f59e0b;
+  color: #000;
+  box-shadow: 0 0 10px #f59e0b;
+}
+.vp-card-box.held-glow .casino-card {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.6) !important;
+}
+.vp-hold-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.vp-hold-btn.active {
+  background: #f59e0b;
+  color: #000;
+  border-color: #fde047;
+}
+
+/* Poker Table */
+.felt-poker-table {
+  background: radial-gradient(circle at 50% 30%, #064e3b 0%, #022c22 80%, #011812 100%) !important;
+  border-color: #15803d !important;
+}
+.felt-poker-table::before {
+  content: 'NO LIMIT HEADS-UP POKER  •  BEST 5-CARD COMBINATION WINS' !important;
+}
+.poker-dealer-zone, .poker-player-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.poker-community-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 10px 16px;
+  border-radius: 14px;
+  border: 1px dashed rgba(245, 176, 65, 0.3);
+  margin: 8px 0;
+}
+.poker-comm-label {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  color: #fde047;
+  letter-spacing: 1px;
+}
+.poker-ante-chip {
+  padding: 6px 14px;
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid #f59e0b;
+  color: #fde047;
+  font-family: var(--font-mono, monospace);
+  font-weight: 800;
+  border-radius: 20px;
+}
+
+/* Showdown & Dragon Tiger & HiLo & Andar Bahar */
+.felt-showdown {
+  background: radial-gradient(circle at 50% 30%, #311042 0%, #170824 80%, #090212 100%) !important;
+  border-color: #a855f7 !important;
+}
+.felt-showdown::before {
+  content: 'HIGH CARD CASINO SHOWDOWN  •  HIGHEST RANK WINS' !important;
+}
+.dragon-tiger-arena {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin: 16px 0;
+}
+.dt-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 14px 20px;
+  border-radius: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  min-width: 140px;
+}
+.dt-side-title {
+  font-family: var(--font-display, serif);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+.dt-center-vs {
+  font-family: var(--font-display, serif);
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #fde047;
+  text-shadow: 0 0 12px rgba(253, 224, 71, 0.6);
+}
+.showdown-bet-selector {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+/* Hi-Lo */
+.hilo-arena {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+}
+.hilo-streak-pill {
+  padding: 6px 18px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid #10b981;
+  color: #6ee7b7;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.85rem;
+  font-weight: 800;
+  border-radius: 20px;
+}
+.hilo-prediction-group {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Andar Bahar */
+.andar-bahar-arena {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0;
+}
+.ab-joker-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.ab-tracks {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+}
+.ab-side {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 10px;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Roulette */
+.felt-roulette {
+  background: radial-gradient(circle at 50% 30%, #064e3b 0%, #022c22 80%, #011812 100%) !important;
+  border-color: #f59e0b !important;
+}
+.felt-roulette::before {
+  content: 'GRAND CASINO ROULETTE  •  STRAIGHT UP NUMBER PAYS 36:1' !important;
+}
+.roulette-wheel-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin: 10px 0;
+}
+.roulette-3d-canvas {
+  border-radius: 50%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 25px rgba(245, 158, 11, 0.2);
+}
+.roulette-pointer-needle {
+  position: absolute;
+  top: 6px;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 18px solid #fde047;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+  z-index: 5;
+}
+.roulette-table-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+.roulette-outside-bets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+.rt-bet-box {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.76rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.rt-bet-box:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+.rt-bet-box.active {
+  border-color: #fde047 !important;
+  color: #fde047 !important;
+  background: rgba(245, 158, 11, 0.25) !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+}
+.rt-red { background: #991b1b !important; color: #fecaca !important; border-color: #ef4444 !important; }
+.rt-black { background: #0f172a !important; color: #cbd5e1 !important; border-color: #475569 !important; }
+.roulette-numbers-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  max-height: 90px;
+  overflow-y: auto;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 8px;
+}
+.rt-num-box {
+  width: 32px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s;
+}
+.rt-num-box:hover {
+  transform: scale(1.15);
+  z-index: 2;
+}
+.rt-num-box.active {
+  border-color: #fde047 !important;
+  box-shadow: 0 0 10px #fde047;
+  transform: scale(1.18);
+}
+.rt-green { background: #15803d; color: #fff; }
+.rt-red-n { background: #b91c1c; color: #fff; }
+.rt-black-n { background: #1e293b; color: #fff; }
+
+/* 3D Dice */
+.felt-dice {
+  background: radial-gradient(circle at 50% 30%, #1e1b4b 0%, #0f172a 80%, #030712 100%) !important;
+  border-color: #8b5cf6 !important;
+}
+.felt-dice::before {
+  content: '3D CYBER DICE & CASINO CRAPS  •  AUTHENTIC TUMBLING PHYSICS' !important;
+}
+.dice-3d-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+.dice-canvas {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+}
+.dice-roll-total-pill {
+  padding: 4px 14px;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid #f59e0b;
+  color: #fde047;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.85rem;
+  font-weight: 800;
+  border-radius: 20px;
+}
+.sicbo-bets-grid, .craps-bets-grid, .cyber-dice-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+/* 3D Coin Flip */
+.felt-coinflip {
+  background: radial-gradient(circle at 50% 30%, #311042 0%, #170824 80%, #090212 100%) !important;
+  border-color: #f59e0b !important;
+}
+.felt-coinflip::before {
+  content: '3D MINTED COIN FLIP  •  STREAK MULTIPLIER ACCUMULATION' !important;
+}
+.coinflip-3d-arena {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin: 16px 0;
+}
+.coinflip-coin-box {
+  width: 130px;
+  height: 130px;
+  perspective: 800px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.coin-3d-disc {
+  width: 110px;
+  height: 110px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.2s;
+}
+.coin-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display, serif);
+  font-size: 2.2rem;
+  font-weight: 900;
+  border: 4px dashed #fef08a;
+  box-shadow: 0 0 25px rgba(245, 158, 11, 0.6), inset 0 0 20px rgba(0,0,0,0.5);
+}
+.coin-face.heads {
+  background: radial-gradient(circle, #fef08a 0%, #f59e0b 60%, #b45309 100%);
+  color: #78350f;
+}
+.coin-face.tails {
+  background: radial-gradient(circle, #bae6fd 0%, #0284c7 60%, #0c4a6e 100%);
+  color: #082f49;
+  transform: rotateY(180deg);
+  border-color: #e0f2fe;
+}
+.coinflip-streak-meter {
+  padding: 6px 18px;
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid #f59e0b;
+  color: #fde047;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.82rem;
+  font-weight: 800;
+  border-radius: 20px;
+}
+.coinflip-choice-row {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+}
+.cf-side-btn {
+  background: rgba(15, 23, 42, 0.85);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
+  padding: 10px 24px;
+  border-radius: 12px;
+  font-family: var(--font-display, serif);
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cf-side-btn.active {
+  border-color: #fde047 !important;
+  color: #fde047 !important;
+  background: rgba(245, 158, 11, 0.25) !important;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.5);
+}
+
+/* 3D Wheel of Fortune */
+.felt-wheel {
+  background: radial-gradient(circle at 50% 30%, #311042 0%, #170824 80%, #090212 100%) !important;
+  border-color: #ec4899 !important;
+}
+.felt-wheel::before {
+  content: 'MEGA WHEEL OF FORTUNE  •  LAND ON 100x FOR MEGA JACKPOT' !important;
+}
+.wheel-canvas-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin: 10px 0;
+}
+.wheel-canvas {
+  border-radius: 50%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 25px rgba(236, 72, 153, 0.3);
+}
+.wheel-top-flapper {
+  position: absolute;
+  top: 2px;
+  font-size: 1.8rem;
+  color: #fde047;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.8));
+  z-index: 5;
+}
+.wheel-bet-selector {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* Keno Mega 80 */
+.felt-keno {
+  background: radial-gradient(circle at 50% 30%, #042f2e 0%, #02201f 80%, #011312 100%) !important;
+  border-color: #06b6d4 !important;
+}
+.felt-keno::before {
+  content: 'NEON KENO MEGA 80  •  DRAW 20 BALLS  •  MATCH UP TO 10 NUMBERS' !important;
+}
+.keno-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.keno-picks-count {
+  padding: 4px 12px;
+  background: rgba(6, 182, 212, 0.2);
+  border: 1px solid #06b6d4;
+  color: #67e8f9;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.8rem;
+  font-weight: 800;
+  border-radius: 14px;
+}
+.keno-actions-row {
+  display: flex;
+  gap: 6px;
+}
+.keno-grid-board {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 12px;
+}
+.keno-num-btn {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  padding: 6px 0;
+  border-radius: 6px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.keno-num-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+.keno-num-btn.selected {
+  background: #0284c7 !important;
+  border-color: #38bdf8 !important;
+  color: #fff !important;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+}
+.keno-num-btn.drawn {
+  background: #dc2626 !important;
+  border-color: #f87171 !important;
+  color: #fff !important;
+}
+.keno-num-btn.matched {
+  background: #f59e0b !important;
+  border-color: #fde047 !important;
+  color: #000 !important;
+  font-weight: 900 !important;
+  box-shadow: 0 0 16px #f59e0b;
+  transform: scale(1.1);
+  z-index: 2;
+}
+.keno-drawn-tray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 10px;
+  min-height: 32px;
+}
+.keno-ball-chip {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #334155;
+  color: #fff;
+  border: 1px solid #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 800;
+  animation: ballPop 0.2s ease-out;
+}
+.keno-ball-chip.hit {
+  background: #f59e0b;
+  color: #000;
+  border-color: #fde047;
+  box-shadow: 0 0 12px #f59e0b;
+}
+
+/* Cyber Derby */
+.felt-derby {
+  background: radial-gradient(circle at 50% 30%, #064e3b 0%, #022c22 80%, #011812 100%) !important;
+  border-color: #10b981 !important;
+}
+.felt-derby::before {
+  content: 'CYBER HORSE SPRINT DERBY  •  PHOTO FINISH TURF RACE' !important;
+}
+.derby-track-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.derby-lane {
+  position: relative;
+  height: 28px;
+  display: flex;
+  align-items: center;
+}
+.derby-horse-runner {
+  position: absolute;
+  left: 0%;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 10px;
+  color: #fff;
+  border: 1px solid #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  transition: left 0.05s linear;
+  white-space: nowrap;
+}
+.derby-lane-line {
+  width: 100%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+.derby-finish-line {
+  position: absolute;
+  right: 40px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: repeating-linear-gradient(0deg, #fff 0, #fff 8px, #000 8px, #000 16px);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+}
+.derby-horse-selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+
+/* Scratch & Win */
+.felt-scratch {
+  background: radial-gradient(circle at 50% 30%, #311042 0%, #170824 80%, #090212 100%) !important;
+  border-color: #f59e0b !important;
+}
+.felt-scratch::before {
+  content: 'NEON GOLD SCRATCH & WIN  •  MATCH 3 SYMBOLS TO WIN UP TO 500x' !important;
+}
+.scratch-card-box {
+  width: 300px;
+  height: 300px;
+  margin: 12px auto;
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 25px rgba(245, 158, 11, 0.4);
+  border: 2px solid #fde047;
+}
+.scratch-under-grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  background: #090d16;
+}
+.scratch-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+.scratch-foil-layer {
+  position: absolute;
+  inset: 0;
+  cursor: crosshair;
+}
+
+/* Limbo */
+.felt-limbo {
+  background: radial-gradient(circle at 50% 30%, #1e1b4b 0%, #0f172a 80%, #030712 100%) !important;
+  border-color: #a855f7 !important;
+}
+.felt-limbo::before {
+  content: 'TURBO LIMBO ROCKET  •  TARGET ACCELERATION MULTIPLIER' !important;
+}
+.limbo-target-arena {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 20px 0;
+}
+.limbo-mult-display {
+  font-family: var(--font-display, serif);
+  font-size: 4rem;
+  font-weight: 900;
+  color: #fde047;
+  text-shadow: 0 0 25px rgba(253, 224, 71, 0.6);
+}
+.limbo-win-prob-pill {
+  padding: 4px 14px;
+  background: rgba(168, 85, 247, 0.2);
+  border: 1px solid #a855f7;
+  color: #d8b4fe;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.85rem;
+  font-weight: 800;
+  border-radius: 20px;
+}
+.limbo-input-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+/* Tower Climb */
+.felt-tower {
+  background: radial-gradient(circle at 50% 30%, #111827 0%, #030712 100%) !important;
+  border-color: #38bdf8 !important;
+}
+.felt-tower::before {
+  content: 'CYBER SPIRE TOWER CLIMB  •  EVADE TRAPS AND CASH OUT' !important;
+}
+.tower-spire-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 380px;
+  margin: 10px auto;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.tower-floor-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  border: 1px solid transparent;
+}
+.tower-floor-row.active-floor {
+  background: rgba(56, 189, 248, 0.15) !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+}
+.tower-floor-mult {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #fde047;
+}
+.tower-doors-group {
+  display: flex;
+  gap: 8px;
+}
+.tower-door-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 1.1rem;
+  padding: 4px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tower-door-btn:hover {
+  background: rgba(56, 189, 248, 0.3);
+  border-color: #38bdf8;
+  transform: scale(1.1);
+}

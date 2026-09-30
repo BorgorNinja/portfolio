@@ -279,7 +279,8 @@
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .preview-canvas {
+    .preview-canvas,
+    .card-canvas-3d {
       width: 100%;
       height: 100%;
       display: block;
@@ -1014,6 +1015,7 @@
 
   <div class="toast" id="toast"></div>
 
+  <script src="arcade_3d_renderers.js?v=1.0"></script>
   <script>
     /* =========================================================================
        IDENTITY & HUD SYNC
@@ -1738,21 +1740,28 @@
       ctxJTrash.restore();
     }
 
-    /* Master Animation Loop */
+    /* Master Animation Loop (IntersectionObserver-Optimized) */
     function animate() {
-      renderSlots3D();
-      renderSlotsCyber3D();
-        renderSlotsVegas3D();
-      renderSlotsCandy3D();
-      renderSlotsAnubis3D();
-      renderPinball3D();
-      renderPool3D();
-      renderRoulette3D();
-      renderFishRace3D();
-      renderJTrash3D();
+      if (!window.Arcade3D || window.Arcade3D.isCanvasVisible(cvSlots)) renderSlots3D();
+      if (!window.Arcade3D || window.Arcade3D.isCanvasVisible(cvSlotsCyber)) renderSlotsCyber3D();
+      if (!window.Arcade3D || window.Arcade3D.isCanvasVisible(cvSlotsVegas)) renderSlotsVegas3D();
+      if (!window.Arcade3D || window.Arcade3D.isCanvasVisible(cvSlotsCandy)) renderSlotsCandy3D();
+      if (!window.Arcade3D || window.Arcade3D.isCanvasVisible(cvSlotsAnubis)) renderSlotsAnubis3D();
+      if (!window.Arcade3D || window.Arcade3D.isCanvasVisible(cvPinball)) renderPinball3D();
+      if (!window.Arcade3D || window.Arcade3D.isCanvasVisible(cvPool)) renderPool3D();
+      if (!window.Arcade3D || window.Arcade3D.isCanvasVisible(cvRoulette)) renderRoulette3D();
+      if (!window.Arcade3D || window.Arcade3D.isCanvasVisible(cvFishRace)) renderFishRace3D();
+      if (!window.Arcade3D || window.Arcade3D.isCanvasVisible(cvJTrash)) renderJTrash3D();
       requestAnimationFrame(animate);
     }
     requestAnimationFrame(animate);
+
+    // Register top custom canvases with IntersectionObserver
+    if (window.Arcade3D) {
+      [cvSlots, cvSlotsCyber, cvSlotsVegas, cvSlotsCandy, cvSlotsAnubis, cvPinball, cvPool, cvRoulette, cvFishRace, cvJTrash].forEach(cv => {
+        if (cv) window.Arcade3D.observeCanvas(cv);
+      });
+    }
 
     /* =========================================================================
        MATCHES & CHALLENGE MODAL SYSTEM
@@ -1901,7 +1910,7 @@
 
         card.innerHTML = `
           <div class="preview-viewport" style="background: radial-gradient(circle at 50% 50%, ${g.accent}25 0%, #080c16 100%); display:flex; align-items:center; justify-content:center; position:relative; min-height:190px;">
-            <div style="font-size: 3.8rem; filter: drop-shadow(0 0 16px ${g.accent}66); transform: scale(1); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);">${g.icon}</div>
+            <canvas class="card-canvas-3d preview-canvas" id="canvas-${g.id}" width="300" height="190"></canvas>
             <div class="live-badge">
               <span class="live-pulse-dot" style="background: ${g.accent}; box-shadow: 0 0 8px ${g.accent};"></span>
               <span>${g.badge}</span>
@@ -1933,7 +1942,7 @@
           </div>
         `;
 
-        // 3D tilt tracking for new card
+        // 3D tilt tracking for card and canvas
         card.addEventListener('mousemove', (e) => {
           const rect = card.getBoundingClientRect();
           const x = e.clientX - rect.left;
@@ -1945,12 +1954,31 @@
           const rotateX = ((y - centerY) / centerY) * -8;
           const rotateY = ((x - centerX) / centerX) * 8;
           card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.02, 1.02, 1.02)`;
+
+          const cv = card.querySelector('.card-canvas-3d');
+          if (cv) {
+            cv.dataset.mx = ((x - centerX) / centerX).toFixed(2);
+            cv.dataset.my = ((y - centerY) / centerY).toFixed(2);
+            cv.dataset.hover = '1';
+          }
         });
         card.addEventListener('mouseleave', () => {
           card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+          const cv = card.querySelector('.card-canvas-3d');
+          if (cv) {
+            cv.dataset.mx = '0';
+            cv.dataset.my = '0';
+            cv.dataset.hover = '0';
+          }
         });
 
         grid.appendChild(card);
+
+        // Register 3D canvas with Arcade3D engine
+        const cv = card.querySelector('.card-canvas-3d');
+        if (cv && window.Arcade3D) {
+          window.Arcade3D.registerCard(cv, g);
+        }
       });
     }
 
