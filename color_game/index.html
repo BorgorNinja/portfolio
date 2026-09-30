@@ -882,7 +882,7 @@
     const cubeGeom = new THREE.BoxGeometry(S, S, S);
 
     const diceMeshes = [];
-    const initialFloorY = 0.52;
+    const initialFloorY = 0.58;
 
     const diceState = [
       {
@@ -929,14 +929,14 @@
       d.mesh = mesh;
     });
 
-    // Face rotation map: brings the requested color directly facing the camera with slight top pitch
+    // Face rotation map: dice land flat on the table with the winning perya color on the top face
     const TARGET_EULERS = {
-      yellow: new THREE.Euler(-0.4, 0, 0),
-      white:  new THREE.Euler(-0.4, Math.PI, 0),
-      pink:   new THREE.Euler(-0.4, -Math.PI / 2, 0),
-      blue:   new THREE.Euler(-0.4, Math.PI / 2, 0),
-      red:    new THREE.Euler(Math.PI / 2 - 0.4, 0, 0),
-      green:  new THREE.Euler(-Math.PI / 2 - 0.4, 0, 0)
+      red:    new THREE.Euler(0, 0, 0),
+      green:  new THREE.Euler(Math.PI, 0, 0),
+      yellow: new THREE.Euler(-Math.PI / 2, 0, 0),
+      white:  new THREE.Euler(Math.PI / 2, 0, 0),
+      pink:   new THREE.Euler(0, 0, Math.PI / 2),
+      blue:   new THREE.Euler(0, 0, -Math.PI / 2)
     };
 
     // Set initial settled orientation
@@ -1279,8 +1279,7 @@
             }
           }
         } else if (!isRolling) {
-          // Idle gentle hover/breathing
-          d.mesh.position.y = initialFloorY + Math.sin(clock.getElapsedTime() * 2 + idx) * 0.02;
+          d.mesh.position.y = initialFloorY;
         }
       });
 
