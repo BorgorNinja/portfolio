@@ -2063,13 +2063,36 @@
       }
       .slot-grid {
         contain: layout paint;
+        transform: translateZ(0);
+        backface-visibility: hidden;
       }
       .reel-strip, .roller-track {
         will-change: transform;
         contain: paint;
+        transform: translateZ(0);
       }
       .slot-cell {
         contain: layout paint;
+      }
+      /* Strip expensive GPU filters, blurs and shadows from high-quality variants on mobile */
+      .variant-cyber .reel-column.impact-flash::before,
+      .variant-candy .reel-column.impact-flash::before,
+      .variant-anubis .reel-column.impact-flash::before {
+        box-shadow: none !important;
+        filter: none !important;
+        animation: none !important;
+        opacity: 0 !important;
+      }
+      .variant-cyber .slot-cell.win-exploding,
+      .variant-candy .slot-cell.win-exploding,
+      .variant-anubis .slot-cell.win-exploding {
+        filter: none !important;
+      }
+      .spark-container, .reel-spark {
+        display: none !important;
+      }
+      .scatter-laser-overlay {
+        display: none !important;
       }
     }
 
@@ -2633,6 +2656,8 @@
   </div>
 
   <script>
+    const isMobileDevice = (typeof window !== 'undefined') && ((window.innerWidth < 768) || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0));
+
     /* =========================================================================
        AUDIO ENGINE (Web Audio API - Crisp procedural casino synthesizer)
        ========================================================================= */
@@ -2891,7 +2916,7 @@
           gain.connect(this.out());
           osc.start(now);
           osc.stop(now + 0.038);
-        }, 42);
+        }, isMobileDevice ? 95 : 42);
       }
 
       stopReelSpinSound() {
@@ -5384,13 +5409,14 @@
     }
 
     function triggerGridShake() {
-      if (!gridEl) return;
+      if (!gridEl || isMobileDevice) return;
       gridEl.classList.remove('reel-shake');
       void gridEl.offsetWidth; // force reflow
       gridEl.classList.add('reel-shake');
     }
 
     function spawnReelSparks(colIndex) {
+      if (isMobileDevice) return;
       const col = document.getElementById(`reel-col-${colIndex}`);
       if (!col) return;
       const sparkContainer = document.createElement('div');
@@ -5412,7 +5438,7 @@
     }
 
     function spawnScatterSparks(cell) {
-      if (!cell) return;
+      if (!cell || isMobileDevice) return;
       const container = document.createElement('div');
       container.className = 'scatter-spark-container';
       for (let i = 0; i < 12; i++) {
@@ -5474,6 +5500,7 @@
     }
 
     function updateScatterLaserBeams() {
+      if (isMobileDevice) return;
       const svg = document.getElementById('scatter-laser-svg');
       if (!svg || !gridEl) return;
       svg.innerHTML = '';
@@ -6118,7 +6145,7 @@
       }
     }
 
-    const isMobileDevice = (window.innerWidth < 768) || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    // isMobileDevice is declared at top of script
 
     let fxAnimFrame = null;
     function triggerUpdateParticles() {
