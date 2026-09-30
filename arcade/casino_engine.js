@@ -1633,7 +1633,7 @@
     };
   }
 
-  /* --- 4F: PERYA COLOR GAME --- */
+  /* --- 4F: PERYA COLOR GAME (TRUE 3D INTERACTIVE CARNIVAL CUBES) --- */
   function buildColorGame(gameDef, container) {
     let bet = 100;
     const colors = [
@@ -1645,19 +1645,19 @@
       { id: 'pink', name: 'Pink', hex: '#ec4899' }
     ];
     let bets = { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 };
+    let isDropping = false;
 
     container.innerHTML = `
       <div class="theater-game-shell">
         <div class="color-game-board">
-          <div class="perya-cubes-tray" id="cubes-tray">
-            <div class="perya-cube" style="background:#ef4444">🎲</div>
-            <div class="perya-cube" style="background:#facc15">🎲</div>
-            <div class="perya-cube" style="background:#3b82f6">🎲</div>
+          <div class="perya-3d-stage">
+            <div class="perya-funnel-decor">🎪 PHILIPPINE PERYA COLOR GAME • 3D CUBES 🎪</div>
+            <canvas id="perya-canvas-3d" width="480" height="210" class="perya-canvas"></canvas>
           </div>
-          <div class="felt-center-banner" id="color-status">Place chips on the colors and click Drop Cubes</div>
+          <div class="felt-center-banner" id="color-status">Place chips on the colors and click DROP 3D CUBES</div>
           <div class="color-bet-grid">
             ${colors.map(c => `
-              <div class="color-card-spot" data-color="${c.id}" style="border-color:${c.hex}">
+              <div class="color-card-spot" id="spot-${c.id}" data-color="${c.id}" style="border-color:${c.hex}">
                 <div class="color-swatch" style="background:${c.hex}"></div>
                 <div class="color-title">${c.name}</div>
                 <div class="color-staked" id="stake-${c.id}">0</div>
@@ -1675,12 +1675,220 @@
             <button class="btn-ctrl-sub" id="btn-clear-colors">CLEAR</button>
           </div>
           <div class="action-buttons-group">
-            <button class="btn-action primary" id="btn-drop-cubes">DROP CUBES 🎪</button>
+            <button class="btn-action primary" id="btn-drop-cubes" style="background: linear-gradient(135deg, #f59e0b, #d97706); border-color: #fde047; box-shadow: 0 0 20px rgba(245, 176, 65, 0.4);">
+              DROP 3D CUBES 🎪
+            </button>
           </div>
         </div>
       </div>
     `;
 
+    const canvas = container.querySelector('#perya-canvas-3d');
+    const ctx = canvas.getContext('2d');
+    const btnDrop = container.querySelector('#btn-drop-cubes');
+    const elStatus = container.querySelector('#color-status');
+
+    // 3D Math Utilities
+    const project = (x, y, z, cx, cy, fov = 280) => {
+      const scale = fov / (fov + z);
+      return { x: cx + x * scale, y: cy + y * scale, scale, z };
+    };
+    const rx = (p, a) => {
+      const c = Math.cos(a), s = Math.sin(a);
+      return { x: p.x, y: p.y * c - p.z * s, z: p.y * s + p.z * c };
+    };
+    const ry = (p, a) => {
+      const c = Math.cos(a), s = Math.sin(a);
+      return { x: p.x * c + p.z * s, y: p.y, z: -p.x * s + p.z * c };
+    };
+    const rz = (p, a) => {
+      const c = Math.cos(a), s = Math.sin(a);
+      return { x: p.x * c - p.y * s, y: p.x * s + p.y * c, z: p.z };
+    };
+
+    const S = 27;
+    const baseVerts = [
+      { x: -S, y: -S, z: -S },
+      { x:  S, y: -S, z: -S },
+      { x:  S, y:  S, z: -S },
+      { x: -S, y:  S, z: -S },
+      { x: -S, y: -S, z:  S },
+      { x:  S, y: -S, z:  S },
+      { x:  S, y:  S, z:  S },
+      { x: -S, y:  S, z:  S }
+    ];
+
+    const faces = [
+      { verts: [4, 5, 6, 7], normal: { x: 0, y: 0, z: 1 }, color: '#facc15', id: 'yellow' },
+      { verts: [1, 0, 3, 2], normal: { x: 0, y: 0, z: -1 }, color: '#f8fafc', id: 'white' },
+      { verts: [5, 1, 2, 6], normal: { x: 1, y: 0, z: 0 }, color: '#ec4899', id: 'pink' },
+      { verts: [0, 4, 7, 3], normal: { x: -1, y: 0, z: 0 }, color: '#3b82f6', id: 'blue' },
+      { verts: [7, 6, 2, 3], normal: { x: 0, y: 1, z: 0 }, color: '#ef4444', id: 'red' },
+      { verts: [0, 1, 5, 4], normal: { x: 0, y: -1, z: 0 }, color: '#10b981', id: 'green' }
+    ];
+
+    const targetAngles = {
+      yellow: { y: 0,               x: -0.35, z: 0 },
+      white:  { y: Math.PI,         x: -0.35, z: 0 },
+      pink:   { y: -Math.PI / 2,    x: -0.35, z: 0 },
+      blue:   { y: Math.PI / 2,     x: -0.35, z: 0 },
+      red:    { y: 0,               x: Math.PI / 2 - 0.35, z: 0 },
+      green:  { y: 0,               x: -Math.PI / 2 - 0.35, z: 0 }
+    };
+
+    // Initialize 3 Dice on the Perya wooden deck
+    const floorY = 125;
+    const dice = [
+      { x: 120, y: floorY, rotX: -0.35, rotY: 0, rotZ: 0, vy: 0, vRotX: 0, vRotY: 0, vRotZ: 0, targetColor: 'yellow', settled: true, bounces: 0 },
+      { x: 240, y: floorY, rotX: Math.PI / 2 - 0.35, rotY: 0, rotZ: 0, vy: 0, vRotX: 0, vRotY: 0, vRotZ: 0, targetColor: 'red', settled: true, bounces: 0 },
+      { x: 360, y: floorY, rotX: -0.35, rotY: Math.PI / 2, rotZ: 0, vy: 0, vRotX: 0, vRotY: 0, vRotZ: 0, targetColor: 'blue', settled: true, bounces: 0 }
+    ];
+
+    let animId = null;
+
+    function render3DScene(t) {
+      if (!container.isConnected) return; // Clean up when theater closes
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Carnival wood stage gradient
+      const stageGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      stageGrad.addColorStop(0, '#0a0f1d');
+      stageGrad.addColorStop(0.55, '#111827');
+      stageGrad.addColorStop(1, '#070b14');
+      ctx.fillStyle = stageGrad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Carnival floor deck line with glowing gold trim
+      ctx.strokeStyle = 'rgba(250, 204, 21, 0.25)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(30, 155);
+      ctx.lineTo(450, 155);
+      ctx.stroke();
+
+      // Render each die
+      dice.forEach((die, dIdx) => {
+        // Physics update while dropping
+        if (!die.settled) {
+          die.vy += 0.72; // Gravity
+          die.y += die.vy;
+          die.rotX += die.vRotX;
+          die.rotY += die.vRotY;
+          die.rotZ += die.vRotZ;
+
+          if (die.y >= floorY) {
+            die.y = floorY;
+            die.bounces++;
+            if (die.bounces < 3) {
+              die.vy = -die.vy * 0.42; // Bounce damping
+              die.vRotX *= 0.65;
+              die.vRotY *= 0.65;
+              die.vRotZ *= 0.65;
+              sound.chip();
+            } else {
+              // Settle
+              die.vy = 0;
+              die.vRotX = 0;
+              die.vRotY = 0;
+              die.vRotZ = 0;
+              die.settled = true;
+            }
+          }
+        } else if (isDropping) {
+          // Smoothly interpolate to target angles
+          const ta = targetAngles[die.targetColor] || { x: -0.35, y: 0, z: 0 };
+          die.rotX += (ta.x - die.rotX) * 0.2;
+          die.rotY += (ta.y - die.rotY) * 0.2;
+          die.rotZ += (ta.z - die.rotZ) * 0.2;
+          die.y += (floorY - die.y) * 0.2;
+        } else {
+          // Gentle idle breathing
+          die.y = floorY + Math.sin(t * 0.0025 + dIdx * 1.5) * 2;
+        }
+
+        // Drop shadow on wood floor
+        const heightDiff = Math.max(0, floorY - die.y);
+        const shadowScale = Math.max(0.4, 1 - heightDiff * 0.006);
+        const shadowAlpha = Math.max(0.12, 0.5 - heightDiff * 0.0035);
+
+        ctx.save();
+        ctx.fillStyle = `rgba(0, 0, 0, ${shadowAlpha})`;
+        ctx.beginPath();
+        ctx.ellipse(die.x, 155, 34 * shadowScale, 11 * shadowScale, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // 3D Transform Vertices: apply Y rotation first, then X tilt, then Z
+        const transformedVerts = baseVerts.map(v => {
+          let p = ry(v, die.rotY);
+          p = rx(p, die.rotX);
+          p = rz(p, die.rotZ);
+          return project(p.x, p.y, p.z, die.x, die.y, 300);
+        });
+
+        // Transform faces & sort by Z-depth
+        const sortedFaces = faces.map((f, fIdx) => {
+          let n = ry(f.normal, die.rotY);
+          n = rx(n, die.rotX);
+          n = rz(n, die.rotZ);
+          const avgZ = f.verts.reduce((sum, vi) => sum + transformedVerts[vi].z, 0) / 4;
+          return { ...f, transNormal: n, avgZ };
+        }).sort((a, b) => b.avgZ - a.avgZ);
+
+        // Render visible faces
+        sortedFaces.forEach(f => {
+          if (f.transNormal.z <= 0.02) return; // Backface culling
+
+          // Directional lighting
+          const light = 0.65 + 0.35 * Math.max(0, f.transNormal.x * 0.4 - f.transNormal.y * 0.6 + f.transNormal.z * 0.5);
+
+          ctx.save();
+          ctx.beginPath();
+          const v0 = transformedVerts[f.verts[0]];
+          ctx.moveTo(v0.x, v0.y);
+          for (let i = 1; i < 4; i++) {
+            const vi = transformedVerts[f.verts[i]];
+            ctx.lineTo(vi.x, vi.y);
+          }
+          ctx.closePath();
+
+          // Fill Face with specular light
+          ctx.fillStyle = f.color;
+          ctx.fill();
+
+          // Shading overlay
+          ctx.fillStyle = `rgba(0, 0, 0, ${(1 - light) * 0.45})`;
+          ctx.fill();
+
+          // Border & Edge filigree
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // Center Round Emblem on Cube Face
+          const centerFaceX = f.verts.reduce((sum, vi) => sum + transformedVerts[vi].x, 0) / 4;
+          const centerFaceY = f.verts.reduce((sum, vi) => sum + transformedVerts[vi].y, 0) / 4;
+          const emblemRadius = 7.5 * (300 / (300 + f.avgZ));
+
+          ctx.beginPath();
+          ctx.arc(centerFaceX, centerFaceY, emblemRadius, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          ctx.restore();
+        });
+      });
+
+      animId = requestAnimationFrame(render3DScene);
+    }
+
+    animId = requestAnimationFrame(render3DScene);
+
+    // Chip adjustment & stake handling
     let activeChip = 50;
     const chips = container.querySelectorAll('[data-chip]');
     chips.forEach(c => {
@@ -1695,6 +1903,7 @@
     const spots = container.querySelectorAll('.color-card-spot');
     spots.forEach(sp => {
       sp.onclick = () => {
+        if (isDropping) return;
         const col = sp.getAttribute('data-color');
         if (wallet.deduct(activeChip)) {
           bets[col] += activeChip;
@@ -1707,6 +1916,7 @@
     });
 
     container.querySelector('#btn-clear-colors').onclick = () => {
+      if (isDropping) return;
       let refunded = 0;
       Object.keys(bets).forEach(k => {
         refunded += bets[k];
@@ -1717,39 +1927,71 @@
       sound.click();
     };
 
-    container.querySelector('#btn-drop-cubes').onclick = () => {
+    btnDrop.onclick = () => {
+      if (isDropping) return;
       const totalStaked = Object.values(bets).reduce((a, b) => a + b, 0);
-      const status = container.querySelector('#color-status');
       if (totalStaked <= 0) {
         sound.lose();
-        if (status) status.innerHTML = '<span style="color:#ef4444">Place chips on at least one color first!</span>';
+        elStatus.innerHTML = '<span style="color:#ef4444">Place chips on at least one color first!</span>';
         return;
       }
+
+      isDropping = true;
+      btnDrop.disabled = true;
+      btnDrop.style.opacity = '0.5';
       sound.dice();
-      const tray = container.querySelector('#cubes-tray');
-      tray.classList.add('shaking');
+      spots.forEach(s => s.classList.remove('winner'));
 
+      // Roll 3 authentic colors
+      const roll1 = colors[Math.floor(Math.random() * 6)];
+      const roll2 = colors[Math.floor(Math.random() * 6)];
+      const roll3 = colors[Math.floor(Math.random() * 6)];
+      const rolled = [roll1, roll2, roll3];
+
+      // Launch 3D cubes from funnel
+      dice.forEach((die, i) => {
+        die.y = -40 - i * 25;
+        die.vy = 3 + Math.random() * 2;
+        die.vRotX = 0.22 + Math.random() * 0.18;
+        die.vRotY = 0.25 + Math.random() * 0.2;
+        die.vRotZ = 0.15 + Math.random() * 0.15;
+        die.targetColor = rolled[i].id;
+        die.settled = false;
+        die.bounces = 0;
+      });
+
+      elStatus.innerHTML = '<span style="color:#fde047">🎪 Cubes tumbling down the Perya funnel...</span>';
+
+      // After physics settle (1.4s), evaluate result
       setTimeout(() => {
-        tray.classList.remove('shaking');
-        const roll1 = colors[Math.floor(Math.random() * 6)];
-        const roll2 = colors[Math.floor(Math.random() * 6)];
-        const roll3 = colors[Math.floor(Math.random() * 6)];
-
-        tray.innerHTML = `
-          <div class="perya-cube" style="background:${roll1.hex}"></div>
-          <div class="perya-cube" style="background:${roll2.hex}"></div>
-          <div class="perya-cube" style="background:${roll3.hex}"></div>
-        `;
+        // Force settle to exact target angles
+        dice.forEach(die => {
+          die.settled = true;
+          const ta = targetAngles[die.targetColor];
+          die.rotX = ta.x;
+          die.rotY = ta.y;
+          die.rotZ = ta.z;
+          die.y = floorY;
+        });
 
         const counts = {};
-        [roll1.id, roll2.id, roll3.id].forEach(id => counts[id] = (counts[id] || 0) + 1);
+        rolled.forEach(r => counts[r.id] = (counts[r.id] || 0) + 1);
 
         let won = 0;
+        let matchedColors = [];
+
         Object.keys(bets).forEach(id => {
           if (counts[id] && bets[id] > 0) {
-            // 1 match = stake returned + 1x. 2 matches = stake + 2x. 3 matches = stake + 3x.
+            // 1 match = stake + 1x. 2 matches = stake + 2x. 3 matches = stake + 3x!
             won += bets[id] * (1 + counts[id]);
+            matchedColors.push(id);
           }
+        });
+
+        // Highlight winning spots
+        matchedColors.forEach(id => {
+          const sp = container.querySelector(`#spot-${id}`);
+          if (sp) sp.classList.add('winner');
         });
 
         // Reset stakes
@@ -1758,16 +2000,20 @@
           container.querySelector(`#stake-${k}`).textContent = '0';
         });
 
-        const status = container.querySelector('#color-status');
         if (won > 0) {
           wallet.add(won);
           sound.win();
-          status.innerHTML = `<span style="color:#10b981">🎉 COLOR WIN! +${won.toLocaleString()} COINS</span>`;
+          celebration.burst('win', 40);
+          elStatus.innerHTML = `<span style="color:#10b981; font-weight:800;">🎉 3D PERYA WIN! +${won.toLocaleString()} COINS (${rolled.map(r => r.name).join(' • ')})</span>`;
         } else {
           sound.lose();
-          status.innerHTML = `<span style="color:#ef4444">💀 NO MATCHES. Better luck next roll!</span>`;
+          elStatus.innerHTML = `<span style="color:#94a3b8">Result: ${rolled.map(r => r.name).join(' • ')} — No match. Better luck next roll!</span>`;
         }
-      }, 700);
+
+        isDropping = false;
+        btnDrop.disabled = false;
+        btnDrop.style.opacity = '1';
+      }, 1500);
     };
   }
 
