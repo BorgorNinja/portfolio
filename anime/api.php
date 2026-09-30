@@ -199,4 +199,44 @@ if ($action === 'player') {
     exit;
 }
 
+if ($action === 'image') {
+    $imgUrl = $_GET['url'] ?? '';
+    if (empty($imgUrl) || !filter_var($imgUrl, FILTER_VALIDATE_URL) || strpos($imgUrl, 'aniwave.by') === false) {
+        header('HTTP/1.1 400 Bad Request');
+        echo 'Invalid image url';
+        exit;
+    }
+
+    $cacheFile = $cacheDir . '/img_' . md5($imgUrl) . '.jpg';
+    if (file_exists($cacheFile) && filesize($cacheFile) > 0) {
+        header('Content-Type: image/jpeg');
+        header('Cache-Control: public, max-age=604800');
+        readfile($cacheFile);
+        exit;
+    }
+
+    $ch = curl_init($imgUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    curl_setopt($ch, CURLOPT_REFERER, 'https://aniwave.by/');
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    $data = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE) ?: 'image/jpeg';
+    curl_close($ch);
+
+    if ($httpCode >= 200 && $httpCode < 400 && !empty($data)) {
+        file_put_contents($cacheFile, $data);
+        header('Content-Type: ' . $contentType);
+        header('Cache-Control: public, max-age=604800');
+        echo $data;
+        exit;
+    }
+
+    header('HTTP/1.1 502 Bad Gateway');
+    echo 'Failed to fetch image';
+    exit;
+}
+
 echo json_encode(['error' => 'Unknown action']);

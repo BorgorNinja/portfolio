@@ -1,1052 +1,1472 @@
 [
   {
-    "slug": "ascendance-of-a-bookworm",
-    "title": "Ascendance Of A Bookworm",
-    "url": "https://aniwave.by/anime/ascendance-of-a-bookworm/"
-  },
-  {
-    "slug": "ascendance-of-a-bookworm-side-story",
-    "title": "Ascendance Of A Bookworm Side Story",
-    "url": "https://aniwave.by/anime/ascendance-of-a-bookworm-side-story/"
-  },
-  {
-    "slug": "tamako-market",
-    "title": "Tamako Market",
-    "url": "https://aniwave.by/anime/tamako-market/"
-  },
-  {
-    "slug": "tamako-market-specials",
-    "title": "Tamako Market Specials",
-    "url": "https://aniwave.by/anime/tamako-market-specials/"
-  },
-  {
-    "slug": "ascendance-of-a-bookworm-season-3",
-    "title": "Ascendance Of A Bookworm Season 3",
-    "url": "https://aniwave.by/anime/ascendance-of-a-bookworm-season-3/"
-  },
-  {
-    "slug": "the-angel-next-door-spoils-me-rotten",
-    "title": "The Angel Next Door Spoils Me Rotten",
-    "url": "https://aniwave.by/anime/the-angel-next-door-spoils-me-rotten/"
-  },
-  {
-    "slug": "the-elusive-samurai",
-    "title": "The Elusive Samurai",
-    "url": "https://aniwave.by/anime/the-elusive-samurai/"
-  },
-  {
-    "slug": "dark-moon-the-blood-altar",
-    "title": "Dark Moon The Blood Altar",
-    "url": "https://aniwave.by/anime/dark-moon-the-blood-altar/"
-  },
-  {
-    "slug": "in-the-clear-moonlit-dusk",
-    "title": "In The Clear Moonlit Dusk",
-    "url": "https://aniwave.by/anime/in-the-clear-moonlit-dusk/"
-  },
-  {
-    "slug": "rilakkuma",
-    "title": "Rilakkuma",
-    "url": "https://aniwave.by/anime/rilakkuma/"
-  },
-  {
-    "slug": "onegai-aipri",
-    "title": "Onegai Aipri",
-    "url": "https://aniwave.by/anime/onegai-aipri/"
-  },
-  {
-    "slug": "rooster-fighter",
-    "title": "Rooster Fighter",
-    "url": "https://aniwave.by/anime/rooster-fighter/"
-  },
-  {
-    "slug": "milky%e2%98%86subway-the-galactic-limited-express-movie",
-    "title": "Milky%E2%98%86Subway The Galactic Limited Express Movie",
-    "url": "https://aniwave.by/anime/milky%e2%98%86subway-the-galactic-limited-express-movie/"
-  },
-  {
-    "slug": "dorohedoro-season-2",
-    "title": "Dorohedoro Season 2",
-    "url": "https://aniwave.by/anime/dorohedoro-season-2/"
-  },
-  {
-    "slug": "nigashita-sakana-wa-ookikatta-ga-tsuriageta-sakana-ga-ookisugita-ken",
-    "title": "Nigashita Sakana Wa Ookikatta Ga Tsuriageta Sakana Ga Ookisugita Ken",
-    "url": "https://aniwave.by/anime/nigashita-sakana-wa-ookikatta-ga-tsuriageta-sakana-ga-ookisugita-ken/"
-  },
-  {
-    "slug": "go-for-it-nakamura",
-    "title": "Go For It Nakamura",
-    "url": "https://aniwave.by/anime/go-for-it-nakamura/"
-  },
-  {
-    "slug": "haibaras-teenage-new-game",
-    "title": "Haibaras Teenage New Game",
-    "url": "https://aniwave.by/anime/haibaras-teenage-new-game/"
-  },
-  {
-    "slug": "killed-again-mr-detective",
-    "title": "Killed Again Mr Detective",
-    "url": "https://aniwave.by/anime/killed-again-mr-detective/"
-  },
-  {
-    "slug": "mamonogurai-no-boukensha-ore-dake-mamono-wo-kuratte-tsuyoku-naru",
-    "title": "Mamonogurai No Boukensha Ore Dake Mamono Wo Kuratte Tsuyoku Naru",
-    "url": "https://aniwave.by/anime/mamonogurai-no-boukensha-ore-dake-mamono-wo-kuratte-tsuyoku-naru/"
-  },
-  {
-    "slug": "an-observation-log-of-my-fiancee-who-calls-herself-a-villainess",
-    "title": "An Observation Log Of My Fiancee Who Calls Herself A Villainess",
-    "url": "https://aniwave.by/anime/an-observation-log-of-my-fiancee-who-calls-herself-a-villainess/"
-  },
-  {
-    "slug": "the-strongest-job-is-apparently-not-a-hero-or-a-sage-but-an-appraiser-provisional",
-    "title": "The Strongest Job Is Apparently Not A Hero Or A Sage But An Appraiser Provisional",
-    "url": "https://aniwave.by/anime/the-strongest-job-is-apparently-not-a-hero-or-a-sage-but-an-appraiser-provisional/"
-  },
-  {
-    "slug": "daikenja-riddle-no-jikan-gyakkou",
-    "title": "Daikenja Riddle No Jikan Gyakkou",
-    "url": "https://aniwave.by/anime/daikenja-riddle-no-jikan-gyakkou/"
-  },
-  {
-    "slug": "akane-banashi",
-    "title": "Akane Banashi",
-    "url": "https://aniwave.by/anime/akane-banashi/"
-  },
-  {
-    "slug": "mistress-kanan-is-devilishly-easy",
-    "title": "Mistress Kanan Is Devilishly Easy",
-    "url": "https://aniwave.by/anime/mistress-kanan-is-devilishly-easy/"
-  },
-  {
-    "slug": "kusunokis-garden-of-gods",
-    "title": "Kusunokis Garden Of Gods",
-    "url": "https://aniwave.by/anime/kusunokis-garden-of-gods/"
-  },
-  {
-    "slug": "the-food-diary-of-miss-maid",
-    "title": "The Food Diary Of Miss Maid",
-    "url": "https://aniwave.by/anime/the-food-diary-of-miss-maid/"
-  },
-  {
-    "slug": "nippon-sangoku-the-three-nations-of-the-crimson-sun",
-    "title": "Nippon Sangoku The Three Nations Of The Crimson Sun",
-    "url": "https://aniwave.by/anime/nippon-sangoku-the-three-nations-of-the-crimson-sun/"
-  },
-  {
-    "slug": "ghost-concert-missing-songs",
-    "title": "Ghost Concert Missing Songs",
-    "url": "https://aniwave.by/anime/ghost-concert-missing-songs/"
-  },
-  {
-    "slug": "farming-life-in-another-world-season-2",
-    "title": "Farming Life In Another World Season 2",
-    "url": "https://aniwave.by/anime/farming-life-in-another-world-season-2/"
-  },
-  {
-    "slug": "witch-hat-atelier",
-    "title": "Witch Hat Atelier",
-    "url": "https://aniwave.by/anime/witch-hat-atelier/"
-  },
-  {
-    "slug": "mahou-no-shimai-lulutto-lilly",
-    "title": "Mahou No Shimai Lulutto Lilly",
-    "url": "https://aniwave.by/anime/mahou-no-shimai-lulutto-lilly/"
-  },
-  {
-    "slug": "the-klutzy-class-monitor-and-the-girl-with-the-short-skirt",
-    "title": "The Klutzy Class Monitor And The Girl With The Short Skirt",
-    "url": "https://aniwave.by/anime/the-klutzy-class-monitor-and-the-girl-with-the-short-skirt/"
-  },
-  {
-    "slug": "my-ribdiculous-reincarnation",
-    "title": "My Ribdiculous Reincarnation",
-    "url": "https://aniwave.by/anime/my-ribdiculous-reincarnation/"
-  },
-  {
-    "slug": "hyakki-yakoushou",
-    "title": "Hyakki Yakoushou",
-    "url": "https://aniwave.by/anime/hyakki-yakoushou/"
-  },
-  {
-    "slug": "i-made-friends-with-the-second-prettiest-girl-in-my-class",
-    "title": "I Made Friends With The Second Prettiest Girl In My Class",
-    "url": "https://aniwave.by/anime/i-made-friends-with-the-second-prettiest-girl-in-my-class/"
-  },
-  {
-    "slug": "pardon-the-intrusion-im-home",
-    "title": "Pardon The Intrusion Im Home",
-    "url": "https://aniwave.by/anime/pardon-the-intrusion-im-home/"
-  },
-  {
-    "slug": "classroom-of-the-elite-4th-season-second-year-first-semester",
-    "title": "Classroom Of The Elite 4Th Season Second Year First Semester",
-    "url": "https://aniwave.by/anime/classroom-of-the-elite-4th-season-second-year-first-semester/"
-  },
-  {
-    "slug": "rent-a-girlfriend-season-5",
-    "title": "Rent A Girlfriend Season 5",
-    "url": "https://aniwave.by/anime/rent-a-girlfriend-season-5/"
-  },
-  {
-    "slug": "reborn-as-a-vending-machine-i-now-wander-the-dungeon-season-3",
-    "title": "Reborn As A Vending Machine I Now Wander The Dungeon Season 3",
-    "url": "https://aniwave.by/anime/reborn-as-a-vending-machine-i-now-wander-the-dungeon-season-3/"
-  },
-  {
-    "slug": "gals-cant-be-kind-to-otaku",
-    "title": "Gals Cant Be Kind To Otaku",
-    "url": "https://aniwave.by/anime/gals-cant-be-kind-to-otaku/"
-  },
-  {
-    "slug": "the-beginning-after-the-end-season-2",
-    "title": "The Beginning After The End Season 2",
-    "url": "https://aniwave.by/anime/the-beginning-after-the-end-season-2/"
-  },
-  {
-    "slug": "dr-stone-science-future-part-3",
-    "title": "Dr Stone Science Future Part 3",
-    "url": "https://aniwave.by/anime/dr-stone-science-future-part-3/"
-  },
-  {
-    "slug": "the-warrior-princess-and-the-barbaric-king",
-    "title": "The Warrior Princess And The Barbaric King",
-    "url": "https://aniwave.by/anime/the-warrior-princess-and-the-barbaric-king/"
-  },
-  {
-    "slug": "kujima-why-sing-when-you-can-warble",
-    "title": "Kujima Why Sing When You Can Warble",
-    "url": "https://aniwave.by/anime/kujima-why-sing-when-you-can-warble/"
-  },
-  {
-    "slug": "petals-of-reincarnation",
-    "title": "Petals Of Reincarnation",
-    "url": "https://aniwave.by/anime/petals-of-reincarnation/"
-  },
-  {
-    "slug": "a-hundred-scenes-of-awajima",
-    "title": "A Hundred Scenes Of Awajima",
-    "url": "https://aniwave.by/anime/a-hundred-scenes-of-awajima/"
-  },
-  {
-    "slug": "snowball-earth",
-    "title": "Snowball Earth",
-    "url": "https://aniwave.by/anime/snowball-earth/"
-  },
-  {
-    "slug": "kill-blue",
-    "title": "Kill Blue",
-    "url": "https://aniwave.by/anime/kill-blue/"
-  },
-  {
-    "slug": "agents-of-the-four-seasons-dance-of-spring",
-    "title": "Agents Of The Four Seasons Dance Of Spring",
-    "url": "https://aniwave.by/anime/agents-of-the-four-seasons-dance-of-spring/"
-  },
-  {
-    "slug": "needy-girl-overdose",
-    "title": "Needy Girl Overdose",
-    "url": "https://aniwave.by/anime/needy-girl-overdose/"
-  },
-  {
-    "slug": "scum-of-the-brave",
-    "title": "Scum Of The Brave",
-    "url": "https://aniwave.by/anime/scum-of-the-brave/"
-  },
-  {
-    "slug": "ace-of-diamond-act-ii-season-2",
-    "title": "Ace Of Diamond Act Ii Season 2",
-    "url": "https://aniwave.by/anime/ace-of-diamond-act-ii-season-2/"
-  },
-  {
-    "slug": "mission-yozakura-family-season-2",
-    "title": "Mission Yozakura Family Season 2",
-    "url": "https://aniwave.by/anime/mission-yozakura-family-season-2/"
-  },
-  {
-    "slug": "wistoria-wand-and-sword-season-2",
-    "title": "Wistoria Wand And Sword Season 2",
-    "url": "https://aniwave.by/anime/wistoria-wand-and-sword-season-2/"
-  },
-  {
-    "slug": "i-want-to-end-this-love-game",
-    "title": "I Want To End This Love Game",
-    "url": "https://aniwave.by/anime/i-want-to-end-this-love-game/"
-  },
-  {
-    "slug": "marriagetoxin",
-    "title": "Marriagetoxin",
-    "url": "https://aniwave.by/anime/marriagetoxin/"
-  },
-  {
-    "slug": "even-a-replica-can-fall-in-love",
-    "title": "Even A Replica Can Fall In Love",
-    "url": "https://aniwave.by/anime/even-a-replica-can-fall-in-love/"
-  },
-  {
-    "slug": "eren-the-southpaw",
-    "title": "Eren The Southpaw",
-    "url": "https://aniwave.by/anime/eren-the-southpaw/"
-  },
-  {
-    "slug": "hokuto-no-ken-fist-of-the-north-star",
-    "title": "Hokuto No Ken Fist Of The North Star",
-    "url": "https://aniwave.by/anime/hokuto-no-ken-fist-of-the-north-star/"
-  },
-  {
-    "slug": "one-piece-heroines",
-    "title": "One Piece Heroines",
-    "url": "https://aniwave.by/anime/one-piece-heroines/"
-  },
-  {
-    "slug": "the-ramparts-of-ice",
-    "title": "The Ramparts Of Ice",
-    "url": "https://aniwave.by/anime/the-ramparts-of-ice/"
-  },
-  {
-    "slug": "death-note",
-    "title": "Death Note",
-    "url": "https://aniwave.by/anime/death-note/"
-  },
-  {
-    "slug": "attack-on-titan",
-    "title": "Attack On Titan",
-    "url": "https://aniwave.by/anime/attack-on-titan/"
-  },
-  {
-    "slug": "demon-slayer-kimetsu-no-yaiba",
-    "title": "Demon Slayer Kimetsu No Yaiba",
-    "url": "https://aniwave.by/anime/demon-slayer-kimetsu-no-yaiba/"
-  },
-  {
-    "slug": "jujutsu-kaisen",
-    "title": "Jujutsu Kaisen",
-    "url": "https://aniwave.by/anime/jujutsu-kaisen/"
-  },
-  {
-    "slug": "my-hero-academia",
-    "title": "My Hero Academia",
-    "url": "https://aniwave.by/anime/my-hero-academia/"
-  },
-  {
-    "slug": "hunter-x-hunter",
-    "title": "Hunter X Hunter",
-    "url": "https://aniwave.by/anime/hunter-x-hunter/"
-  },
-  {
-    "slug": "one-punch-man",
-    "title": "One Punch Man",
-    "url": "https://aniwave.by/anime/one-punch-man/"
-  },
-  {
-    "slug": "tokyo-ghoul",
-    "title": "Tokyo Ghoul",
-    "url": "https://aniwave.by/anime/tokyo-ghoul/"
-  },
-  {
-    "slug": "attack-on-titan-season-2",
-    "title": "Attack On Titan Season 2",
-    "url": "https://aniwave.by/anime/attack-on-titan-season-2/"
-  },
-  {
-    "slug": "fullmetal-alchemist-brotherhood",
-    "title": "Fullmetal Alchemist Brotherhood",
-    "url": "https://aniwave.by/anime/fullmetal-alchemist-brotherhood/"
-  },
-  {
-    "slug": "smoking-behind-the-supermarket-with-you",
-    "title": "Smoking Behind The Supermarket With You",
-    "url": "https://aniwave.by/anime/smoking-behind-the-supermarket-with-you/"
-  },
-  {
-    "slug": "sword-art-online",
-    "title": "Sword Art Online",
-    "url": "https://aniwave.by/anime/sword-art-online/"
-  },
-  {
-    "slug": "a-silent-voice",
-    "title": "A Silent Voice",
-    "url": "https://aniwave.by/anime/a-silent-voice/"
-  },
-  {
-    "slug": "your-name",
-    "title": "Your Name",
-    "url": "https://aniwave.by/anime/your-name/"
-  },
-  {
-    "slug": "attack-on-titan-season-3",
-    "title": "Attack On Titan Season 3",
-    "url": "https://aniwave.by/anime/attack-on-titan-season-3/"
-  },
-  {
-    "slug": "my-hero-academia-season-2",
-    "title": "My Hero Academia Season 2",
-    "url": "https://aniwave.by/anime/my-hero-academia-season-2/"
-  },
-  {
-    "slug": "attack-on-titan-final-season",
-    "title": "Attack On Titan Final Season",
-    "url": "https://aniwave.by/anime/attack-on-titan-final-season/"
-  },
-  {
-    "slug": "the-promised-neverland",
-    "title": "The Promised Neverland",
-    "url": "https://aniwave.by/anime/the-promised-neverland/"
-  },
-  {
-    "slug": "chainsaw-man",
-    "title": "Chainsaw Man",
-    "url": "https://aniwave.by/anime/chainsaw-man/"
-  },
-  {
-    "slug": "assassination-classroom",
-    "title": "Assassination Classroom",
-    "url": "https://aniwave.by/anime/assassination-classroom/"
-  },
-  {
-    "slug": "mob-psycho-100",
-    "title": "Mob Psycho 100",
-    "url": "https://aniwave.by/anime/mob-psycho-100/"
-  },
-  {
-    "slug": "rezero-starting-life-in-another-world",
-    "title": "Rezero Starting Life In Another World",
-    "url": "https://aniwave.by/anime/rezero-starting-life-in-another-world/"
-  },
-  {
-    "slug": "your-lie-in-april",
-    "title": "Your Lie In April",
-    "url": "https://aniwave.by/anime/your-lie-in-april/"
-  },
-  {
-    "slug": "naruto-shippuden",
-    "title": "Naruto Shippuden",
-    "url": "https://aniwave.by/anime/naruto-shippuden/"
-  },
-  {
-    "slug": "erased",
-    "title": "Erased",
-    "url": "https://aniwave.by/anime/erased/"
-  },
-  {
-    "slug": "my-hero-academia-season-3",
-    "title": "My Hero Academia Season 3",
-    "url": "https://aniwave.by/anime/my-hero-academia-season-3/"
-  },
-  {
-    "slug": "steinsgate",
-    "title": "Steinsgate",
-    "url": "https://aniwave.by/anime/steinsgate/"
-  },
-  {
-    "slug": "haikyu",
-    "title": "Haikyu",
-    "url": "https://aniwave.by/anime/haikyu/"
-  },
-  {
-    "slug": "black-clover",
-    "title": "Black Clover",
-    "url": "https://aniwave.by/anime/black-clover/"
-  },
-  {
-    "slug": "rascal-does-not-dream-of-bunny-girl-senpai",
-    "title": "Rascal Does Not Dream Of Bunny Girl Senpai",
-    "url": "https://aniwave.by/anime/rascal-does-not-dream-of-bunny-girl-senpai/"
-  },
-  {
-    "slug": "spy-x-family",
-    "title": "Spy X Family",
-    "url": "https://aniwave.by/anime/spy-x-family/"
-  },
-  {
-    "slug": "kaguya-sama-love-is-war",
-    "title": "Kaguya Sama Love Is War",
-    "url": "https://aniwave.by/anime/kaguya-sama-love-is-war/"
-  },
-  {
-    "slug": "dr-stone",
-    "title": "Dr Stone",
-    "url": "https://aniwave.by/anime/dr-stone/"
-  },
-  {
-    "slug": "violet-evergarden",
-    "title": "Violet Evergarden",
-    "url": "https://aniwave.by/anime/violet-evergarden/"
-  },
-  {
-    "slug": "vinland-saga",
-    "title": "Vinland Saga",
-    "url": "https://aniwave.by/anime/vinland-saga/"
-  },
-  {
-    "slug": "toradora",
-    "title": "Toradora",
-    "url": "https://aniwave.by/anime/toradora/"
-  },
-  {
-    "slug": "noragami",
-    "title": "Noragami",
-    "url": "https://aniwave.by/anime/noragami/"
-  },
-  {
-    "slug": "horimiya",
-    "title": "Horimiya",
-    "url": "https://aniwave.by/anime/horimiya/"
-  },
-  {
-    "slug": "my-hero-academia-season-4",
-    "title": "My Hero Academia Season 4",
-    "url": "https://aniwave.by/anime/my-hero-academia-season-4/"
-  },
-  {
-    "slug": "demon-slayer-kimetsu-no-yaiba-the-movie-mugen-train",
-    "title": "Demon Slayer Kimetsu No Yaiba The Movie Mugen Train",
-    "url": "https://aniwave.by/anime/demon-slayer-kimetsu-no-yaiba-the-movie-mugen-train/"
-  },
-  {
-    "slug": "parasyte-the-maxim",
-    "title": "Parasyte The Maxim",
-    "url": "https://aniwave.by/anime/parasyte-the-maxim/"
-  },
-  {
-    "slug": "darling-in-the-franxx",
-    "title": "Darling In The Franxx",
-    "url": "https://aniwave.by/anime/darling-in-the-franxx/"
-  },
-  {
-    "slug": "code-geass-lelouch-of-the-rebellion",
-    "title": "Code Geass Lelouch Of The Rebellion",
-    "url": "https://aniwave.by/anime/code-geass-lelouch-of-the-rebellion/"
-  },
-  {
-    "slug": "yoroi-shinden-samurai-troopers-part-2",
-    "title": "Yoroi Shinden Samurai Troopers Part 2",
-    "url": "https://aniwave.by/anime/yoroi-shinden-samurai-troopers-part-2/"
-  },
-  {
-    "slug": "sorry-about-my-little-brothers",
-    "title": "Sorry About My Little Brothers",
-    "url": "https://aniwave.by/anime/sorry-about-my-little-brothers/"
-  },
-  {
-    "slug": "jujutsu-kaisen-season-2",
-    "title": "Jujutsu Kaisen Season 2",
-    "url": "https://aniwave.by/anime/jujutsu-kaisen-season-2/"
-  },
-  {
-    "slug": "fire-force",
-    "title": "Fire Force",
-    "url": "https://aniwave.by/anime/fire-force/"
-  },
-  {
-    "slug": "demon-slayer-kimetsu-no-yaiba-entertainment-district-arc",
-    "title": "Demon Slayer Kimetsu No Yaiba Entertainment District Arc",
-    "url": "https://aniwave.by/anime/demon-slayer-kimetsu-no-yaiba-entertainment-district-arc/"
-  },
-  {
-    "slug": "akame-ga-kill",
-    "title": "Akame Ga Kill",
-    "url": "https://aniwave.by/anime/akame-ga-kill/"
-  },
-  {
-    "slug": "jojos-bizarre-adventure-2012",
-    "title": "Jojos Bizarre Adventure 2012",
-    "url": "https://aniwave.by/anime/jojos-bizarre-adventure-2012/"
-  },
-  {
-    "slug": "frieren-beyond-journeys-end",
-    "title": "Frieren Beyond Journeys End",
-    "url": "https://aniwave.by/anime/frieren-beyond-journeys-end/"
-  },
-  {
-    "slug": "death-parade",
-    "title": "Death Parade",
-    "url": "https://aniwave.by/anime/death-parade/"
-  },
-  {
-    "slug": "one-punch-man-season-2",
-    "title": "One Punch Man Season 2",
-    "url": "https://aniwave.by/anime/one-punch-man-season-2/"
-  },
-  {
-    "slug": "arifureta-shokugyou-de-sekai-saikyou-prologue",
-    "title": "Arifureta Shokugyou De Sekai Saikyou Prologue",
-    "url": "https://aniwave.by/anime/arifureta-shokugyou-de-sekai-saikyou-prologue/"
-  },
-  {
-    "slug": "link-click-season-3",
-    "title": "Link Click Season 3",
-    "url": "https://aniwave.by/anime/link-click-season-3/"
-  },
-  {
-    "slug": "blue-exorcist",
-    "title": "Blue Exorcist",
-    "url": "https://aniwave.by/anime/blue-exorcist/"
-  },
-  {
-    "slug": "that-time-i-got-reincarnated-as-a-slime",
-    "title": "That Time I Got Reincarnated As A Slime",
-    "url": "https://aniwave.by/anime/that-time-i-got-reincarnated-as-a-slime/"
-  },
-  {
-    "slug": "the-rising-of-the-shield-hero",
-    "title": "The Rising Of The Shield Hero",
-    "url": "https://aniwave.by/anime/the-rising-of-the-shield-hero/"
-  },
-  {
-    "slug": "kirio-fanclub",
-    "title": "Kirio Fanclub",
-    "url": "https://aniwave.by/anime/kirio-fanclub/"
-  },
-  {
-    "slug": "false-memory-2026",
-    "title": "False Memory 2026",
-    "url": "https://aniwave.by/anime/false-memory-2026/"
-  },
-  {
-    "slug": "mobile-suit-gundam-hathaway-the-sorcery-of-nymph-circe",
-    "title": "Mobile Suit Gundam Hathaway The Sorcery Of Nymph Circe",
-    "url": "https://aniwave.by/anime/mobile-suit-gundam-hathaway-the-sorcery-of-nymph-circe/"
-  },
-  {
-    "slug": "beyblade-x",
-    "title": "Beyblade X",
-    "url": "https://aniwave.by/anime/beyblade-x/"
-  },
-  {
-    "slug": "my-stepmother-and-stepsisters-arent-wicked",
-    "title": "My Stepmother And Stepsisters Arent Wicked",
-    "url": "https://aniwave.by/anime/my-stepmother-and-stepsisters-arent-wicked/"
-  },
-  {
-    "slug": "victoria-of-many-faces",
-    "title": "Victoria Of Many Faces",
-    "url": "https://aniwave.by/anime/victoria-of-many-faces/"
-  },
-  {
-    "slug": "the-ghost-in-the-shell",
-    "title": "The Ghost In The Shell",
-    "url": "https://aniwave.by/anime/the-ghost-in-the-shell/"
-  },
-  {
-    "slug": "heroine-saint-no-im-an-all-works-maid-and-proud-of-it",
-    "title": "Heroine Saint No Im An All Works Maid And Proud Of It",
-    "url": "https://aniwave.by/anime/heroine-saint-no-im-an-all-works-maid-and-proud-of-it/"
-  },
-  {
-    "slug": "the-villager-of-level-999",
-    "title": "The Villager Of Level 999",
-    "url": "https://aniwave.by/anime/the-villager-of-level-999/"
-  },
-  {
-    "slug": "bang-dream-yume%e2%88%9emita",
-    "title": "Bang Dream Yume%E2%88%9Emita",
-    "url": "https://aniwave.by/anime/bang-dream-yume%e2%88%9emita/"
-  },
-  {
-    "slug": "from-overshadowed-to-overpowered-second-reincarnation-of-a-talentless-sage",
-    "title": "From Overshadowed To Overpowered Second Reincarnation Of A Talentless Sage",
-    "url": "https://aniwave.by/anime/from-overshadowed-to-overpowered-second-reincarnation-of-a-talentless-sage/"
-  },
-  {
-    "slug": "lord-of-mysteries-specials",
-    "title": "Lord Of Mysteries Specials",
-    "url": "https://aniwave.by/anime/lord-of-mysteries-specials/"
-  },
-  {
-    "slug": "the-cat-and-the-dragon",
-    "title": "The Cat And The Dragon",
-    "url": "https://aniwave.by/anime/the-cat-and-the-dragon/"
-  },
-  {
-    "slug": "recommendations-from-iwamoto-senpai",
-    "title": "Recommendations From Iwamoto Senpai",
-    "url": "https://aniwave.by/anime/recommendations-from-iwamoto-senpai/"
-  },
-  {
-    "slug": "crowned-in-a-hundred-days",
-    "title": "Crowned In A Hundred Days",
-    "url": "https://aniwave.by/anime/crowned-in-a-hundred-days/"
-  },
-  {
-    "slug": "the-oblivious-saint-cant-contain-her-power",
-    "title": "The Oblivious Saint Cant Contain Her Power",
-    "url": "https://aniwave.by/anime/the-oblivious-saint-cant-contain-her-power/"
-  },
-  {
-    "slug": "the-frontier-lord-begins-with-zero-subjects",
-    "title": "The Frontier Lord Begins With Zero Subjects",
-    "url": "https://aniwave.by/anime/the-frontier-lord-begins-with-zero-subjects/"
-  },
-  {
-    "slug": "i-became-a-legend-after-my-10-year-long-last-stand",
-    "title": "I Became A Legend After My 10 Year Long Last Stand",
-    "url": "https://aniwave.by/anime/i-became-a-legend-after-my-10-year-long-last-stand/"
-  },
-  {
-    "slug": "sorry-about-my-little-brothers-2",
-    "title": "Sorry About My Little Brothers 2",
-    "url": "https://aniwave.by/anime/sorry-about-my-little-brothers-2/"
-  },
-  {
-    "slug": "magical-girl-lyrical-nanoha-exceeds-gun-blaze-vengeance",
-    "title": "Magical Girl Lyrical Nanoha Exceeds Gun Blaze Vengeance",
-    "url": "https://aniwave.by/anime/magical-girl-lyrical-nanoha-exceeds-gun-blaze-vengeance/"
-  },
-  {
-    "slug": "the-dukes-son-claims-he-wont-love-me-yet-showers-me-with-adoration",
-    "title": "The Dukes Son Claims He Wont Love Me Yet Showers Me With Adoration",
-    "url": "https://aniwave.by/anime/the-dukes-son-claims-he-wont-love-me-yet-showers-me-with-adoration/"
-  },
-  {
-    "slug": "the-ogres-bride",
-    "title": "The Ogres Bride",
-    "url": "https://aniwave.by/anime/the-ogres-bride/"
-  },
-  {
-    "slug": "rich-girl-caretaker-im-secretly-the-caregiver-of-the-most-popular-girl-in-this-rich-kid-school",
-    "title": "Rich Girl Caretaker Im Secretly The Caregiver Of The Most Popular Girl In This Rich Kid School",
-    "url": "https://aniwave.by/anime/rich-girl-caretaker-im-secretly-the-caregiver-of-the-most-popular-girl-in-this-rich-kid-school/"
-  },
-  {
-    "slug": "black-torch",
-    "title": "Black Torch",
-    "url": "https://aniwave.by/anime/black-torch/"
-  },
-  {
-    "slug": "iron-wok-jan",
-    "title": "Iron Wok Jan",
-    "url": "https://aniwave.by/anime/iron-wok-jan/"
-  },
-  {
-    "slug": "the-worlds-strongest-rearguard",
-    "title": "The Worlds Strongest Rearguard",
-    "url": "https://aniwave.by/anime/the-worlds-strongest-rearguard/"
-  },
-  {
-    "slug": "the-classroom-of-a-black-cat-and-a-witch",
-    "title": "The Classroom Of A Black Cat And A Witch",
-    "url": "https://aniwave.by/anime/the-classroom-of-a-black-cat-and-a-witch/"
-  },
-  {
-    "slug": "azur-lane-slow-ahead-season-2",
-    "title": "Azur Lane Slow Ahead Season 2",
-    "url": "https://aniwave.by/anime/azur-lane-slow-ahead-season-2/"
-  },
-  {
-    "slug": "goodbye-lara",
-    "title": "Goodbye Lara",
-    "url": "https://aniwave.by/anime/goodbye-lara/"
-  },
-  {
-    "slug": "love-unseen-beneath-the-clear-night-sky",
-    "title": "Love Unseen Beneath The Clear Night Sky",
-    "url": "https://aniwave.by/anime/love-unseen-beneath-the-clear-night-sky/"
-  },
-  {
-    "slug": "saikyou-degarashi-ouji-no-anyaku-teii-arasoi",
-    "title": "Saikyou Degarashi Ouji No Anyaku Teii Arasoi",
-    "url": "https://aniwave.by/anime/saikyou-degarashi-ouji-no-anyaku-teii-arasoi/"
-  },
-  {
-    "slug": "a-livid-ladys-guide-to-getting-even-how-i-crushed-my-homeland-with-my-mighty-grimoires",
-    "title": "A Livid Ladys Guide To Getting Even How I Crushed My Homeland With My Mighty Grimoires",
-    "url": "https://aniwave.by/anime/a-livid-ladys-guide-to-getting-even-how-i-crushed-my-homeland-with-my-mighty-grimoires/"
-  },
-  {
-    "slug": "oh-boy-was-i-wrong-about-her",
-    "title": "Oh Boy Was I Wrong About Her",
-    "url": "https://aniwave.by/anime/oh-boy-was-i-wrong-about-her/"
-  },
-  {
-    "slug": "grand-blue-dreaming-season-3",
-    "title": "Grand Blue Dreaming Season 3",
-    "url": "https://aniwave.by/anime/grand-blue-dreaming-season-3/"
-  },
-  {
-    "slug": "skeleton-knight-in-another-world-ii",
-    "title": "Skeleton Knight In Another World Ii",
-    "url": "https://aniwave.by/anime/skeleton-knight-in-another-world-ii/"
-  },
-  {
-    "slug": "young-ladies-dont-play-fighting-games",
-    "title": "Young Ladies Dont Play Fighting Games",
-    "url": "https://aniwave.by/anime/young-ladies-dont-play-fighting-games/"
-  },
-  {
-    "slug": "yoroi-shinden-samurai-troopers-part-2-2",
-    "title": "Yoroi Shinden Samurai Troopers Part 2 2",
-    "url": "https://aniwave.by/anime/yoroi-shinden-samurai-troopers-part-2-2/"
-  },
-  {
-    "slug": "hana-kimi-season-2",
-    "title": "Hana Kimi Season 2",
-    "url": "https://aniwave.by/anime/hana-kimi-season-2/"
-  },
-  {
-    "slug": "trapped-in-a-dating-sim-the-world-of-otome-games-is-tough-for-mobs-2",
-    "title": "Trapped In A Dating Sim The World Of Otome Games Is Tough For Mobs 2",
-    "url": "https://aniwave.by/anime/trapped-in-a-dating-sim-the-world-of-otome-games-is-tough-for-mobs-2/"
-  },
-  {
-    "slug": "from-old-country-bumpkin-to-master-swordsman-season-2",
-    "title": "From Old Country Bumpkin To Master Swordsman Season 2",
-    "url": "https://aniwave.by/anime/from-old-country-bumpkin-to-master-swordsman-season-2/"
-  },
-  {
-    "slug": "saga-of-tanya-the-evil-ii",
-    "title": "Saga Of Tanya The Evil Ii",
-    "url": "https://aniwave.by/anime/saga-of-tanya-the-evil-ii/"
-  },
-  {
-    "slug": "rezero-starting-life-in-another-world-season-4",
-    "title": "Rezero Starting Life In Another World Season 4",
-    "url": "https://aniwave.by/anime/rezero-starting-life-in-another-world-season-4/"
-  },
-  {
-    "slug": "tomb-raider-king",
-    "title": "Tomb Raider King",
-    "url": "https://aniwave.by/anime/tomb-raider-king/"
-  },
-  {
-    "slug": "the-world-is-dancing",
-    "title": "The World Is Dancing",
-    "url": "https://aniwave.by/anime/the-world-is-dancing/"
-  },
-  {
-    "slug": "the-forsaken-saintess-and-her-foodie-roadtrip-in-another-world",
-    "title": "The Forsaken Saintess And Her Foodie Roadtrip In Another World",
-    "url": "https://aniwave.by/anime/the-forsaken-saintess-and-her-foodie-roadtrip-in-another-world/"
-  },
-  {
-    "slug": "dara-san-of-reiwa",
-    "title": "Dara San Of Reiwa",
-    "url": "https://aniwave.by/anime/dara-san-of-reiwa/"
-  },
-  {
-    "slug": "mebius-dust",
-    "title": "Mebius Dust",
-    "url": "https://aniwave.by/anime/mebius-dust/"
-  },
-  {
-    "slug": "honoo-no-toukyuujo-dodge-danko",
-    "title": "Honoo No Toukyuujo Dodge Danko",
-    "url": "https://aniwave.by/anime/honoo-no-toukyuujo-dodge-danko/"
-  },
-  {
-    "slug": "kaiju-girl-caramelise",
-    "title": "Kaiju Girl Caramelise",
-    "url": "https://aniwave.by/anime/kaiju-girl-caramelise/"
-  },
-  {
-    "slug": "bungo-stray-dogs-wan-2",
-    "title": "Bungo Stray Dogs Wan 2",
-    "url": "https://aniwave.by/anime/bungo-stray-dogs-wan-2/"
-  },
-  {
-    "slug": "the-exiled-heavy-knight-knows-how-to-game-the-system",
-    "title": "The Exiled Heavy Knight Knows How To Game The System",
-    "url": "https://aniwave.by/anime/the-exiled-heavy-knight-knows-how-to-game-the-system/"
-  },
-  {
-    "slug": "the-angel-next-door-spoils-me-rotten-2",
-    "title": "The Angel Next Door Spoils Me Rotten 2",
-    "url": "https://aniwave.by/anime/the-angel-next-door-spoils-me-rotten-2/"
-  },
-  {
-    "slug": "smoking-behind-the-supermarket-with-you-2",
-    "title": "Smoking Behind The Supermarket With You 2",
-    "url": "https://aniwave.by/anime/smoking-behind-the-supermarket-with-you-2/"
-  },
-  {
-    "slug": "steel-ball-run-jojos-bizarre-adventure",
-    "title": "Steel Ball Run Jojos Bizarre Adventure",
-    "url": "https://aniwave.by/anime/steel-ball-run-jojos-bizarre-adventure/"
-  },
-  {
-    "slug": "that-time-i-got-reincarnated-as-a-slime-season-4",
-    "title": "That Time I Got Reincarnated As A Slime Season 4",
-    "url": "https://aniwave.by/anime/that-time-i-got-reincarnated-as-a-slime-season-4/"
-  },
-  {
-    "slug": "the-elusive-samurai-season-2",
-    "title": "The Elusive Samurai Season 2",
-    "url": "https://aniwave.by/anime/the-elusive-samurai-season-2/"
-  },
-  {
-    "slug": "hell-mode-the-hardcore-gamer-dominates-in-another-world-with-garbage-balancing-season-2",
-    "title": "Hell Mode The Hardcore Gamer Dominates In Another World With Garbage Balancing Season 2",
-    "url": "https://aniwave.by/anime/hell-mode-the-hardcore-gamer-dominates-in-another-world-with-garbage-balancing-season-2/"
-  },
-  {
-    "slug": "my-stepmother-and-stepsisters-arent-wicked-2",
-    "title": "My Stepmother And Stepsisters Arent Wicked 2",
-    "url": "https://aniwave.by/anime/my-stepmother-and-stepsisters-arent-wicked-2/"
-  },
-  {
-    "slug": "link-click-season-3-2",
-    "title": "Link Click Season 3 2",
-    "url": "https://aniwave.by/anime/link-click-season-3-2/"
-  },
-  {
-    "slug": "draw-this-then-die",
-    "title": "Draw This Then Die",
-    "url": "https://aniwave.by/anime/draw-this-then-die/"
-  },
-  {
-    "slug": "the-most-heretical-last-boss-queen-from-villainess-to-savior-season-2",
-    "title": "The Most Heretical Last Boss Queen From Villainess To Savior Season 2",
-    "url": "https://aniwave.by/anime/the-most-heretical-last-boss-queen-from-villainess-to-savior-season-2/"
-  },
-  {
-    "slug": "kakegurui",
-    "title": "Kakegurui",
-    "url": "https://aniwave.by/anime/kakegurui/"
-  },
-  {
-    "slug": "sword-art-online-ii",
-    "title": "Sword Art Online Ii",
-    "url": "https://aniwave.by/anime/sword-art-online-ii/"
-  },
-  {
-    "slug": "pokemon-horizons-the-series",
-    "title": "Pokemon Horizons The Series",
-    "url": "https://aniwave.by/anime/pokemon-horizons-the-series/"
-  },
-  {
-    "slug": "case-closed",
-    "title": "Case Closed",
-    "url": "https://aniwave.by/anime/case-closed/"
-  },
-  {
-    "slug": "a-wild-last-boss-appeared-season-2",
-    "title": "A Wild Last Boss Appeared Season 2",
-    "url": "https://aniwave.by/anime/a-wild-last-boss-appeared-season-2/"
-  },
-  {
-    "slug": "mao",
-    "title": "Mao",
-    "url": "https://aniwave.by/anime/mao/"
-  },
-  {
-    "slug": "hanaori-san-still-wants-to-fight-in-the-next-life",
-    "title": "Hanaori San Still Wants To Fight In The Next Life",
-    "url": "https://aniwave.by/anime/hanaori-san-still-wants-to-fight-in-the-next-life/"
-  },
-  {
-    "slug": "magilumiere-magical-girls-inc-season-2",
-    "title": "Magilumiere Magical Girls Inc Season 2",
-    "url": "https://aniwave.by/anime/magilumiere-magical-girls-inc-season-2/"
-  },
-  {
-    "slug": "grow-up-show-sunflower-circus",
-    "title": "Grow Up Show Sunflower Circus",
-    "url": "https://aniwave.by/anime/grow-up-show-sunflower-circus/"
-  },
-  {
-    "slug": "though-i-am-an-inept-villainess",
-    "title": "Though I Am An Inept Villainess",
-    "url": "https://aniwave.by/anime/though-i-am-an-inept-villainess/"
-  },
-  {
-    "slug": "jaadugar-a-witch-in-mongolia",
-    "title": "Jaadugar A Witch In Mongolia",
-    "url": "https://aniwave.by/anime/jaadugar-a-witch-in-mongolia/"
-  },
-  {
-    "slug": "daemons-of-the-shadow-realm",
-    "title": "Daemons Of The Shadow Realm",
-    "url": "https://aniwave.by/anime/daemons-of-the-shadow-realm/"
-  },
-  {
-    "slug": "bleach-thousand-year-blood-war-the-calamity",
-    "title": "Bleach Thousand Year Blood War The Calamity",
-    "url": "https://aniwave.by/anime/bleach-thousand-year-blood-war-the-calamity/"
-  },
-  {
-    "slug": "welcome-to-demon-school-iruma-kun-season-4",
-    "title": "Welcome To Demon School Iruma Kun Season 4",
-    "url": "https://aniwave.by/anime/welcome-to-demon-school-iruma-kun-season-4/"
-  },
-  {
-    "slug": "narumis-week-at-work",
-    "title": "Narumis Week At Work",
-    "url": "https://aniwave.by/anime/narumis-week-at-work/"
-  },
-  {
-    "slug": "ascendance-of-a-bookworm-adopted-daughter-of-an-archduke",
-    "title": "Ascendance Of A Bookworm Adopted Daughter Of An Archduke",
-    "url": "https://aniwave.by/anime/ascendance-of-a-bookworm-adopted-daughter-of-an-archduke/"
-  },
-  {
-    "slug": "digimon-beatbreak",
-    "title": "Digimon Beatbreak",
-    "url": "https://aniwave.by/anime/digimon-beatbreak/"
-  },
-  {
-    "slug": "lets-go-kaikigumi",
-    "title": "Lets Go Kaikigumi",
-    "url": "https://aniwave.by/anime/lets-go-kaikigumi/"
-  },
-  {
     "slug": "as-a-reincarnated-aristocrat-ill-use-my-appraisal-skill-to-rise-in-the-world-season-3",
-    "title": "As A Reincarnated Aristocrat Ill Use My Appraisal Skill To Rise In The World Season 3",
-    "url": "https://aniwave.by/anime/as-a-reincarnated-aristocrat-ill-use-my-appraisal-skill-to-rise-in-the-world-season-3/"
-  },
-  {
-    "slug": "one-piece",
-    "title": "One Piece",
-    "url": "https://aniwave.by/anime/one-piece/"
-  },
-  {
-    "slug": "mushoku-tensei-jobless-reincarnation-season-3",
-    "title": "Mushoku Tensei Jobless Reincarnation Season 3",
-    "url": "https://aniwave.by/anime/mushoku-tensei-jobless-reincarnation-season-3/"
+    "title": "As a Reincarnated Aristocrat, I’ll Use My Appraisal Skill to Rise in the World Season 3",
+    "url": "https://aniwave.by/anime/as-a-reincarnated-aristocrat-ill-use-my-appraisal-skill-to-rise-in-the-world-season-3/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/09/tensei-kizoku-kantei-skill-de-nariagaru-3rd-season.jpg",
+    "status": "Ongoing"
   },
   {
     "slug": "overgeared",
     "title": "Overgeared",
-    "url": "https://aniwave.by/anime/overgeared/"
+    "url": "https://aniwave.by/anime/overgeared/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/09/temppal-item-no-chikara.jpg",
+    "status": "Ongoing"
   },
   {
-    "slug": "sparks-of-tomorrow",
-    "title": "Sparks Of Tomorrow",
-    "url": "https://aniwave.by/anime/sparks-of-tomorrow/"
+    "slug": "a-wild-last-boss-appeared-season-2",
+    "title": "A Wild Last Boss Appeared! Season 2",
+    "url": "https://aniwave.by/anime/a-wild-last-boss-appeared-season-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/09/yasei-no-last-boss-ga-arawareta-2nd-season.jpg",
+    "status": "Ongoing"
   },
   {
-    "slug": "the-100-girlfriends-who-really-really-really-really-really-love-you-season-3",
-    "title": "The 100 Girlfriends Who Really Really Really Really Really Love You Season 3",
-    "url": "https://aniwave.by/anime/the-100-girlfriends-who-really-really-really-really-really-love-you-season-3/"
+    "slug": "narumis-week-at-work",
+    "title": "Narumi’s Week at Work",
+    "url": "https://aniwave.by/anime/narumis-week-at-work/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/09/kaijuu-8-gou-narumi-no-heijitsu.jpg",
+    "status": "Ongoing"
   },
   {
-    "slug": "you-and-i-are-polar-opposites-season-2",
-    "title": "You And I Are Polar Opposites Season 2",
-    "url": "https://aniwave.by/anime/you-and-i-are-polar-opposites-season-2/"
+    "slug": "mobile-suit-gundam-hathaway-the-sorcery-of-nymph-circe",
+    "title": "MOBILE SUIT GUNDAM HATHAWAY The Sorcery of Nymph Circe",
+    "url": "https://aniwave.by/anime/mobile-suit-gundam-hathaway-the-sorcery-of-nymph-circe/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/08/kidou-senshi-gundam-senkou-no-hathaway-circe-no-majo.jpg",
+    "status": "Completed"
   },
   {
-    "slug": "chainsmoker-cat",
-    "title": "Chainsmoker Cat",
-    "url": "https://aniwave.by/anime/chainsmoker-cat/"
+    "slug": "false-memory-2026",
+    "title": "False Memory (2026)",
+    "url": "https://aniwave.by/anime/false-memory-2026/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/08/jiyi-guanli-ju-2026.png",
+    "status": "Ongoing"
   },
   {
-    "slug": "liar-game",
-    "title": "Liar Game",
-    "url": "https://aniwave.by/anime/liar-game/"
+    "slug": "link-click-season-3-2",
+    "title": "Link Click Season 3",
+    "url": "https://aniwave.by/anime/link-click-season-3-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/08/shiguang-dailiren-iii.png",
+    "status": "Ongoing"
   },
   {
-    "slug": "i-want-to-love-you-till-your-dying-day",
-    "title": "I Want To Love You Till Your Dying Day",
-    "url": "https://aniwave.by/anime/i-want-to-love-you-till-your-dying-day/"
+    "slug": "bleach-thousand-year-blood-war-the-calamity",
+    "title": "BLEACH: Thousand-Year Blood War – The Calamity",
+    "url": "https://aniwave.by/anime/bleach-thousand-year-blood-war-the-calamity/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/bleach-sennen-kessen-hen-kashin-tan.jpg",
+    "status": "Ongoing"
   },
   {
-    "slug": "sora-wa-akai-kawa-no-hotori",
-    "title": "Sora Wa Akai Kawa No Hotori",
-    "url": "https://aniwave.by/anime/sora-wa-akai-kawa-no-hotori/"
+    "slug": "the-elusive-samurai-season-2",
+    "title": "The Elusive Samurai Season 2",
+    "url": "https://aniwave.by/anime/the-elusive-samurai-season-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/nige-jouzu-no-wakagimi-2nd-season.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "smoking-behind-the-supermarket-with-you-2",
+    "title": "Smoking Behind the Supermarket with You",
+    "url": "https://aniwave.by/anime/smoking-behind-the-supermarket-with-you-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/super-no-ura-de-yani-suu-futari.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "though-i-am-an-inept-villainess",
+    "title": "Though I Am an Inept Villainess",
+    "url": "https://aniwave.by/anime/though-i-am-an-inept-villainess/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/futsutsuka-na-akujo-de-wa-gozaimasu-ga-suuguu-chouso-torikae-den.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "hanaori-san-still-wants-to-fight-in-the-next-life",
+    "title": "Hanaori-san Still Wants to Fight in the Next Life",
+    "url": "https://aniwave.by/anime/hanaori-san-still-wants-to-fight-in-the-next-life/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/hanaori-san-wa-tensei-shitemo-kenka-ga-shitai.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "mebius-dust",
+    "title": "Mebius Dust",
+    "url": "https://aniwave.by/anime/mebius-dust/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/mebius-dust.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "tomb-raider-king",
+    "title": "Tomb Raider King",
+    "url": "https://aniwave.by/anime/tomb-raider-king/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/dogulwang.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "trapped-in-a-dating-sim-the-world-of-otome-games-is-tough-for-mobs-2",
+    "title": "Trapped in a Dating Sim: The World of Otome Games is Tough for Mobs 2",
+    "url": "https://aniwave.by/anime/trapped-in-a-dating-sim-the-world-of-otome-games-is-tough-for-mobs-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/otome-game-sekai-wa-mob-ni-kibishii-sekai-desu-2.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "from-old-country-bumpkin-to-master-swordsman-season-2",
+    "title": "From Old Country Bumpkin to Master Swordsman Season 2",
+    "url": "https://aniwave.by/anime/from-old-country-bumpkin-to-master-swordsman-season-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/katainaka-no-ossan-kensei-ni-naru-ii.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "my-stepmother-and-stepsisters-arent-wicked-2",
+    "title": "My Stepmother and Stepsisters Aren’t Wicked",
+    "url": "https://aniwave.by/anime/my-stepmother-and-stepsisters-arent-wicked-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/ibitte-konai-gibo-to-gishi.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "saga-of-tanya-the-evil-ii",
+    "title": "Saga of Tanya the Evil II",
+    "url": "https://aniwave.by/anime/saga-of-tanya-the-evil-ii/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/youjo-senki-ii.jpg",
+    "status": "Ongoing"
   },
   {
     "slug": "clevatess-season-2",
     "title": "Clevatess Season 2",
-    "url": "https://aniwave.by/anime/clevatess-season-2/"
+    "url": "https://aniwave.by/anime/clevatess-season-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/clevatess-ii-majuu-no-ou-to-itsuwari-no-yuusha-denshou.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-ghost-in-the-shell",
+    "title": "The Ghost in the Shell",
+    "url": "https://aniwave.by/anime/the-ghost-in-the-shell/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/koukaku-kidoutai-tv.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "honoo-no-toukyuujo-dodge-danko",
+    "title": "Honoo no Toukyuujo: Dodge Danko",
+    "url": "https://aniwave.by/anime/honoo-no-toukyuujo-dodge-danko/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/honoo-no-toukyuujo-dodge-danko.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "sora-wa-akai-kawa-no-hotori",
+    "title": "Red River",
+    "url": "https://aniwave.by/anime/sora-wa-akai-kawa-no-hotori/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/Sora-wa-Akai-Kawa-no-Hotori.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "victoria-of-many-faces",
+    "title": "Victoria of Many Faces",
+    "url": "https://aniwave.by/anime/victoria-of-many-faces/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/tefuda-ga-oome-no-victoria.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "yoroi-shinden-samurai-troopers-part-2-2",
+    "title": "Yoroi-Shinden Samurai Troopers Part 2",
+    "url": "https://aniwave.by/anime/yoroi-shinden-samurai-troopers-part-2-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/yoroi-shin-den-samurai-troopers-part-2.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "i-want-to-love-you-till-your-dying-day",
+    "title": "I Want to Love You Till Your Dying Day",
+    "url": "https://aniwave.by/anime/i-want-to-love-you-till-your-dying-day/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/kimi-ga-shinu-made-koi-wo-shitai.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "young-ladies-dont-play-fighting-games",
+    "title": "Young Ladies Don’t Play Fighting Games",
+    "url": "https://aniwave.by/anime/young-ladies-dont-play-fighting-games/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/tai-ari-deshita-ojousama-wa-kakutou-game-nante-shinai.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "grand-blue-dreaming-season-3",
+    "title": "Grand Blue Dreaming Season 3",
+    "url": "https://aniwave.by/anime/grand-blue-dreaming-season-3/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/grand-blue-season-3.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "oh-boy-was-i-wrong-about-her",
+    "title": "Oh Boy, Was I Wrong About Her",
+    "url": "https://aniwave.by/anime/oh-boy-was-i-wrong-about-her/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/tenkou-saki-no-seiso-karen-na-bishoujo-ga-mukashi-danshi-to-omotte-issho-ni-asonda-osananajimi-datta-ken.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "a-livid-ladys-guide-to-getting-even-how-i-crushed-my-homeland-with-my-mighty-grimoires",
+    "title": "A Livid Lady’s Guide to Getting Even: How I Crushed My Homeland with My Mighty Grimoires",
+    "url": "https://aniwave.by/anime/a-livid-ladys-guide-to-getting-even-how-i-crushed-my-homeland-with-my-mighty-grimoires/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/buchigire-reijou-wa-houfuku-wo-chikaimashita-madousho-no-chikara-de-sokoku-wo-tatakitsubushimasu.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-forsaken-saintess-and-her-foodie-roadtrip-in-another-world",
+    "title": "The Forsaken Saintess and her Foodie Roadtrip in Another World",
+    "url": "https://aniwave.by/anime/the-forsaken-saintess-and-her-foodie-roadtrip-in-another-world/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/suterare-seijo-no-isekai-gohan-tabi-kakure-skill-de-camping-car-wo-shoukan-shimashita.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "love-unseen-beneath-the-clear-night-sky",
+    "title": "Love Unseen Beneath the Clear Night Sky",
+    "url": "https://aniwave.by/anime/love-unseen-beneath-the-clear-night-sky/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/toumei-na-yoru-ni-kakeru-kimi-to-me-ni-mienai-koi-wo-shita.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "saikyou-degarashi-ouji-no-anyaku-teii-arasoi",
+    "title": "Saikyou Degarashi Ouji no Anyaku Teii Arasoi",
+    "url": "https://aniwave.by/anime/saikyou-degarashi-ouji-no-anyaku-teii-arasoi/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/saikyou-degarashi-ouji-no-anyaku-teii-arasoi.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "azur-lane-slow-ahead-season-2",
+    "title": "Azur Lane: Slow Ahead! Season 2",
+    "url": "https://aniwave.by/anime/azur-lane-slow-ahead-season-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/azur-lane-bisoku-zenshin-ni.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "one-piece-heroines",
+    "title": "One Piece: Heroines",
+    "url": "https://aniwave.by/anime/one-piece-heroines/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/one-piece-heroines.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "goodbye-lara",
+    "title": "Goodbye, Lara",
+    "url": "https://aniwave.by/anime/goodbye-lara/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/sayonara-lara.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "sparks-of-tomorrow",
+    "title": "Sparks of Tomorrow",
+    "url": "https://aniwave.by/anime/sparks-of-tomorrow/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/nijusseiki-denki-mokuroku-eureka-evrika.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-100-girlfriends-who-really-really-really-really-really-love-you-season-3",
+    "title": "The 100 Girlfriends Who Really, Really, Really, Really, Really Love You Season 3",
+    "url": "https://aniwave.by/anime/the-100-girlfriends-who-really-really-really-really-really-love-you-season-3/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/kimi-no-koto-ga-daidaidaidaidaisuki-na-100-nin-no-kanojo-3rd-season.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-worlds-strongest-rearguard",
+    "title": "The World’s Strongest Rearguard",
+    "url": "https://aniwave.by/anime/the-worlds-strongest-rearguard/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/sekai-saikyou-no-kouei-meikyuukoku-no-shinjin-tansakusha.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "iron-wok-jan",
+    "title": "Iron Wok Jan!",
+    "url": "https://aniwave.by/anime/iron-wok-jan/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/tetsunabe-no-jan.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "lets-go-kaikigumi",
+    "title": "Let’s Go Kaikigumi",
+    "url": "https://aniwave.by/anime/lets-go-kaikigumi/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/lets-go-kaiki-gumi.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "you-and-i-are-polar-opposites-season-2",
+    "title": "You and I Are Polar Opposites Season 2",
+    "url": "https://aniwave.by/anime/you-and-i-are-polar-opposites-season-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/seihantai-na-kimi-to-boku-2nd-season.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "rich-girl-caretaker-im-secretly-the-caregiver-of-the-most-popular-girl-in-this-rich-kid-school",
+    "title": "Rich Girl Caretaker: I’m Secretly the Caregiver of the Most Popular Girl in This Rich Kid School",
+    "url": "https://aniwave.by/anime/rich-girl-caretaker-im-secretly-the-caregiver-of-the-most-popular-girl-in-this-rich-kid-school/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/saijo-no-osewa-takane-no-hanadarake-na-meimonkou-de-gakuin-ichi-no-ojousama-seikatsu-nouryoku-kaimu-wo-kagenagara-osewa-suru-koto-ni-narimashita.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-dukes-son-claims-he-wont-love-me-yet-showers-me-with-adoration",
+    "title": "The Duke’s Son Claims He Won’t Love Me Yet Showers Me with Adoration",
+    "url": "https://aniwave.by/anime/the-dukes-son-claims-he-wont-love-me-yet-showers-me-with-adoration/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/kimi-wo-aisuru-ki-wa-nai-to-itta-jiki-koushaku-sama-ga-nazeka-dekiai-shitekimasu.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "magilumiere-magical-girls-inc-season-2",
+    "title": "Magilumiere Magical Girls Inc. Season 2",
+    "url": "https://aniwave.by/anime/magilumiere-magical-girls-inc-season-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/kabushikigaisha-magi-lumiere-2nd-season.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "magical-girl-lyrical-nanoha-exceeds-gun-blaze-vengeance",
+    "title": "Magical Girl Lyrical Nanoha EXCEEDS Gun Blaze Vengeance",
+    "url": "https://aniwave.by/anime/magical-girl-lyrical-nanoha-exceeds-gun-blaze-vengeance/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/mahou-shoujo-lyrical-nanoha-exceeds-gun-blaze-vengeance.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-ogres-bride",
+    "title": "The Ogre’s Bride",
+    "url": "https://aniwave.by/anime/the-ogres-bride/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/oni-no-hanayome.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "jaadugar-a-witch-in-mongolia",
+    "title": "Jaadugar: A Witch in Mongolia",
+    "url": "https://aniwave.by/anime/jaadugar-a-witch-in-mongolia/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/tenmaku-no-jaadugar.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "grow-up-show-sunflower-circus",
+    "title": "Grow Up Show: Sunflower Circus",
+    "url": "https://aniwave.by/anime/grow-up-show-sunflower-circus/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/grow-up-show-himawari-no-circus-dan.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "recommendations-from-iwamoto-senpai",
+    "title": "Recommendations from Iwamoto-Senpai",
+    "url": "https://aniwave.by/anime/recommendations-from-iwamoto-senpai/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/iwamoto-senpai-no-suisen.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "black-torch",
+    "title": "Black Torch",
+    "url": "https://aniwave.by/anime/black-torch/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/black-torch.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "mushoku-tensei-jobless-reincarnation-season-3",
+    "title": "Mushoku Tensei: Jobless Reincarnation Season 3",
+    "url": "https://aniwave.by/anime/mushoku-tensei-jobless-reincarnation-season-3/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/mushoku-tensei-iii-isekai-ittara-honki-dasu.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "skeleton-knight-in-another-world-ii",
+    "title": "Skeleton Knight in Another World II",
+    "url": "https://aniwave.by/anime/skeleton-knight-in-another-world-ii/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/gaikotsu-kishi-sama-tadaima-isekai-e-odekakechuu-ii.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "hell-mode-the-hardcore-gamer-dominates-in-another-world-with-garbage-balancing-season-2",
+    "title": "Hell Mode: The Hardcore Gamer Dominates in Another World with Garbage Balancing Season 2",
+    "url": "https://aniwave.by/anime/hell-mode-the-hardcore-gamer-dominates-in-another-world-with-garbage-balancing-season-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/hell-mode-yarikomizuki-no-gamer-wa-hai-settei-no-isekai-de-musou-suru-2nd-season.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "sorry-about-my-little-brothers-2",
+    "title": "Sorry About My Little Brothers",
+    "url": "https://aniwave.by/anime/sorry-about-my-little-brothers-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/uchi-no-otouto-domo-ga-sumimasen.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "draw-this-then-die",
+    "title": "Draw This, Then Die!",
+    "url": "https://aniwave.by/anime/draw-this-then-die/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/kore-kaite-shine.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "i-became-a-legend-after-my-10-year-long-last-stand",
+    "title": "I Became a Legend After My 10 Year-Long Last Stand.",
+    "url": "https://aniwave.by/anime/i-became-a-legend-after-my-10-year-long-last-stand/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/koko-wa-ore-ni-makasete-saki-ni-ike-to-itte-kara-10-nen-ga-tattara-densetsu-ni-natteita.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-frontier-lord-begins-with-zero-subjects",
+    "title": "The Frontier Lord Begins with Zero Subjects",
+    "url": "https://aniwave.by/anime/the-frontier-lord-begins-with-zero-subjects/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/ryoumin-0-nin-start-no-henkyou-ryoushu-sama-1.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "crowned-in-a-hundred-days",
+    "title": "Crowned in a Hundred Days",
+    "url": "https://aniwave.by/anime/crowned-in-a-hundred-days/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/bai-ri-cheng-wang.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "kaiju-girl-caramelise",
+    "title": "Kaiju Girl Caramelise",
+    "url": "https://aniwave.by/anime/kaiju-girl-caramelise/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/otome-kaijuu-carameliser.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "chainsmoker-cat",
+    "title": "Chainsmoker Cat",
+    "url": "https://aniwave.by/anime/chainsmoker-cat/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/yani-neko.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-exiled-heavy-knight-knows-how-to-game-the-system",
+    "title": "The Exiled Heavy Knight Knows How to Game the System",
+    "url": "https://aniwave.by/anime/the-exiled-heavy-knight-knows-how-to-game-the-system/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/tsuihou-sareta-tensei-juukishi-wa-game-chishiki-de-musou-suru.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "bang-dream-yume%e2%88%9emita",
+    "title": "BanG Dream! Yume∞Mita",
+    "url": "https://aniwave.by/anime/bang-dream-yume%e2%88%9emita/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/bang-dream-yumee2889emita.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "dara-san-of-reiwa",
+    "title": "Dara-san of Reiwa",
+    "url": "https://aniwave.by/anime/dara-san-of-reiwa/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/reiwa-no-dara-san.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "bungo-stray-dogs-wan-2",
+    "title": "Bungo Stray Dogs Wan! 2",
+    "url": "https://aniwave.by/anime/bungo-stray-dogs-wan-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/bungou-stray-dogs-wan-2.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-villager-of-level-999",
+    "title": "The Villager of Level 999",
+    "url": "https://aniwave.by/anime/the-villager-of-level-999/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/lv999-no-murabito.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "hana-kimi-season-2",
+    "title": "Hana-Kimi Season 2",
+    "url": "https://aniwave.by/anime/hana-kimi-season-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/07/hanazakari-no-kimitachi-e-2nd-season.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-oblivious-saint-cant-contain-her-power",
+    "title": "The Oblivious Saint Can’t Contain Her Power",
+    "url": "https://aniwave.by/anime/the-oblivious-saint-cant-contain-her-power/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/06/mujikaku-seijo-wa-kyou-mo-muishiki-ni-chikara-wo-tare-nagasu.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-world-is-dancing",
+    "title": "The World Is Dancing",
+    "url": "https://aniwave.by/anime/the-world-is-dancing/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/06/world-is-dancing.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-cat-and-the-dragon",
+    "title": "The Cat and the Dragon",
+    "url": "https://aniwave.by/anime/the-cat-and-the-dragon/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/06/neko-to-ryuu.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "from-overshadowed-to-overpowered-second-reincarnation-of-a-talentless-sage",
+    "title": "From Overshadowed to Overpowered: Second Reincarnation of a Talentless Sage",
+    "url": "https://aniwave.by/anime/from-overshadowed-to-overpowered-second-reincarnation-of-a-talentless-sage/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/06/rakudai-kenja-no-gakuin-musou-nidome-no-tensei-s-rank-cheat-majutsushi-boukenroku.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "heroine-saint-no-im-an-all-works-maid-and-proud-of-it",
+    "title": "Heroine? Saint? No, I’m an All-Works Maid (And Proud of It)!",
+    "url": "https://aniwave.by/anime/heroine-saint-no-im-an-all-works-maid-and-proud-of-it/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/06/heroine-seijo-iie-all-works-maid-desu-hokori.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "lord-of-mysteries-specials",
+    "title": "Lord of Mysteries Specials",
+    "url": "https://aniwave.by/anime/lord-of-mysteries-specials/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/06/guimi-zhi-zhu-tebie-pian-liewu.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "case-closed",
+    "title": "Case Closed",
+    "url": "https://aniwave.by/anime/case-closed/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/06/meitantei-conan.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "milky%e2%98%86subway-the-galactic-limited-express-movie",
+    "title": "Milky☆Subway: The Galactic Limited Express Movie",
+    "url": "https://aniwave.by/anime/milky%e2%98%86subway-the-galactic-limited-express-movie/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/ginga-tokkyuu-milkye29886subway-movie-kakueki-teisha-gekijou-yuki.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "pokemon-horizons-the-series",
+    "title": "Pokémon Horizons: The Series",
+    "url": "https://aniwave.by/anime/pokemon-horizons-the-series/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/pokemon-2023.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "kusunokis-garden-of-gods",
+    "title": "Kusunoki’s Garden of Gods",
+    "url": "https://aniwave.by/anime/kusunokis-garden-of-gods/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/kami-no-niwatsuki-kusunoki-tei.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "needy-girl-overdose",
+    "title": "Needy Girl Overdose",
+    "url": "https://aniwave.by/anime/needy-girl-overdose/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/needy-girl-overdose.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "scum-of-the-brave",
+    "title": "Scum of the Brave",
+    "url": "https://aniwave.by/anime/scum-of-the-brave/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/yuusha-no-kuzu.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "agents-of-the-four-seasons-dance-of-spring",
+    "title": "Agents of the Four Seasons: Dance of Spring",
+    "url": "https://aniwave.by/anime/agents-of-the-four-seasons-dance-of-spring/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/shunkashuutou-daikousha-haru-no-mai.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "mistress-kanan-is-devilishly-easy",
+    "title": "Mistress Kanan is Devilishly Easy",
+    "url": "https://aniwave.by/anime/mistress-kanan-is-devilishly-easy/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/kanan-sama-wa-akumade-choroi.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "akane-banashi",
+    "title": "Akane-banashi",
+    "url": "https://aniwave.by/anime/akane-banashi/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/akane-banashi.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "kill-blue",
+    "title": "Kill Blue",
+    "url": "https://aniwave.by/anime/kill-blue/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/kill-ao.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-strongest-job-is-apparently-not-a-hero-or-a-sage-but-an-appraiser-provisional",
+    "title": "The Strongest Job is Apparently Not a Hero or a Sage, but an Appraiser (Provisional)!",
+    "url": "https://aniwave.by/anime/the-strongest-job-is-apparently-not-a-hero-or-a-sage-but-an-appraiser-provisional/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/saikyou-no-shokugyou-wa-yuusha-demo-kenja-demo-naku-kanteishi-kari-rashii-desu-yo.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "daikenja-riddle-no-jikan-gyakkou",
+    "title": "Daikenja Riddle no Jikan Gyakkou",
+    "url": "https://aniwave.by/anime/daikenja-riddle-no-jikan-gyakkou/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/daikenja-riddle-no-jikan-gyakkou.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "hokuto-no-ken-fist-of-the-north-star",
+    "title": "Hokuto no Ken: Fist of the North Star",
+    "url": "https://aniwave.by/anime/hokuto-no-ken-fist-of-the-north-star/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/hokuto-no-ken-fist-of-the-north-star.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "snowball-earth",
+    "title": "Snowball Earth",
+    "url": "https://aniwave.by/anime/snowball-earth/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/snowball-earth.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "an-observation-log-of-my-fiancee-who-calls-herself-a-villainess",
+    "title": "An Observation Log of My Fiancée Who Calls Herself a Villainess",
+    "url": "https://aniwave.by/anime/an-observation-log-of-my-fiancee-who-calls-herself-a-villainess/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/jishou-akuyaku-reijou-na-konyakusha-no-kansatsu-kiroku.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "killed-again-mr-detective",
+    "title": "Killed Again, Mr. Detective.",
+    "url": "https://aniwave.by/anime/killed-again-mr-detective/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/mata-korosarete-shimatta-no-desu-ne-tantei-sama.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "a-hundred-scenes-of-awajima",
+    "title": "A Hundred Scenes of Awajima",
+    "url": "https://aniwave.by/anime/a-hundred-scenes-of-awajima/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/awajima-hyakkei.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "petals-of-reincarnation",
+    "title": "Petals of Reincarnation",
+    "url": "https://aniwave.by/anime/petals-of-reincarnation/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/reincarnation-no-kaben.jpg",
+    "status": "Upcoming"
+  },
+  {
+    "slug": "haibaras-teenage-new-game",
+    "title": "Haibara’s Teenage New Game+",
+    "url": "https://aniwave.by/anime/haibaras-teenage-new-game/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/haibara-kun-no-tsuyokute-seishun-new-game.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "mamonogurai-no-boukensha-ore-dake-mamono-wo-kuratte-tsuyoku-naru",
+    "title": "Mamonogurai no Boukensha: Ore dake Mamono wo Kuratte Tsuyoku Naru",
+    "url": "https://aniwave.by/anime/mamonogurai-no-boukensha-ore-dake-mamono-wo-kuratte-tsuyoku-naru/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/mamonogurai-no-boukensha-ore-dake-mamono-wo-kuratte-tsuyoku-naru.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-ramparts-of-ice",
+    "title": "The Ramparts of Ice",
+    "url": "https://aniwave.by/anime/the-ramparts-of-ice/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/koori-no-jouheki.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "kujima-why-sing-when-you-can-warble",
+    "title": "Kujima: Why Sing, When You Can Warble?",
+    "url": "https://aniwave.by/anime/kujima-why-sing-when-you-can-warble/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/kujima-utaeba-ie-hororo.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "dr-stone-science-future-part-3",
+    "title": "Dr. Stone: Science Future Part 3",
+    "url": "https://aniwave.by/anime/dr-stone-science-future-part-3/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/dr-stone-science-future-part-3.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-warrior-princess-and-the-barbaric-king",
+    "title": "The Warrior Princess and the Barbaric King",
+    "url": "https://aniwave.by/anime/the-warrior-princess-and-the-barbaric-king/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/himekishi-wa-barbaroi-no-yome.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "go-for-it-nakamura",
+    "title": "Go For It, Nakamura!",
+    "url": "https://aniwave.by/anime/go-for-it-nakamura/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/ganbare-nakamura-kun.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-beginning-after-the-end-season-2",
+    "title": "The Beginning After the End Season 2",
+    "url": "https://aniwave.by/anime/the-beginning-after-the-end-season-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/saikyou-no-ousama-nidome-no-jinsei-wa-nani-wo-suru-season-2.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "nigashita-sakana-wa-ookikatta-ga-tsuriageta-sakana-ga-ookisugita-ken",
+    "title": "Nigashita Sakana wa Ookikatta ga Tsuriageta Sakana ga Ookisugita Ken",
+    "url": "https://aniwave.by/anime/nigashita-sakana-wa-ookikatta-ga-tsuriageta-sakana-ga-ookisugita-ken/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/nigashita-sakana-wa-ookikatta-ga-tsuriageta-sakana-ga-ookisugita-ken.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "gals-cant-be-kind-to-otaku",
+    "title": "Gals Can’t Be Kind to Otaku!?",
+    "url": "https://aniwave.by/anime/gals-cant-be-kind-to-otaku/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/otaku-ni-yasashii-gal-wa-inai.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "reborn-as-a-vending-machine-i-now-wander-the-dungeon-season-3",
+    "title": "Reborn as a Vending Machine, I Now Wander the Dungeon Season 3",
+    "url": "https://aniwave.by/anime/reborn-as-a-vending-machine-i-now-wander-the-dungeon-season-3/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/jidou-hanbaiki-ni-umarekawatta-ore-wa-meikyuu-wo-samayou-3rd-season.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "dorohedoro-season-2",
+    "title": "Dorohedoro Season 2",
+    "url": "https://aniwave.by/anime/dorohedoro-season-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/dorohedoro-season-2.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "rent-a-girlfriend-season-5",
+    "title": "Rent-a-Girlfriend Season 5",
+    "url": "https://aniwave.by/anime/rent-a-girlfriend-season-5/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/kanojo-okarishimasu-5th-season.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "classroom-of-the-elite-4th-season-second-year-first-semester",
+    "title": "Classroom of the Elite 4th Season: Second Year, First Semester",
+    "url": "https://aniwave.by/anime/classroom-of-the-elite-4th-season-second-year-first-semester/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/youkoso-jitsuryoku-shijou-shugi-no-kyoushitsu-e-4th-season-2-nensei-hen-1-gakki.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "my-ribdiculous-reincarnation",
+    "title": "My Ribdiculous Reincarnation",
+    "url": "https://aniwave.by/anime/my-ribdiculous-reincarnation/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/megami-isekai-tensei-nani-ni-naritai-desu-ka-ore-yuusha-no-rokkotsu-de.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "pardon-the-intrusion-im-home",
+    "title": "Pardon the Intrusion, I’m Home!",
+    "url": "https://aniwave.by/anime/pardon-the-intrusion-im-home/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/tadaima-ojamasaremasu.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "eren-the-southpaw",
+    "title": "Eren the Southpaw",
+    "url": "https://aniwave.by/anime/eren-the-southpaw/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/hidarikiki-no-eren.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "i-made-friends-with-the-second-prettiest-girl-in-my-class",
+    "title": "I Made Friends with the Second Prettiest Girl in My Class",
+    "url": "https://aniwave.by/anime/i-made-friends-with-the-second-prettiest-girl-in-my-class/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/class-de-2-banme-ni-kawaii-onnanoko-to-tomodachi-ni-natta.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "i-want-to-end-this-love-game",
+    "title": "I Want to End this Love Game",
+    "url": "https://aniwave.by/anime/i-want-to-end-this-love-game/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/aishiteru-game-wo-owarasetai.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "even-a-replica-can-fall-in-love",
+    "title": "Even a Replica Can Fall in Love",
+    "url": "https://aniwave.by/anime/even-a-replica-can-fall-in-love/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/replica-datte-koi-wo-suru.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "marriagetoxin",
+    "title": "Marriagetoxin",
+    "url": "https://aniwave.by/anime/marriagetoxin/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/marriagetoxin.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "hyakki-yakoushou",
+    "title": "Hyakki Yakoushou",
+    "url": "https://aniwave.by/anime/hyakki-yakoushou/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/hyakki-yakoushou.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-klutzy-class-monitor-and-the-girl-with-the-short-skirt",
+    "title": "The Klutzy Class Monitor and the Girl with the Short Skirt",
+    "url": "https://aniwave.by/anime/the-klutzy-class-monitor-and-the-girl-with-the-short-skirt/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/ponkotsu-fuuki-iin-to-skirt-take-ga-futekisetsu-na-jk-no-hanashi.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "farming-life-in-another-world-season-2",
+    "title": "Farming Life in Another World Season 2",
+    "url": "https://aniwave.by/anime/farming-life-in-another-world-season-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/isekai-nonbiri-nouka-2.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "witch-hat-atelier",
+    "title": "Witch Hat Atelier",
+    "url": "https://aniwave.by/anime/witch-hat-atelier/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/tongari-boushi-no-atelier.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "mahou-no-shimai-lulutto-lilly",
+    "title": "Mahou no Shimai Lulutto Lilly",
+    "url": "https://aniwave.by/anime/mahou-no-shimai-lulutto-lilly/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/mahou-no-shimai-lulutto-lilly.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "ghost-concert-missing-songs",
+    "title": "Ghost Concert: Missing Songs",
+    "url": "https://aniwave.by/anime/ghost-concert-missing-songs/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/ghost-concert-missing-songs.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-classroom-of-a-black-cat-and-a-witch",
+    "title": "The Classroom of a Black Cat and a Witch",
+    "url": "https://aniwave.by/anime/the-classroom-of-a-black-cat-and-a-witch/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/kuroneko-to-majo-no-kyoushitsu.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-food-diary-of-miss-maid",
+    "title": "The Food Diary of Miss Maid",
+    "url": "https://aniwave.by/anime/the-food-diary-of-miss-maid/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/maid-san-wa-taberu-dake.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "nippon-sangoku-the-three-nations-of-the-crimson-sun",
+    "title": "Nippon Sangoku: The Three Nations of the Crimson Sun",
+    "url": "https://aniwave.by/anime/nippon-sangoku-the-three-nations-of-the-crimson-sun/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/nippon-sangoku.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "mission-yozakura-family-season-2",
+    "title": "Mission: Yozakura Family Season 2",
+    "url": "https://aniwave.by/anime/mission-yozakura-family-season-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/yozakura-san-chi-no-daisakusen-2nd-season.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "ace-of-diamond-act-ii-season-2",
+    "title": "Ace of Diamond Act II Season 2",
+    "url": "https://aniwave.by/anime/ace-of-diamond-act-ii-season-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/diamond-no-ace-act-ii-second-season.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "wistoria-wand-and-sword-season-2",
+    "title": "Wistoria: Wand and Sword Season 2",
+    "url": "https://aniwave.by/anime/wistoria-wand-and-sword-season-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/tsue-to-tsurugi-no-wistoria-season-2.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "rooster-fighter",
+    "title": "Rooster Fighter",
+    "url": "https://aniwave.by/anime/rooster-fighter/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/niwatori-fighter.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "one-piece",
+    "title": "One Piece",
+    "url": "https://aniwave.by/anime/one-piece/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/one-piece.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "onegai-aipri",
+    "title": "Onegai AiPri",
+    "url": "https://aniwave.by/anime/onegai-aipri/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/04/onegai-aipri.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "rezero-starting-life-in-another-world-season-4",
+    "title": "Re:ZERO -Starting Life in Another World- Season 4",
+    "url": "https://aniwave.by/anime/rezero-starting-life-in-another-world-season-4/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/rezero-kara-hajimeru-isekai-seikatsu-4th-season.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-most-heretical-last-boss-queen-from-villainess-to-savior-season-2",
+    "title": "The Most Heretical Last Boss Queen: From Villainess to Savior Season 2",
+    "url": "https://aniwave.by/anime/the-most-heretical-last-boss-queen-from-villainess-to-savior-season-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/higeki-no-genkyou-to-naru-saikyou-gedou-last-boss-joou-wa-tami-no-tame-ni-tsukushimasu-season-2.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "liar-game",
+    "title": "Liar Game",
+    "url": "https://aniwave.by/anime/liar-game/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/liar-game.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "mao",
+    "title": "Mao",
+    "url": "https://aniwave.by/anime/mao/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/mao.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "daemons-of-the-shadow-realm",
+    "title": "Daemons of the Shadow Realm",
+    "url": "https://aniwave.by/anime/daemons-of-the-shadow-realm/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/yomi-no-tsugai.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "welcome-to-demon-school-iruma-kun-season-4",
+    "title": "Welcome to Demon School! Iruma-kun Season 4",
+    "url": "https://aniwave.by/anime/welcome-to-demon-school-iruma-kun-season-4/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/mairimashita-iruma-kun-4th-season.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "ascendance-of-a-bookworm-adopted-daughter-of-an-archduke",
+    "title": "Ascendance of a Bookworm: Adopted Daughter of an Archduke",
+    "url": "https://aniwave.by/anime/ascendance-of-a-bookworm-adopted-daughter-of-an-archduke/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/honzuki-no-gekokujou-shisho-ni-naru-tame-ni-wa-shudan-wo-erandeiraremasen-ryoushu-no-youjo.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "rilakkuma",
+    "title": "Rilakkuma",
+    "url": "https://aniwave.by/anime/rilakkuma/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/04/rilakkuma.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "that-time-i-got-reincarnated-as-a-slime-season-4",
+    "title": "That Time I Got Reincarnated as a Slime Season 4",
+    "url": "https://aniwave.by/anime/that-time-i-got-reincarnated-as-a-slime-season-4/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/tensei-shitara-slime-datta-ken-4th-season.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-angel-next-door-spoils-me-rotten-2",
+    "title": "The Angel Next Door Spoils Me Rotten 2",
+    "url": "https://aniwave.by/anime/the-angel-next-door-spoils-me-rotten-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/otonari-no-tenshi-sama-ni-itsunomanika-dame-ningen-ni-sareteita-ken-2.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "kirio-fanclub",
+    "title": "Kirio Fanclub",
+    "url": "https://aniwave.by/anime/kirio-fanclub/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/kirio-fanclub.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "steel-ball-run-jojos-bizarre-adventure",
+    "title": "Steel Ball Run: JoJo’s Bizarre Adventure",
+    "url": "https://aniwave.by/anime/steel-ball-run-jojos-bizarre-adventure/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/03/steel-ball-run-jojo-no-kimyou-na-bouken.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "in-the-clear-moonlit-dusk",
+    "title": "In the Clear Moonlit Dusk",
+    "url": "https://aniwave.by/anime/in-the-clear-moonlit-dusk/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/01/uruwashi-no-yoi-no-tsuki.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "dark-moon-the-blood-altar",
+    "title": "Dark Moon: The Blood Altar",
+    "url": "https://aniwave.by/anime/dark-moon-the-blood-altar/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/01/dark-moon-tsuki-no-saidan.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "digimon-beatbreak",
+    "title": "Digimon Beatbreak",
+    "url": "https://aniwave.by/anime/digimon-beatbreak/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/digimon-beatbreak.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "the-elusive-samurai",
+    "title": "The Elusive Samurai",
+    "url": "https://aniwave.by/anime/the-elusive-samurai/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/09/nige-jouzu-no-wakagimi.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "the-angel-next-door-spoils-me-rotten",
+    "title": "The Angel Next Door Spoils Me Rotten",
+    "url": "https://aniwave.by/anime/the-angel-next-door-spoils-me-rotten/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/09/otonari-no-tenshi-sama-ni-itsunomanika-dame-ningen-ni-sareteita-ken.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "jujutsu-kaisen-season-2",
+    "title": "Jujutsu Kaisen Season 2",
+    "url": "https://aniwave.by/anime/jujutsu-kaisen-season-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/09/jujutsu-kaisen-2nd-season.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "spy-x-family",
+    "title": "Spy x Family",
+    "url": "https://aniwave.by/anime/spy-x-family/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/09/spy-x-family.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "beyblade-x",
+    "title": "Beyblade X",
+    "url": "https://aniwave.by/anime/beyblade-x/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/09/beyblade-x.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "demon-slayer-kimetsu-no-yaiba-entertainment-district-arc",
+    "title": "Demon Slayer: Kimetsu no Yaiba Entertainment District Arc",
+    "url": "https://aniwave.by/anime/demon-slayer-kimetsu-no-yaiba-entertainment-district-arc/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/09/kimetsu-no-yaiba-yuukaku-hen.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "chainsaw-man",
+    "title": "Chainsaw Man",
+    "url": "https://aniwave.by/anime/chainsaw-man/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/09/chainsaw-man.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "ascendance-of-a-bookworm-season-3",
+    "title": "Ascendance of a Bookworm Season 3",
+    "url": "https://aniwave.by/anime/ascendance-of-a-bookworm-season-3/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/09/honzuki-no-gekokujou-shisho-ni-naru-tame-ni-wa-shudan-wo-erandeiraremasen-3rd-season.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "demon-slayer-kimetsu-no-yaiba-the-movie-mugen-train",
+    "title": "Demon Slayer: Kimetsu no Yaiba – The Movie: Mugen Train",
+    "url": "https://aniwave.by/anime/demon-slayer-kimetsu-no-yaiba-the-movie-mugen-train/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/09/kimetsu-no-yaiba-movie-mugen-ressha-hen.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "horimiya",
+    "title": "Horimiya",
+    "url": "https://aniwave.by/anime/horimiya/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/09/horimiya.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "attack-on-titan-final-season",
+    "title": "Attack on Titan: Final Season",
+    "url": "https://aniwave.by/anime/attack-on-titan-final-season/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/shingeki-no-kyojin-the-final-season.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "frieren-beyond-journeys-end",
+    "title": "Frieren: Beyond Journey’s End",
+    "url": "https://aniwave.by/anime/frieren-beyond-journeys-end/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/sousou-no-frieren.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "tamako-market-specials",
+    "title": "Tamako Market Specials",
+    "url": "https://aniwave.by/anime/tamako-market-specials/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/tamako-market-specials.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "sword-art-online-ii",
+    "title": "Sword Art Online II",
+    "url": "https://aniwave.by/anime/sword-art-online-ii/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/sword-art-online-ii.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "black-clover",
+    "title": "Black Clover",
+    "url": "https://aniwave.by/anime/black-clover/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/black-clover.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "sword-art-online",
+    "title": "Sword Art Online",
+    "url": "https://aniwave.by/anime/sword-art-online/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/sword-art-online.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "darling-in-the-franxx",
+    "title": "Darling in the FranXX",
+    "url": "https://aniwave.by/anime/darling-in-the-franxx/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/darling-in-the-franxx.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "tamako-market",
+    "title": "Tamako Market",
+    "url": "https://aniwave.by/anime/tamako-market/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/tamako-market.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "one-punch-man-season-2",
+    "title": "One-Punch Man Season 2",
+    "url": "https://aniwave.by/anime/one-punch-man-season-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/one-punch-man-2nd-season.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "kakegurui",
+    "title": "Kakegurui",
+    "url": "https://aniwave.by/anime/kakegurui/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/kakegurui.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "ascendance-of-a-bookworm-side-story",
+    "title": "Ascendance of a Bookworm: Side Story",
+    "url": "https://aniwave.by/anime/ascendance-of-a-bookworm-side-story/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/honzuki-no-gekokujou-shisho-ni-naru-tame-ni-wa-shudan-wo-erandeiraremasen-ova.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "blue-exorcist",
+    "title": "Blue Exorcist",
+    "url": "https://aniwave.by/anime/blue-exorcist/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/ao-no-exorcist.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "fire-force",
+    "title": "Fire Force",
+    "url": "https://aniwave.by/anime/fire-force/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/enen-no-shouboutai.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "tokyo-ghoul",
+    "title": "Tokyo Ghoul",
+    "url": "https://aniwave.by/anime/tokyo-ghoul/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/tokyo-ghoul.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "smoking-behind-the-supermarket-with-you",
+    "title": "Naruto",
+    "url": "https://aniwave.by/anime/smoking-behind-the-supermarket-with-you/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/naruto.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "jujutsu-kaisen",
+    "title": "Jujutsu Kaisen",
+    "url": "https://aniwave.by/anime/jujutsu-kaisen/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/jujutsu-kaisen.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "the-rising-of-the-shield-hero",
+    "title": "The Rising of the Shield Hero",
+    "url": "https://aniwave.by/anime/the-rising-of-the-shield-hero/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/tate-no-yuusha-no-nariagari.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "noragami",
+    "title": "Noragami",
+    "url": "https://aniwave.by/anime/noragami/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/noragami.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "ascendance-of-a-bookworm",
+    "title": "Ascendance of a Bookworm",
+    "url": "https://aniwave.by/anime/ascendance-of-a-bookworm/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/honzuki-no-gekokujou-shisho-ni-naru-tame-ni-wa-shudan-wo-erandeiraremasen.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "that-time-i-got-reincarnated-as-a-slime",
+    "title": "That Time I Got Reincarnated as a Slime",
+    "url": "https://aniwave.by/anime/that-time-i-got-reincarnated-as-a-slime/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/tensei-shitara-slime-datta-ken.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "assassination-classroom",
+    "title": "Assassination Classroom",
+    "url": "https://aniwave.by/anime/assassination-classroom/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/ansatsu-kyoushitsu.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "jojos-bizarre-adventure-2012",
+    "title": "JoJo’s Bizarre Adventure (2012)",
+    "url": "https://aniwave.by/anime/jojos-bizarre-adventure-2012/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/jojo-no-kimyou-na-bouken-tv.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "my-hero-academia-season-4",
+    "title": "My Hero Academia Season 4",
+    "url": "https://aniwave.by/anime/my-hero-academia-season-4/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/boku-no-hero-academia-4th-season.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "naruto-shippuden",
+    "title": "Naruto Shippuden",
+    "url": "https://aniwave.by/anime/naruto-shippuden/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/naruto-shippuuden.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "my-hero-academia",
+    "title": "My Hero Academia",
+    "url": "https://aniwave.by/anime/my-hero-academia/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/boku-no-hero-academia.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "death-parade",
+    "title": "Death Parade",
+    "url": "https://aniwave.by/anime/death-parade/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/death-parade.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "toradora",
+    "title": "Toradora!",
+    "url": "https://aniwave.by/anime/toradora/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/toradora.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "rezero-starting-life-in-another-world",
+    "title": "Re:ZERO -Starting Life in Another World-",
+    "url": "https://aniwave.by/anime/rezero-starting-life-in-another-world/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/rezero-kara-hajimeru-isekai-seikatsu.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "yoroi-shinden-samurai-troopers-part-2",
+    "title": "Neon Genesis Evangelion",
+    "url": "https://aniwave.by/anime/yoroi-shinden-samurai-troopers-part-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/shinseiki-evangelion.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "sorry-about-my-little-brothers",
+    "title": "Neon Genesis Evangelion",
+    "url": "https://aniwave.by/anime/sorry-about-my-little-brothers/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/shinseiki-evangelion.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "my-hero-academia-season-3",
+    "title": "My Hero Academia Season 3",
+    "url": "https://aniwave.by/anime/my-hero-academia-season-3/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/boku-no-hero-academia-3rd-season.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "dr-stone",
+    "title": "Dr. Stone",
+    "url": "https://aniwave.by/anime/dr-stone/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/dr-stone.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "erased",
+    "title": "Erased",
+    "url": "https://aniwave.by/anime/erased/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/boku-dake-ga-inai-machi.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "attack-on-titan-season-2",
+    "title": "Attack on Titan Season 2",
+    "url": "https://aniwave.by/anime/attack-on-titan-season-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/shingeki-no-kyojin-season-2.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "rascal-does-not-dream-of-bunny-girl-senpai",
+    "title": "Rascal Does Not Dream of Bunny Girl Senpai",
+    "url": "https://aniwave.by/anime/rascal-does-not-dream-of-bunny-girl-senpai/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/seishun-buta-yarou-wa-bunny-girl-senpai-no-yume-wo-minai.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "parasyte-the-maxim",
+    "title": "Parasyte: The Maxim",
+    "url": "https://aniwave.by/anime/parasyte-the-maxim/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/kiseijuu-sei-no-kakuritsu.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "my-hero-academia-season-2",
+    "title": "My Hero Academia Season 2",
+    "url": "https://aniwave.by/anime/my-hero-academia-season-2/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/boku-no-hero-academia-2nd-season.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "kaguya-sama-love-is-war",
+    "title": "Kaguya-sama: Love is War",
+    "url": "https://aniwave.by/anime/kaguya-sama-love-is-war/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/kaguya-sama-wa-kokurasetai-tensai-tachi-no-renai-zunousen-2.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "attack-on-titan",
+    "title": "Attack on Titan",
+    "url": "https://aniwave.by/anime/attack-on-titan/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/shingeki-no-kyojin.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "mob-psycho-100",
+    "title": "Mob Psycho 100",
+    "url": "https://aniwave.by/anime/mob-psycho-100/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/mob-psycho-100.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "my-stepmother-and-stepsisters-arent-wicked",
+    "title": "One Piece",
+    "url": "https://aniwave.by/anime/my-stepmother-and-stepsisters-arent-wicked/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2026/05/one-piece.jpg",
+    "status": "Ongoing"
+  },
+  {
+    "slug": "attack-on-titan-season-3",
+    "title": "Attack on Titan Season 3",
+    "url": "https://aniwave.by/anime/attack-on-titan-season-3/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/shingeki-no-kyojin-season-3.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "haikyu",
+    "title": "Haikyu!!",
+    "url": "https://aniwave.by/anime/haikyu/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/haikyuu.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "one-punch-man",
+    "title": "One-Punch Man",
+    "url": "https://aniwave.by/anime/one-punch-man/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/one-punch-man-1.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "death-note",
+    "title": "Death Note",
+    "url": "https://aniwave.by/anime/death-note/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/death-note-1.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "violet-evergarden",
+    "title": "Violet Evergarden",
+    "url": "https://aniwave.by/anime/violet-evergarden/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/violet-evergarden-1.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "the-promised-neverland",
+    "title": "The Promised Neverland",
+    "url": "https://aniwave.by/anime/the-promised-neverland/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/yakusoku-no-neverland-1.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "demon-slayer-kimetsu-no-yaiba",
+    "title": "Demon Slayer: Kimetsu no Yaiba",
+    "url": "https://aniwave.by/anime/demon-slayer-kimetsu-no-yaiba/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/kimetsu-no-yaiba.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "code-geass-lelouch-of-the-rebellion",
+    "title": "Code Geass: Lelouch of the Rebellion",
+    "url": "https://aniwave.by/anime/code-geass-lelouch-of-the-rebellion/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/code-geass-hangyaku-no-lelouch-1.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "vinland-saga",
+    "title": "Vinland Saga",
+    "url": "https://aniwave.by/anime/vinland-saga/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/vinland-saga-1.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "your-lie-in-april",
+    "title": "Your Lie in April",
+    "url": "https://aniwave.by/anime/your-lie-in-april/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/shigatsu-wa-kimi-no-uso-1.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "arifureta-shokugyou-de-sekai-saikyou-prologue",
+    "title": "Cowboy Bebop",
+    "url": "https://aniwave.by/anime/arifureta-shokugyou-de-sekai-saikyou-prologue/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/cowboy-bebop-1.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "link-click-season-3",
+    "title": "Cowboy Bebop",
+    "url": "https://aniwave.by/anime/link-click-season-3/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/cowboy-bebop-1.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "akame-ga-kill",
+    "title": "Spirited Away",
+    "url": "https://aniwave.by/anime/akame-ga-kill/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/sen-to-chihiro-no-kamikakushi-1.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "a-silent-voice",
+    "title": "A Silent Voice",
+    "url": "https://aniwave.by/anime/a-silent-voice/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/koe-no-katachi-1.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "your-name",
+    "title": "Your Name.",
+    "url": "https://aniwave.by/anime/your-name/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/kimi-no-na-wa-1.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "steinsgate",
+    "title": "Steins;Gate",
+    "url": "https://aniwave.by/anime/steinsgate/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/steinsgate-1.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "hunter-x-hunter",
+    "title": "Hunter x Hunter",
+    "url": "https://aniwave.by/anime/hunter-x-hunter/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/hunter-x-hunter-2011-1.jpg",
+    "status": "Completed"
+  },
+  {
+    "slug": "fullmetal-alchemist-brotherhood",
+    "title": "Fullmetal Alchemist: Brotherhood",
+    "url": "https://aniwave.by/anime/fullmetal-alchemist-brotherhood/",
+    "thumb": "https://aniwave.by/wp-content/uploads/2025/08/fullmetal-alchemist-brotherhood-1.jpg",
+    "status": "Completed"
   }
 ]
