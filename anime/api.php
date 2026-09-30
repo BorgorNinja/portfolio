@@ -148,4 +148,55 @@ if ($action === 'stream') {
     exit;
 }
 
+if ($action === 'player') {
+    $epUrl = $_GET['ep_url'] ?? '';
+    if (empty($epUrl) || !filter_var($epUrl, FILTER_VALIDATE_URL)) {
+        header('HTTP/1.1 400 Bad Request');
+        echo 'Invalid ep_url';
+        exit;
+    }
+
+    $html = fetchUrl($epUrl);
+    if (!$html) {
+        header('HTTP/1.1 502 Bad Gateway');
+        echo 'Failed to fetch episode page';
+        exit;
+    }
+
+    $playerUrl = '';
+    if (preg_match('/<div class="player-embed"[^>]*id="pembed"[^>]*>\s*<iframe[^>]+src="([^"]+)"/si', $html, $m)) {
+        $playerUrl = html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5);
+    } elseif (preg_match('/<iframe[^>]+src="([^"]+)"/si', $html, $m)) {
+        $playerUrl = html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5);
+    }
+
+    if (empty($playerUrl)) {
+        header('HTTP/1.1 404 Not Found');
+        echo 'Player iframe not found';
+        exit;
+    }
+
+    // Fetch the actual player embed HTML with upstream referer
+    $ch = curl_init($playerUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    curl_setopt($ch, CURLOPT_REFERER, $epUrl);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+    $playerHtml = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode >= 200 && $httpCode < 400 && !empty($playerHtml)) {
+        header('Content-Type: text/html; charset=utf-8');
+        header('X-Frame-Options: ALLOWALL');
+        echo $playerHtml;
+        exit;
+    }
+
+    header('HTTP/1.1 502 Bad Gateway');
+    echo 'Failed to load player backend';
+    exit;
+}
+
 echo json_encode(['error' => 'Unknown action']);

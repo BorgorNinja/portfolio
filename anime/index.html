@@ -871,13 +871,13 @@
       updateControls();
     }
 
-    async function selectEpisode(idx) {
+    function selectEpisode(idx) {
       if (idx < 0 || idx >= currentEpisodes.length) return;
       currentIndex = idx;
       const ep = currentEpisodes[currentIndex];
 
       displayTitle.textContent = ep.title;
-      displaySource.textContent = "Resolving stream token...";
+      displaySource.textContent = "Source: Streaming via Proxy";
       showLoader(`Loading ${ep.title}...`);
 
       // Update active state in playlist
@@ -885,38 +885,13 @@
       cards.forEach((c, i) => c.classList.toggle('active', i === currentIndex));
       updateControls();
 
-      // If we already cached the stream embed on this episode object
-      if (ep.embedUrl) {
-        player.src = ep.embedUrl;
-        displaySource.textContent = `Source: ${ep.sourceType.toUpperCase()}`;
+      // Point player directly to our same-origin proxy to bypass anti-hotlink checks
+      player.src = `/anime/api.php?action=player&ep_url=${encodeURIComponent(ep.url)}`;
+
+      player.onload = () => {
         hideLoader();
-        return;
-      }
-
-      try {
-        const res = await fetch(`/anime/api.php?action=stream&ep_url=${encodeURIComponent(ep.url)}`);
-        const streamData = await res.json();
-
-        if (streamData.embed_url) {
-          ep.embedUrl = streamData.embed_url;
-          ep.sourceType = streamData.source_type;
-          player.src = ep.embedUrl;
-          displaySource.textContent = `Source: ${ep.sourceType.toUpperCase()}`;
-
-          const badge = document.getElementById(`badge-ep-${idx}`);
-          if (badge) {
-            badge.textContent = ep.sourceType.toUpperCase();
-            badge.className = `ep-source-pill src-${ep.sourceType}`;
-          }
-        } else {
-          displaySource.textContent = "Stream embed not available";
-        }
-      } catch (err) {
-        console.error(err);
-        displaySource.textContent = "Error loading stream";
-      } finally {
-        hideLoader();
-      }
+      };
+      setTimeout(hideLoader, 2500);
     }
 
     function prevEpisode() {
