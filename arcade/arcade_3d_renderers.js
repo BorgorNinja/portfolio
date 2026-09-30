@@ -1329,6 +1329,8 @@
      CENTRAL INTERSECTION OBSERVER & ANIMATION LOOP
      ========================================================================= */
 
+  let lastMasterTick = 0;
+
   function setupObserver() {
     if (isObserverSetup) return;
     isObserverSetup = true;
@@ -1345,7 +1347,7 @@
         });
       }, {
         root: null,
-        rootMargin: '60px 0px 60px 0px',
+        rootMargin: '20px 0px 20px 0px',
         threshold: 0.05
       });
     }
@@ -1353,6 +1355,20 @@
 
   function masterLoop(t) {
     animFrameId = requestAnimationFrame(masterLoop);
+
+    // Dynamic FPS throttling: hovered cards get full 60 FPS responsiveness,
+    // while visible background cards tick at ~24 FPS to eliminate CPU/GPU lag
+    const isThrottled = (t - lastMasterTick) < 40;
+    if (isThrottled) {
+      for (const cv of activeCanvases) {
+        if (cv.dataset && cv.dataset.hover === '1') {
+          const g = cardConfigs.get(cv.id);
+          if (g) renderCardCanvas(t, cv, g);
+        }
+      }
+      return;
+    }
+    lastMasterTick = t;
 
     // Only render active visible canvases
     for (const cv of activeCanvases) {
@@ -1375,7 +1391,10 @@
     registerCard: function (cv, gameData) {
       if (!cv || !gameData) return;
       cardConfigs.set(cv.id, gameData);
-      activeCanvases.add(cv);
+      // Render single initial static frame immediately so card is never blank
+      try {
+        renderCardCanvas(0, cv, gameData);
+      } catch (e) {}
       if (observer) {
         observer.observe(cv);
       }
@@ -1388,7 +1407,6 @@
 
     observeCanvas: function (cv) {
       if (!cv) return;
-      activeCanvases.add(cv);
       if (observer) {
         observer.observe(cv);
       }

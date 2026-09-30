@@ -1740,19 +1740,32 @@
       ctxJTrash.restore();
     }
 
-    /* Master Animation Loop (IntersectionObserver-Optimized) */
-    function animate() {
-      if (!window.Arcade3D || window.Arcade3D.isCanvasVisible(cvSlots)) renderSlots3D();
-      if (!window.Arcade3D || window.Arcade3D.isCanvasVisible(cvSlotsCyber)) renderSlotsCyber3D();
-      if (!window.Arcade3D || window.Arcade3D.isCanvasVisible(cvSlotsVegas)) renderSlotsVegas3D();
-      if (!window.Arcade3D || window.Arcade3D.isCanvasVisible(cvSlotsCandy)) renderSlotsCandy3D();
-      if (!window.Arcade3D || window.Arcade3D.isCanvasVisible(cvSlotsAnubis)) renderSlotsAnubis3D();
-      if (!window.Arcade3D || window.Arcade3D.isCanvasVisible(cvPinball)) renderPinball3D();
-      if (!window.Arcade3D || window.Arcade3D.isCanvasVisible(cvPool)) renderPool3D();
-      if (!window.Arcade3D || window.Arcade3D.isCanvasVisible(cvRoulette)) renderRoulette3D();
-      if (!window.Arcade3D || window.Arcade3D.isCanvasVisible(cvFishRace)) renderFishRace3D();
-      if (!window.Arcade3D || window.Arcade3D.isCanvasVisible(cvJTrash)) renderJTrash3D();
+    /* Master Animation Loop (IntersectionObserver-Optimized & 30 FPS Capped) */
+    // Initial draw for all top cards
+    try {
+      renderSlots3D(); renderSlotsCyber3D(); renderSlotsVegas3D(); renderSlotsCandy3D();
+      renderSlotsAnubis3D(); renderPinball3D(); renderPool3D(); renderRoulette3D();
+      renderFishRace3D(); renderJTrash3D();
+    } catch (e) {}
+
+    let lastTopTick = 0;
+    function animate(now) {
       requestAnimationFrame(animate);
+      if (now - lastTopTick < 33) return; // Cap at 30 FPS to eliminate CPU stutter
+      lastTopTick = now;
+
+      if (window.Arcade3D) {
+        if (window.Arcade3D.isCanvasVisible(cvSlots)) renderSlots3D();
+        if (window.Arcade3D.isCanvasVisible(cvSlotsCyber)) renderSlotsCyber3D();
+        if (window.Arcade3D.isCanvasVisible(cvSlotsVegas)) renderSlotsVegas3D();
+        if (window.Arcade3D.isCanvasVisible(cvSlotsCandy)) renderSlotsCandy3D();
+        if (window.Arcade3D.isCanvasVisible(cvSlotsAnubis)) renderSlotsAnubis3D();
+        if (window.Arcade3D.isCanvasVisible(cvPinball)) renderPinball3D();
+        if (window.Arcade3D.isCanvasVisible(cvPool)) renderPool3D();
+        if (window.Arcade3D.isCanvasVisible(cvRoulette)) renderRoulette3D();
+        if (window.Arcade3D.isCanvasVisible(cvFishRace)) renderFishRace3D();
+        if (window.Arcade3D.isCanvasVisible(cvJTrash)) renderJTrash3D();
+      }
     }
     requestAnimationFrame(animate);
 
