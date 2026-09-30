@@ -630,6 +630,8 @@
     let currentChip = 50;
     let bets = { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 };
     let isRolling = false;
+    let currentRollColors = [];
+    let rollEvaluated = false;
 
     /* --- Three.js 3D Scene Setup --- */
     const container = document.getElementById('webgl-container');
@@ -939,10 +941,18 @@
       blue:   new THREE.Euler(0, 0, -Math.PI / 2)
     };
 
+    const TARGET_QUATS = {};
+    Object.keys(TARGET_EULERS).forEach(k => {
+      TARGET_QUATS[k] = new THREE.Quaternion().setFromEuler(TARGET_EULERS[k]);
+    });
+
     // Set initial settled orientation
-    diceState[0].mesh.rotation.copy(TARGET_EULERS['yellow']);
-    diceState[1].mesh.rotation.copy(TARGET_EULERS['red']);
-    diceState[2].mesh.rotation.copy(TARGET_EULERS['blue']);
+    diceState[0].targetQuat = TARGET_QUATS['yellow'];
+    diceState[1].targetQuat = TARGET_QUATS['red'];
+    diceState[2].targetQuat = TARGET_QUATS['blue'];
+    diceState[0].mesh.quaternion.copy(TARGET_QUATS['yellow']);
+    diceState[1].mesh.quaternion.copy(TARGET_QUATS['red']);
+    diceState[2].mesh.quaternion.copy(TARGET_QUATS['blue']);
 
     /* --- 3D Stacked Casino Chips on Pads --- */
     const chipStacks = { red: [], yellow: [], blue: [], green: [], white: [], pink: [] };
@@ -1104,6 +1114,8 @@
       const roll2 = PERYA_COLORS[Math.floor(Math.random() * 6)].id;
       const roll3 = PERYA_COLORS[Math.floor(Math.random() * 6)].id;
       const winningColors = [roll1, roll2, roll3];
+      currentRollColors = winningColors;
+      rollEvaluated = false;
 
       // Launch Cubes with realistic drop & spin physics
       diceState.forEach((d, i) => {
@@ -1114,29 +1126,34 @@
 
         d.vy = -0.05 - Math.random() * 0.04;
         d.vRot.set(
-          (Math.random() - 0.5) * 0.5,
-          (Math.random() - 0.5) * 0.5,
-          (Math.random() - 0.5) * 0.5
+          (Math.random() - 0.5) * 0.6,
+          (Math.random() - 0.5) * 0.6,
+          (Math.random() - 0.5) * 0.6
         );
         d.targetColor = winningColors[i];
+        d.targetQuat = TARGET_QUATS[winningColors[i]];
         d.settled = false;
         d.bounces = 0;
       });
 
-      // Settle and evaluate after 2.1s
+      // Safety fallback to settle and evaluate after 1.5s
       setTimeout(() => {
-        evaluateRoll(winningColors);
-      }, 2100);
+        if (isRolling && !rollEvaluated) {
+          evaluateRoll(winningColors);
+        }
+      }, 1500);
     }
 
     function evaluateRoll(winningColors) {
+      if (rollEvaluated) return;
+      rollEvaluated = true;
+
       // Force cubes cleanly to their exact target angles & resting floor altitude
       diceState.forEach(d => {
         d.settled = true;
         d.y = initialFloorY;
         d.mesh.position.y = initialFloorY;
-        const targetRot = TARGET_EULERS[d.targetColor];
-        if (targetRot) d.mesh.rotation.copy(targetRot);
+        if (d.targetQuat) d.mesh.quaternion.copy(d.targetQuat);
       });
 
       const counts = {};
@@ -1261,27 +1278,43 @@
           d.y += d.vy * delta;
           d.mesh.position.y = d.y;
 
-          d.mesh.rotation.x += d.vRot.x * delta * 20;
-          d.mesh.rotation.y += d.vRot.y * delta * 20;
-          d.mesh.rotation.z += d.vRot.z * delta * 20;
+          if (d.bounces === 0) {
+            d.mesh.rotation.x += d.vRot.x * delta * 20;
+            d.mesh.rotation.y += d.vRot.y * delta * 20;
+            d.mesh.rotation.z += d.vRot.z * delta * 20;
+          } else {
+            const slerpSpeed = d.bounces >= 2 ? 16.0 : 8.0;
+            if (d.targetQuat) d.mesh.quaternion.slerp(d.targetQuat, Math.min(1.0, delta * slerpSpeed));
+          }
 
           if (d.y <= initialFloorY) {
             d.y = initialFloorY;
             d.mesh.position.y = initialFloorY;
             d.bounces++;
             if (d.bounces < 3) {
-              d.vy = -d.vy * 0.45; // Bounce damping
-              d.vRot.multiplyScalar(0.65);
+              d.vy = -d.vy * 0.42; // Bounce damping
               sound.woodClack(0.9 + Math.random() * 0.3);
             } else {
               d.vy = 0;
-              d.vRot.set(0, 0, 0);
+              if (d.targetQuat) {
+                d.mesh.quaternion.slerp(d.targetQuat, Math.min(1.0, delta * 22.0));
+                if (d.mesh.quaternion.angleTo(d.targetQuat) < 0.02) {
+                  d.mesh.quaternion.copy(d.targetQuat);
+                  d.settled = true;
+                }
+              } else {
+                d.settled = true;
+              }
             }
           }
         } else if (!isRolling) {
           d.mesh.position.y = initialFloorY;
         }
       });
+
+      if (isRolling && !rollEvaluated && diceState.every(d => d.settled)) {
+        evaluateRoll(currentRollColors);
+      }
 
       renderer.render(scene, camera);
     }
