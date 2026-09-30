@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Plus+Jakarta+Sans:wght@500;700;800&family=JetBrains+Mono:wght@600;800&display=swap" rel="stylesheet">
   <script src="vendor/three.min.js"></script>
   <script src="vendor/OrbitControls.js"></script>
+  <script src="vendor/cannon.min.js"></script>
   <style>
     :root {
       --bg: #070a12;
@@ -876,83 +877,114 @@
     tassel.userData = { isRope: true };
     ropeGroup.add(tassel);
 
+    /* --- Real Cannon.js 3D Physics World --- */
+    const physicsWorld = new CANNON.World();
+    physicsWorld.gravity.set(0, -18.0, 0); // Fast, punchy carnival gravity
+    physicsWorld.solver.iterations = 12;
+
+    const woodPhysicsMat = new CANNON.Material('wood');
+    const woodContactMat = new CANNON.ContactMaterial(woodPhysicsMat, woodPhysicsMat, {
+      friction: 0.45,
+      restitution: 0.28
+    });
+    physicsWorld.addContactMaterial(woodContactMat);
+
+    // Table deck collider
+    const tableBody = new CANNON.Body({ mass: 0, material: woodPhysicsMat });
+    tableBody.addShape(new CANNON.Box(new CANNON.Vec3(4.1, 0.2, 2.6)));
+    tableBody.position.set(0, -0.12, 0.1);
+    physicsWorld.addBody(tableBody);
+
+    // Rim retainers (walls) so dice stay on the table
+    function addRimCollider(x, y, z, hx, hy, hz) {
+      const b = new CANNON.Body({ mass: 0, material: woodPhysicsMat });
+      b.addShape(new CANNON.Box(new CANNON.Vec3(hx, hy, hz)));
+      b.position.set(x, y, z);
+      physicsWorld.addBody(b);
+    }
+    addRimCollider(0, 0.35, 2.7, 4.2, 0.35, 0.15); // Front wall
+    addRimCollider(0, 0.45, -2.5, 4.2, 0.45, 0.15); // Back wall
+    addRimCollider(-4.2, 0.35, 0.1, 0.15, 0.35, 2.7); // Left wall
+    addRimCollider(4.2, 0.35, 0.1, 0.15, 0.35, 2.7); // Right wall
+
     /* --- The 3 Large 3D Wooden Perya Blocks (Cubes) --- */
     const cubesGroup = new THREE.Group();
     scene.add(cubesGroup);
 
     const S = 0.92;
+    const halfS = S / 2;
     const cubeGeom = new THREE.BoxGeometry(S, S, S);
-
-    const diceMeshes = [];
-    const initialFloorY = 0.58;
+    const cubeShape = new CANNON.Box(new CANNON.Vec3(halfS, halfS, halfS));
 
     const diceState = [
-      {
-        mesh: null,
-        spawnX: -1.4,
-        y: initialFloorY,
-        vy: 0,
-        rot: new THREE.Euler(0, 0, 0),
-        vRot: new THREE.Vector3(),
-        settled: true,
-        bounces: 0,
-        targetColor: 'yellow'
-      },
-      {
-        mesh: null,
-        spawnX: 0,
-        y: initialFloorY,
-        vy: 0,
-        rot: new THREE.Euler(0, 0, 0),
-        vRot: new THREE.Vector3(),
-        settled: true,
-        bounces: 0,
-        targetColor: 'red'
-      },
-      {
-        mesh: null,
-        spawnX: 1.4,
-        y: initialFloorY,
-        vy: 0,
-        rot: new THREE.Euler(0, 0, 0),
-        vRot: new THREE.Vector3(),
-        settled: true,
-        bounces: 0,
-        targetColor: 'blue'
-      }
+      { mesh: null, body: null, spawnX: -1.3 },
+      { mesh: null, body: null, spawnX: 0 },
+      { mesh: null, body: null, spawnX: 1.3 }
     ];
+
+    // Initial starting orientations
+    const INIT_EULERS = {
+      yellow: new THREE.Euler(-Math.PI / 2, 0, 0),
+      red:    new THREE.Euler(0, 0, 0),
+      blue:   new THREE.Euler(0, 0, -Math.PI / 2)
+    };
 
     diceState.forEach((d, idx) => {
       const mesh = new THREE.Mesh(cubeGeom, cubeFaceMaterials);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
-      mesh.position.set(d.spawnX, d.y, 0.1);
       cubesGroup.add(mesh);
       d.mesh = mesh;
+
+      const body = new CANNON.Body({
+        mass: 1.4,
+        material: woodPhysicsMat,
+        linearDamping: 0.08,
+        angularDamping: 0.18
+      });
+      body.addShape(cubeShape);
+      body.position.set(d.spawnX, 0.08 + halfS, 0.1);
+      const initEuler = idx === 0 ? INIT_EULERS.yellow : (idx === 1 ? INIT_EULERS.red : INIT_EULERS.blue);
+      body.quaternion.setFromEuler(initEuler.x, initEuler.y, initEuler.z);
+      physicsWorld.addBody(body);
+      d.body = body;
+
+      // Sync initial mesh
+      mesh.position.copy(body.position);
+      mesh.quaternion.copy(body.quaternion);
+
+      // Realistic impact audio on collisions
+      body.addEventListener('collide', (e) => {
+        if (!isRolling) return;
+        const v = e.contact ? e.contact.getImpactVelocityAlongNormal() : 1.0;
+        if (v > 0.8) {
+          sound.woodClack(0.85 + Math.random() * 0.3);
+        }
+      });
     });
 
-    // Face rotation map: dice land flat on the table with the winning perya color on the top face
-    const TARGET_EULERS = {
-      red:    new THREE.Euler(0, 0, 0),
-      green:  new THREE.Euler(Math.PI, 0, 0),
-      yellow: new THREE.Euler(-Math.PI / 2, 0, 0),
-      white:  new THREE.Euler(Math.PI / 2, 0, 0),
-      pink:   new THREE.Euler(0, 0, Math.PI / 2),
-      blue:   new THREE.Euler(0, 0, -Math.PI / 2)
-    };
+    // Face detection: read which face of the cube body is pointing UP (+Y in world)
+    const CUBE_FACES = [
+      { id: 'pink',   v: new CANNON.Vec3(1, 0, 0) },
+      { id: 'blue',   v: new CANNON.Vec3(-1, 0, 0) },
+      { id: 'red',    v: new CANNON.Vec3(0, 1, 0) },
+      { id: 'green',  v: new CANNON.Vec3(0, -1, 0) },
+      { id: 'yellow', v: new CANNON.Vec3(0, 0, 1) },
+      { id: 'white',  v: new CANNON.Vec3(0, 0, -1) }
+    ];
 
-    const TARGET_QUATS = {};
-    Object.keys(TARGET_EULERS).forEach(k => {
-      TARGET_QUATS[k] = new THREE.Quaternion().setFromEuler(TARGET_EULERS[k]);
-    });
-
-    // Set initial settled orientation
-    diceState[0].targetQuat = TARGET_QUATS['yellow'];
-    diceState[1].targetQuat = TARGET_QUATS['red'];
-    diceState[2].targetQuat = TARGET_QUATS['blue'];
-    diceState[0].mesh.quaternion.copy(TARGET_QUATS['yellow']);
-    diceState[1].mesh.quaternion.copy(TARGET_QUATS['red']);
-    diceState[2].mesh.quaternion.copy(TARGET_QUATS['blue']);
+    function getPhysicalTopColor(body) {
+      let best = 'red';
+      let maxDot = -Infinity;
+      for (const f of CUBE_FACES) {
+        const worldV = body.quaternion.vmult(f.v);
+        if (worldV.y > maxDot) {
+          maxDot = worldV.y;
+          best = f.id;
+        }
+      }
+      return best;
+    }
 
     /* --- 3D Stacked Casino Chips on Pads --- */
     const chipStacks = { red: [], yellow: [], blue: [], green: [], white: [], pink: [] };
@@ -1080,6 +1112,9 @@
       }
     }
 
+    let rollSettledFrames = 0;
+    let rollStartTime = 0;
+
     /* --- Drop 3D Cubes (Hilahin ang Lubid) --- */
     function triggerDropCubes() {
       if (isRolling) return;
@@ -1091,6 +1126,9 @@
       }
 
       isRolling = true;
+      rollEvaluated = false;
+      rollSettledFrames = 0;
+      rollStartTime = performance.now();
       document.getElementById('btn-drop').disabled = true;
       sound.ropePull();
 
@@ -1107,54 +1145,45 @@
         }
       }, 25);
 
-      showBanner('🎪 Cubes tumbling out of the chute...');
+      showBanner('🎪 Cubes tumbling out of the chute with real physics...');
 
-      // Roll 3 random winning colors
-      const roll1 = PERYA_COLORS[Math.floor(Math.random() * 6)].id;
-      const roll2 = PERYA_COLORS[Math.floor(Math.random() * 6)].id;
-      const roll3 = PERYA_COLORS[Math.floor(Math.random() * 6)].id;
-      const winningColors = [roll1, roll2, roll3];
-      currentRollColors = winningColors;
-      rollEvaluated = false;
-
-      // Launch Cubes with realistic drop & spin physics
+      // Spawn cubes inside the top chute hopper with randomized downward drops and chaotic tumble torques
       diceState.forEach((d, i) => {
-        d.y = 3.6 + i * 0.4;
-        d.mesh.position.y = d.y;
-        d.mesh.position.x = d.spawnX + (Math.random() - 0.5) * 0.3;
-        d.mesh.position.z = -0.5 + (Math.random() - 0.5) * 0.4;
-
-        d.vy = -0.05 - Math.random() * 0.04;
-        d.vRot.set(
-          (Math.random() - 0.5) * 0.6,
-          (Math.random() - 0.5) * 0.6,
-          (Math.random() - 0.5) * 0.6
+        // Reset position inside chute
+        d.body.position.set(
+          -1.2 + i * 1.2 + (Math.random() - 0.5) * 0.4,
+          3.8 + i * 0.35,
+          -0.6 + (Math.random() - 0.5) * 0.4
         );
-        d.targetColor = winningColors[i];
-        d.targetQuat = TARGET_QUATS[winningColors[i]];
-        d.settled = false;
-        d.bounces = 0;
+        // Random tumble rotation
+        d.body.quaternion.setFromEuler(
+          Math.random() * Math.PI * 2,
+          Math.random() * Math.PI * 2,
+          Math.random() * Math.PI * 2
+        );
+        // Initial downward tumble impulse + spread
+        d.body.velocity.set(
+          (Math.random() - 0.5) * 2.5,
+          -3.5 - Math.random() * 2.0,
+          1.2 + (Math.random() - 0.5) * 1.8
+        );
+        d.body.angularVelocity.set(
+          (Math.random() - 0.5) * 28,
+          (Math.random() - 0.5) * 28,
+          (Math.random() - 0.5) * 28
+        );
       });
+    }
 
-      // Safety fallback to settle and evaluate after 1.5s
-      setTimeout(() => {
-        if (isRolling && !rollEvaluated) {
-          evaluateRoll(winningColors);
-        }
-      }, 1500);
+    function finishPhysicalRoll() {
+      if (rollEvaluated) return;
+      rollEvaluated = true;
+      // Read the actual physical top face of each die
+      const winningColors = diceState.map(d => getPhysicalTopColor(d.body));
+      evaluateRoll(winningColors);
     }
 
     function evaluateRoll(winningColors) {
-      if (rollEvaluated) return;
-      rollEvaluated = true;
-
-      // Force cubes cleanly to their exact target angles & resting floor altitude
-      diceState.forEach(d => {
-        d.settled = true;
-        d.y = initialFloorY;
-        d.mesh.position.y = initialFloorY;
-        if (d.targetQuat) d.mesh.quaternion.copy(d.targetQuat);
-      });
 
       const counts = {};
       winningColors.forEach(c => counts[c] = (counts[c] || 0) + 1);
@@ -1271,49 +1300,38 @@
 
       controls.update();
 
-      // Dice Physics
-      diceState.forEach((d, idx) => {
-        if (!d.settled) {
-          d.vy -= 18.0 * delta; // Gravity
-          d.y += d.vy * delta;
-          d.mesh.position.y = d.y;
+      // Step Cannon.js Physics
+      physicsWorld.step(delta);
 
-          if (d.bounces === 0) {
-            d.mesh.rotation.x += d.vRot.x * delta * 20;
-            d.mesh.rotation.y += d.vRot.y * delta * 20;
-            d.mesh.rotation.z += d.vRot.z * delta * 20;
-          } else {
-            const slerpSpeed = d.bounces >= 2 ? 16.0 : 8.0;
-            if (d.targetQuat) d.mesh.quaternion.slerp(d.targetQuat, Math.min(1.0, delta * slerpSpeed));
-          }
-
-          if (d.y <= initialFloorY) {
-            d.y = initialFloorY;
-            d.mesh.position.y = initialFloorY;
-            d.bounces++;
-            if (d.bounces < 3) {
-              d.vy = -d.vy * 0.42; // Bounce damping
-              sound.woodClack(0.9 + Math.random() * 0.3);
-            } else {
-              d.vy = 0;
-              if (d.targetQuat) {
-                d.mesh.quaternion.slerp(d.targetQuat, Math.min(1.0, delta * 22.0));
-                if (d.mesh.quaternion.angleTo(d.targetQuat) < 0.02) {
-                  d.mesh.quaternion.copy(d.targetQuat);
-                  d.settled = true;
-                }
-              } else {
-                d.settled = true;
-              }
-            }
-          }
-        } else if (!isRolling) {
-          d.mesh.position.y = initialFloorY;
-        }
+      // Synchronize Three.js visual meshes with physical bodies
+      diceState.forEach(d => {
+        d.mesh.position.copy(d.body.position);
+        d.mesh.quaternion.copy(d.body.quaternion);
       });
 
-      if (isRolling && !rollEvaluated && diceState.every(d => d.settled)) {
-        evaluateRoll(currentRollColors);
+      // Detect natural physical settlement
+      if (isRolling && !rollEvaluated) {
+        let allStopped = true;
+        for (const d of diceState) {
+          const speedSq = d.body.velocity.lengthSquared();
+          const angSpeedSq = d.body.angularVelocity.lengthSquared();
+          if (speedSq > 0.008 || angSpeedSq > 0.02 || d.body.position.y > 1.2) {
+            allStopped = false;
+            break;
+          }
+        }
+
+        const elapsed = (performance.now() - rollStartTime) / 1000;
+        if (allStopped && elapsed > 1.0) {
+          rollSettledFrames++;
+          if (rollSettledFrames > 12) {
+            finishPhysicalRoll();
+          }
+        } else if (elapsed > 4.5) {
+          finishPhysicalRoll();
+        } else {
+          rollSettledFrames = 0;
+        }
       }
 
       renderer.render(scene, camera);
