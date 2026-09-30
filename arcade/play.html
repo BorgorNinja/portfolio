@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="theater.css">
+  <link rel="stylesheet" href="theater.css?v=2.5">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body {
@@ -55,8 +55,8 @@
     <div id="game-mount-point"></div>
   </div>
 
-  <script src="games_data.js"></script>
-  <script src="casino_engine.js"></script>
+  <script src="games_data.js?v=2.5"></script>
+  <script src="casino_engine.js?v=2.5"></script>
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const gameId = urlParams.get('game') || 'blackjack';
