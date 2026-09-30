@@ -255,6 +255,33 @@
       border-radius: 50%;
       border: 1px solid rgba(255, 255, 255, 0.4);
     }
+    .btn-hud-icon.btn-leave {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.5);
+      color: #fca5a5;
+    }
+    .btn-hud-icon.btn-leave:hover {
+      background: rgba(239, 68, 68, 0.4);
+      border-color: #ef4444;
+      color: #fff;
+    }
+    .btn-card-stand {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      color: #fca5a5;
+      font-size: 0.62rem;
+      font-weight: 700;
+      border-radius: 4px;
+      padding: 2px 6px;
+      cursor: pointer;
+      margin-top: 3px;
+      transition: all 0.15s ease;
+      display: inline-block;
+    }
+    .btn-card-stand:hover {
+      background: #ef4444;
+      color: #fff;
+    }
 
     /* Center Toast Banner */
     .center-banner {
@@ -277,6 +304,16 @@
       align-items: center;
       gap: 8px;
       transition: all 0.3s;
+    }
+    .center-banner.last-call {
+      border-color: #ef4444;
+      background: rgba(45, 10, 15, 0.95);
+      box-shadow: 0 0 26px rgba(239, 68, 68, 0.8);
+      animation: alertPulse 0.5s infinite alternate ease-in-out;
+    }
+    @keyframes alertPulse {
+      0% { transform: translateX(-50%) scale(1); }
+      100% { transform: translateX(-50%) scale(1.04); }
     }
 
     /* Pull Rope Floating Visual Hint */
@@ -515,7 +552,7 @@
         <span>💰</span>
         <span id="display-wallet">25,000</span>
       </div>
-      <button class="btn-hud-icon" id="btn-bots" title="Toggle AI Fiesta Patrons">👥 Bots: OFF</button>
+      <button class="btn-hud-icon btn-leave" id="btn-leave-seat" title="Leave seat and spectate" style="display:none;" onclick="standUpFromSeat()">🚪 Stand Up</button>
       <button class="btn-hud-icon" id="btn-ayuda" title="Claim ₱2,000 Ayuda Refill">🎁 Ayuda</button>
       <button class="btn-hud-icon" id="btn-bgm" title="Toggle Fiesta Carnival Music">🎵 Music</button>
       <button class="btn-hud-icon" id="btn-sfx" title="Toggle Sound Effects">🔊</button>
@@ -779,13 +816,11 @@
       else if (s === -1) activeSeat = -1;
     }
 
-    let botsActive = false; // Toggle bot fiesta patrons
-
     let players = [
-      { seat: 0, isUser: (activeSeat === 0), isBot: false, ref: (activeSeat === 0 ? userRef : null), name: (activeSeat === 0 ? userName : 'Open Seat'), avatar: '👑', balance: (activeSeat === 0 ? wallet.get() : 0), bets: { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 } },
-      { seat: 1, isUser: (activeSeat === 1), isBot: false, ref: (activeSeat === 1 ? userRef : null), name: (activeSeat === 1 ? userName : 'Open Seat'), avatar: '⚡', balance: (activeSeat === 1 ? wallet.get() : 0), bets: { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 } },
-      { seat: 2, isUser: (activeSeat === 2), isBot: false, ref: (activeSeat === 2 ? userRef : null), name: (activeSeat === 2 ? userName : 'Open Seat'), avatar: '🍀', balance: (activeSeat === 2 ? wallet.get() : 0), bets: { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 } },
-      { seat: 3, isUser: (activeSeat === 3), isBot: false, ref: (activeSeat === 3 ? userRef : null), name: (activeSeat === 3 ? userName : 'Open Seat'), avatar: '🔥', balance: (activeSeat === 3 ? wallet.get() : 0), bets: { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 } }
+      { seat: 0, isUser: (activeSeat === 0), ref: (activeSeat === 0 ? userRef : null), name: (activeSeat === 0 ? userName : 'Open Seat'), avatar: '👑', balance: (activeSeat === 0 ? wallet.get() : 0), bets: { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 } },
+      { seat: 1, isUser: (activeSeat === 1), ref: (activeSeat === 1 ? userRef : null), name: (activeSeat === 1 ? userName : 'Open Seat'), avatar: '⚡', balance: (activeSeat === 1 ? wallet.get() : 0), bets: { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 } },
+      { seat: 2, isUser: (activeSeat === 2), ref: (activeSeat === 2 ? userRef : null), name: (activeSeat === 2 ? userName : 'Open Seat'), avatar: '🍀', balance: (activeSeat === 2 ? wallet.get() : 0), bets: { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 } },
+      { seat: 3, isUser: (activeSeat === 3), ref: (activeSeat === 3 ? userRef : null), name: (activeSeat === 3 ? userName : 'Open Seat'), avatar: '🔥', balance: (activeSeat === 3 ? wallet.get() : 0), bets: { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 } }
     ];
 
     /* --- Three.js 3D Scene Setup --- */
@@ -1201,7 +1236,7 @@
     function rebuildAll3DChips() {
       clear3DChips();
       players.forEach((p, sIdx) => {
-        if ((p.isUser || p.isBot || p.ref) && p.bets) {
+        if ((p.isUser || p.ref) && p.bets) {
           Object.keys(p.bets).forEach(colId => {
             const amt = p.bets[colId] || 0;
             if (amt > 0) {
@@ -1225,6 +1260,11 @@
       if (!ribbonEl) return;
       ribbonEl.innerHTML = '';
 
+      const topLeaveBtn = document.getElementById('btn-leave-seat');
+      if (topLeaveBtn) {
+        topLeaveBtn.style.display = (activeSeat !== -1) ? 'inline-flex' : 'none';
+      }
+
       players.forEach((p, idx) => {
         const tmpl = SEAT_TEMPLATES[idx];
         const cardEl = document.createElement('div');
@@ -1232,7 +1272,7 @@
         cardEl.id = `seat-card-${idx}`;
 
         const isLocalUser = (idx === activeSeat && activeSeat !== -1);
-        const isOccupied = (p.ref && !isLocalUser) || p.isBot;
+        const isOccupied = (p.ref && !isLocalUser);
 
         if (isLocalUser) {
           cardEl.classList.add('active-user');
@@ -1259,10 +1299,12 @@
         }
 
         let statusText = '';
+        let standBtnHtml = '';
         if (isLocalUser) {
-          statusText = isRolling ? 'Rolling...' : (totalBet > 0 ? `₱${p.balance.toLocaleString()} • Click to Stand` : `₱${p.balance.toLocaleString()} • Seated`);
+          statusText = isRolling ? 'Rolling...' : (totalBet > 0 ? `₱${p.balance.toLocaleString()} • Seated` : `₱${p.balance.toLocaleString()} • Seated`);
+          standBtnHtml = `<button class="btn-card-stand" onclick="event.stopPropagation(); standUpFromSeat();">🚪 Leave Seat</button>`;
         } else if (isOccupied) {
-          statusText = p.isBot ? `₱${p.balance.toLocaleString()} • AI Patron` : `₱${p.balance.toLocaleString()} • Online`;
+          statusText = `₱${p.balance.toLocaleString()} • Online`;
         } else {
           statusText = 'Click to Sit';
         }
@@ -1273,6 +1315,7 @@
             <div>
               <div class="seat-name" style="color: ${tmpl.color}">${escapeHtml(name)}</div>
               <div class="seat-status">${statusText}</div>
+              ${standBtnHtml}
             </div>
           </div>
           <div>
@@ -1285,7 +1328,7 @@
           if (isRolling) return;
           if (isLocalUser) {
             standUpFromSeat();
-          } else if (!isOccupied || p.isBot) {
+          } else if (!isOccupied) {
             switchPlayerSeat(idx);
           }
         };
@@ -1314,7 +1357,6 @@
       players[seatIdx] = {
         seat: seatIdx,
         isUser: true,
-        isBot: false,
         ref: userRef,
         name: userName,
         avatar: tmpl.avatar,
@@ -1366,73 +1408,6 @@
       rebuildAll3DChips();
       syncRoomHeartbeat();
       showBanner('Spectating mode. Click any open seat to join the game!');
-    }
-
-    /* --- Bot Fiesta Patrons --- */
-    const BOT_PROFILES = [
-      { name: 'Mang Boy', avatar: '⚡', balance: 50000 },
-      { name: 'Aling Tess', avatar: '🍀', balance: 45000 },
-      { name: 'Kuya Jojo', avatar: '🔥', balance: 60000 },
-      { name: 'Ate Beth', avatar: '✨', balance: 35000 }
-    ];
-
-    function toggleBots() {
-      botsActive = !botsActive;
-      const btn = document.getElementById('btn-bots');
-      if (btn) {
-        btn.textContent = botsActive ? '👥 Bots: ON' : '👥 Bots: OFF';
-        btn.style.borderColor = botsActive ? '#10b981' : 'rgba(255,255,255,0.2)';
-        btn.style.color = botsActive ? '#4ade80' : '#f8fafc';
-      }
-
-      if (botsActive) {
-        players.forEach((p, idx) => {
-          if (idx !== activeSeat && (!p.ref || p.isBot)) {
-            const bot = BOT_PROFILES[idx % BOT_PROFILES.length];
-            p.isUser = false;
-            p.isBot = true;
-            p.ref = 'bot_' + idx;
-            p.name = bot.name;
-            p.avatar = bot.avatar;
-            p.balance = bot.balance;
-            p.bets = { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 };
-            placeBotBets(idx);
-          }
-        });
-        sound.chip();
-        showBanner('👥 AI Fiesta Patrons joined the table!');
-      } else {
-        players.forEach((p, idx) => {
-          if (idx !== activeSeat && p.isBot) {
-            p.isUser = false;
-            p.isBot = false;
-            p.ref = null;
-            p.name = 'Open Seat';
-            p.avatar = SEAT_TEMPLATES[idx].avatar;
-            p.balance = 0;
-            p.bets = { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 };
-          }
-        });
-        showBanner('👥 AI Fiesta Patrons left the table.');
-      }
-      rebuildAll3DChips();
-      renderSeats();
-    }
-
-    function placeBotBets(seatIdx) {
-      const p = players[seatIdx];
-      if (!p || !p.isBot || isRolling) return;
-      Object.keys(p.bets).forEach(k => p.bets[k] = 0);
-
-      const shuffledColors = [...PERYA_COLORS].sort(() => Math.random() - 0.5);
-      const numChoices = 1 + Math.floor(Math.random() * 2);
-      const chipSizes = [50, 100, 200, 500];
-
-      for (let i = 0; i < numChoices; i++) {
-        const col = shuffledColors[i];
-        const betAmt = chipSizes[Math.floor(Math.random() * chipSizes.length)];
-        p.bets[col.id] = betAmt;
-      }
     }
 
     /* --- Raycasting for 3D Table & Rope Interaction --- */
@@ -1548,10 +1523,23 @@
 
     let rollSettledFrames = 0;
     let rollStartTime = 0;
+    let lastCallTimer = null;
+    let lastCallSecondsRemaining = 0;
+    let lastCallActive = false;
+
+    function countActivePlayers() {
+      let count = 0;
+      players.forEach((p, idx) => {
+        if (idx === activeSeat && activeSeat !== -1) count++;
+        else if (p.ref) count++;
+      });
+      return count;
+    }
 
     /* --- Drop 3D Cubes (Hilahin ang Lubid) --- */
     function triggerDropCubes() {
-      if (isRolling) return;
+      if (isRolling || lastCallActive) return;
+
       let anyBetPlaced = false;
       players.forEach(p => {
         if (p.bets && Object.values(p.bets).some(v => v > 0)) {
@@ -1564,6 +1552,63 @@
         return;
       }
 
+      const puller = (activeSeat !== -1 && players[activeSeat]) ? players[activeSeat].name : userName;
+      const numPlayers = countActivePlayers();
+
+      // If multiplayer (more than 1 seated player): start 5-second Last Call countdown so others aren't cut off!
+      if (numPlayers > 1) {
+        initiateServerPull(puller);
+        startLastCallCountdown(puller, 5);
+      } else {
+        // Solo player: execute drop immediately!
+        executeDropCubes();
+      }
+    }
+
+    async function initiateServerPull(pullerName) {
+      try {
+        await fetch('/color_game/api.php?action=initiate_pull', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ puller_name: pullerName })
+        });
+      } catch (e) {}
+    }
+
+    function startLastCallCountdown(pullerName, seconds = 5) {
+      if (lastCallActive || isRolling) return;
+      lastCallActive = true;
+      lastCallSecondsRemaining = seconds;
+
+      const dropBtn = document.getElementById('btn-drop');
+      if (dropBtn) dropBtn.disabled = true;
+
+      const banner = document.getElementById('status-banner');
+      if (banner) banner.classList.add('last-call');
+
+      sound.fanfare(1);
+      showBanner(`🚨 LAST CALL: ${escapeHtml(pullerName)} pulled the rope! Cubes drop in ${lastCallSecondsRemaining}s... Place final bets!`);
+
+      if (lastCallTimer) clearInterval(lastCallTimer);
+      lastCallTimer = setInterval(() => {
+        lastCallSecondsRemaining--;
+        if (lastCallSecondsRemaining > 0) {
+          sound.woodClack(1.2);
+          showBanner(`🚨 LAST CALL: ${escapeHtml(pullerName)} pulled the rope! Cubes drop in ${lastCallSecondsRemaining}s... Place final bets!`);
+          if (dropBtn) dropBtn.textContent = `⏳ DROPPING (${lastCallSecondsRemaining}s)`;
+        } else {
+          clearInterval(lastCallTimer);
+          lastCallTimer = null;
+          lastCallActive = false;
+          if (banner) banner.classList.remove('last-call');
+          if (dropBtn) dropBtn.textContent = '🎲 Hilahin ang Lubid (Pull Rope)';
+          executeDropCubes();
+        }
+      }, 1000);
+    }
+
+    function executeDropCubes() {
+      if (isRolling) return;
       isRolling = true;
       rollEvaluated = false;
       rollSettledFrames = 0;
@@ -1619,6 +1664,14 @@
     }
 
     function evaluateRoll(winningColors) {
+      lastCallActive = false;
+      if (lastCallTimer) {
+        clearInterval(lastCallTimer);
+        lastCallTimer = null;
+      }
+      const banner = document.getElementById('status-banner');
+      if (banner) banner.classList.remove('last-call');
+
       const counts = {};
       winningColors.forEach(c => counts[c] = (counts[c] || 0) + 1);
 
@@ -1628,14 +1681,12 @@
       let userWon = 0;
       let multiWinners = [];
 
-      // Payout calculation for each player (Seats 0 to 3)
+      // Payout calculation for each seated real player (Seats 0 to 3)
       players.forEach((p, idx) => {
-        if ((p.isUser || p.isBot || p.ref) && p.bets) {
+        if ((p.isUser || p.ref) && p.bets) {
           let seatWon = 0;
           Object.keys(p.bets).forEach(colId => {
             if (counts[colId] && p.bets[colId] > 0) {
-              // Traditional Perya Color Game payout:
-              // 1 match = stake returned + 1x. 2 matches = stake + 2x. 3 matches = stake + 3x!
               const winMultiplier = 1 + counts[colId];
               seatWon += p.bets[colId] * winMultiplier;
             }
@@ -1701,21 +1752,7 @@
 
       isRolling = false;
       document.getElementById('btn-drop').disabled = false;
-
-      // If bots are active, have them place bets for the next round
-      if (botsActive) {
-        setTimeout(() => {
-          if (botsActive && !isRolling) {
-            players.forEach((p, idx) => {
-              if (p.isBot && idx !== activeSeat) {
-                placeBotBets(idx);
-              }
-            });
-            rebuildAll3DChips();
-            renderSeats();
-          }
-        }, 1800);
-      }
+      document.getElementById('btn-drop').textContent = '🎲 Hilahin ang Lubid (Pull Rope)';
     }
 
     let lastSeenRollId = 0;
@@ -1764,33 +1801,28 @@
               players[idx].balance = wallet.get();
             } else if (serverSeat && serverSeat.ref) {
               if (serverSeat.ref === userRef && idx !== activeSeat) {
-                if (!botsActive) {
-                  players[idx].ref = null;
-                  players[idx].name = 'Open Seat';
-                  players[idx].avatar = SEAT_TEMPLATES[idx].avatar;
-                  players[idx].isUser = false;
-                  players[idx].isBot = false;
-                  players[idx].bets = { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 };
-                  players[idx].balance = 0;
-                  remoteChanged = true;
-                }
+                players[idx].ref = null;
+                players[idx].name = 'Open Seat';
+                players[idx].avatar = SEAT_TEMPLATES[idx].avatar;
+                players[idx].isUser = false;
+                players[idx].bets = { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 };
+                players[idx].balance = 0;
+                remoteChanged = true;
               } else {
                 players[idx].ref = serverSeat.ref;
                 players[idx].name = serverSeat.name;
                 players[idx].avatar = serverSeat.avatar || SEAT_TEMPLATES[idx].avatar;
                 players[idx].isUser = false;
-                players[idx].isBot = false;
                 players[idx].balance = serverSeat.balance || 0;
                 players[idx].bets = serverSeat.bets || { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 };
                 remoteChanged = true;
               }
-            } else if (!botsActive && idx !== activeSeat) {
+            } else if (idx !== activeSeat) {
               if (players[idx].ref !== null) {
                 players[idx].ref = null;
                 players[idx].name = 'Open Seat';
                 players[idx].avatar = SEAT_TEMPLATES[idx].avatar;
                 players[idx].isUser = false;
-                players[idx].isBot = false;
                 players[idx].bets = { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 };
                 players[idx].balance = 0;
                 remoteChanged = true;
@@ -1800,6 +1832,14 @@
           renderSeats();
           if (remoteChanged && !isRolling) {
             rebuildAll3DChips();
+          }
+        }
+
+        // Check synchronized pull initiation from remote player
+        if (data && data.pull_initiated && data.pull_initiated.drop_time) {
+          const remainingSecs = Math.max(1, Math.round(data.pull_initiated.drop_time - data.server_time));
+          if (!isRolling && !lastCallActive && remainingSecs > 0 && remainingSecs <= 6) {
+            startLastCallCountdown(data.pull_initiated.puller_name, remainingSecs);
           }
         }
 
@@ -1839,7 +1879,6 @@
     document.getElementById('btn-clear').onclick = clearBets;
     document.getElementById('btn-double').onclick = doubleBets;
     document.getElementById('btn-drop').onclick = triggerDropCubes;
-    document.getElementById('btn-bots').onclick = toggleBots;
 
     const AYUDA_COOLDOWN_MS = 60 * 60 * 1000; // 1 hour cooldown
 

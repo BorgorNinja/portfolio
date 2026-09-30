@@ -133,11 +133,35 @@ if ($action === 'join_or_heartbeat') {
         saveRoomState($roomFile, $room);
     }
 
+    // Clean up expired pull_initiated
+    if (isset($room['pull_initiated']) && $nowFloat > (($room['pull_initiated']['drop_time'] ?? 0) + 8)) {
+        $room['pull_initiated'] = null;
+    }
+
     echo json_encode([
         'status' => 'ok',
         'assigned_seat' => $assignedSeat,
         'seats' => $room['seats'],
         'last_roll' => $room['last_roll'] ?? null,
+        'pull_initiated' => $room['pull_initiated'] ?? null,
+        'server_time' => $nowFloat
+    ]);
+    exit;
+}
+
+if ($action === 'initiate_pull') {
+    $puller = trim($input['puller_name'] ?? 'Player');
+    $countdown = 5.0; // 5-second grace period for final bets
+    $room['pull_initiated'] = [
+        'puller_name' => htmlspecialchars($puller, ENT_QUOTES, 'UTF-8'),
+        'start_time' => $nowFloat,
+        'drop_time' => $nowFloat + $countdown
+    ];
+    saveRoomState($roomFile, $room);
+    echo json_encode([
+        'status' => 'ok',
+        'pull_initiated' => $room['pull_initiated'],
+        'seats' => $room['seats'],
         'server_time' => $nowFloat
     ]);
     exit;
@@ -154,6 +178,7 @@ if ($action === 'broadcast_roll') {
         'puller_name' => $puller,
         'time' => $nowFloat
     ];
+    $room['pull_initiated'] = null;
     // Reset bets on server
     for ($s = 0; $s < 4; $s++) {
         if (isset($room['seats'][$s]) && $room['seats'][$s] !== null) {
@@ -161,12 +186,22 @@ if ($action === 'broadcast_roll') {
         }
     }
     saveRoomState($roomFile, $room);
-    echo json_encode(['status' => 'ok', 'last_roll' => $room['last_roll'], 'seats' => $room['seats']]);
+    echo json_encode(['status' => 'ok', 'last_roll' => $room['last_roll'], 'seats' => $room['seats'], 'server_time' => $nowFloat]);
     exit;
 }
 
 // Default GET state
+if (isset($room['pull_initiated']) && $nowFloat > (($room['pull_initiated']['drop_time'] ?? 0) + 8)) {
+    $room['pull_initiated'] = null;
+    $seatsChanged = true;
+}
 if ($seatsChanged) {
     saveRoomState($roomFile, $room);
 }
-echo json_encode(['status' => 'ok', 'seats' => $room['seats'], 'last_roll' => $room['last_roll'] ?? null, 'server_time' => $nowFloat]);
+echo json_encode([
+    'status' => 'ok',
+    'seats' => $room['seats'],
+    'last_roll' => $room['last_roll'] ?? null,
+    'pull_initiated' => $room['pull_initiated'] ?? null,
+    'server_time' => $nowFloat
+]);
