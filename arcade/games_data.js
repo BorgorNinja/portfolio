@@ -358,6 +358,7 @@ const ARCADE_GAMES = [
     maxWin: '4x',
     blurb: 'The undisputed Philippine carnival classic! Bet on Red, Yellow, Blue, Green, White, and Pink. 3 wooden cubes drop from the chute.',
     tags: ['6 Perya Colors', '1:1 Single Match', '2:1 Double Match', '3:1 Triple Match'],
+    directUrl: '/color_game/',
     type: 'color_game'
   },
   {

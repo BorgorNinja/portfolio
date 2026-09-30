@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>Perya Color Game 3D • Philippine Fiesta Carnival Arcade</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Plus+Jakarta+Sans:wght@500;700;800&family=JetBrains+Mono:wght@600;800&display=swap" rel="stylesheet">
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/OrbitControls.js"></script>
+  <style>
+    :root {
+      --bg: #070a12;
+      --gold: #facc15;
+      --gold-dark: #ca8a04;
+      --wood-dark: #271406;
+      --font-display: 'Cinzel', serif;
+      --font-sans: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background: var(--bg);
+      color: #f8fafc;
+      font-family: var(--font-sans);
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    /* Top Navigation Header */
+    header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 56px;
+      padding: 0 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(180deg, rgba(7, 10, 18, 0.95) 0%, rgba(7, 10, 18, 0.7) 80%, transparent 100%);
+      backdrop-filter: blur(8px);
+      z-index: 50;
+      border-bottom: 1px solid rgba(250, 204, 21, 0.15);
+    }
+
+    .brand-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-nav-back {
+      color: #38bdf8;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .btn-nav-back:hover {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: #38bdf8;
+      color: #fff;
+    }
+
+    .game-logo-title {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+      color: var(--gold);
+      text-shadow: 0 0 14px rgba(250, 204, 21, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-hud-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hud-balance-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(250, 204, 21, 0.4);
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      color: #fde047;
+      box-shadow: 0 0 12px rgba(250, 204, 21, 0.15);
+      font-size: 0.9rem;
+    }
+
+    .btn-hud-icon {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #cbd5e1;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+    .btn-hud-icon:hover {
+      background: rgba(250, 204, 21, 0.2);
+      border-color: var(--gold);
+      color: #fff;
+    }
+
+    /* 3D WebGL Canvas Container */
+    #webgl-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Center Toast Banner */
+    .center-banner {
+      position: absolute;
+      top: 68px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 15, 29, 0.88);
+      border: 1px solid rgba(250, 204, 21, 0.4);
+      border-radius: 30px;
+      padding: 7px 22px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: 0.5px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+      z-index: 20;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+
+    /* Pull Rope Floating Visual Hint */
+    .rope-hint-tag {
+      position: absolute;
+      top: 195px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(239, 68, 68, 0.85);
+      border: 1px solid #fde047;
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      pointer-events: none;
+      z-index: 20;
+      animation: hintFloat 1.2s infinite alternate ease-in-out;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
+    }
+    @keyframes hintFloat {
+      0% { transform: translate(-50%, 0); }
+      100% { transform: translate(-50%, 6px); }
+    }
+
+    /* Bottom Carnival Control Deck */
+    .carnival-controls-deck {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 24px);
+      max-width: 960px;
+      background: linear-gradient(180deg, rgba(17, 24, 39, 0.94) 0%, rgba(10, 14, 26, 0.98) 100%);
+      border: 2px solid rgba(250, 204, 21, 0.4);
+      border-radius: 18px;
+      padding: 12px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.75), inset 0 0 20px rgba(250, 204, 21, 0.08);
+      z-index: 40;
+    }
+
+    /* Total Stake & Live Outcome Row */
+    .deck-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.82rem;
+    }
+
+    .stakes-summary {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      font-family: var(--font-mono);
+    }
+
+    .color-chip-tag {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.5);
+      font-size: 0.75rem;
+      border: 1px solid;
+    }
+
+    /* Controls Bar */
+    .deck-bottom-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* Chip Selector Group */
+    .chip-selector-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chip-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px dashed rgba(255, 255, 255, 0.4);
+      font-family: var(--font-mono);
+      font-weight: 800;
+      font-size: 0.78rem;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    }
+    .chip-btn:hover {
+      transform: translateY(-3px) scale(1.08);
+    }
+    .chip-btn.active {
+      border: 3px solid #fff;
+      transform: translateY(-5px) scale(1.15);
+      box-shadow: 0 0 16px currentColor;
+    }
+
+    .chip-10   { background: radial-gradient(circle, #38bdf8 40%, #0284c7 100%); color: #fff; }
+    .chip-50   { background: radial-gradient(circle, #34d399 40%, #059669 100%); color: #fff; }
+    .chip-100  { background: radial-gradient(circle, #f43f5e 40%, #e11d48 100%); color: #fff; }
+    .chip-500  { background: radial-gradient(circle, #a855f7 40%, #7e22ce 100%); color: #fff; }
+    .chip-1000 { background: radial-gradient(circle, #facc15 40%, #ca8a04 100%); color: #000; }
+
+    /* Action Buttons */
+    .quick-actions-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-quick {
+      padding: 8px 14px;
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #cbd5e1;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-quick:hover {
+      background: rgba(250, 204, 21, 0.15);
+      border-color: var(--gold);
+      color: #fff;
+    }
+
+    /* Big Main Action Button */
+    .btn-main-drop {
+      padding: 10px 24px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border: 2px solid #fde047;
+      border-radius: 12px;
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 0.92rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 0 24px rgba(245, 158, 11, 0.45);
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .btn-main-drop:hover:not(:disabled) {
+      transform: scale(1.04);
+      box-shadow: 0 0 32px rgba(245, 158, 11, 0.7);
+    }
+    .btn-main-drop:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Celebration Banner */
+    .celebration-overlay {
+      position: absolute;
+      top: 35%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.6);
+      background: radial-gradient(circle, rgba(234, 179, 8, 0.95) 0%, rgba(180, 83, 9, 0.98) 100%);
+      border: 3px solid #fff;
+      border-radius: 20px;
+      padding: 20px 40px;
+      color: #fff;
+      text-align: center;
+      box-shadow: 0 0 50px rgba(250, 204, 21, 0.8);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .celebration-overlay.active {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    .celebration-title {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    }
+    .celebration-sub {
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #fef08a;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 640px) {
+      .game-logo-title { font-size: 0.9rem; }
+      .brand-left .btn-nav-back span { display: none; }
+      .chip-btn { width: 38px; height: 38px; font-size: 0.7rem; }
+      .carnival-controls-deck { padding: 8px 12px; bottom: 8px; }
+      .btn-main-drop { padding: 8px 16px; font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand-left">
+      <a href="/arcade/" class="btn-nav-back">← <span>Arcadia Lobby</span></a>
+      <div class="game-logo-title">🎪 PERYA COLOR GAME 3D</div>
+    </div>
+    <div class="nav-hud-right">
+      <div class="hud-balance-pill">
+        <span>💰</span>
+        <span id="display-wallet">25,000</span>
+      </div>
+      <button class="btn-hud-icon" id="btn-ayuda" title="Claim ₱2,000 Ayuda Refill">🎁 Ayuda</button>
+      <button class="btn-hud-icon" id="btn-bgm" title="Toggle Fiesta Carnival Music">🎵 Music</button>
+      <button class="btn-hud-icon" id="btn-sfx" title="Toggle Sound Effects">🔊</button>
+      <button class="btn-hud-icon" id="btn-cam" title="Toggle 3D Camera Angle">🎥 View</button>
+    </div>
+  </header>
+
+  <!-- Banner & Floating Rope Label -->
+  <div class="center-banner" id="status-banner">
+    <span>🎪</span>
+    <span id="banner-text">Click the 3D colored table squares to place chips, then pull the rope!</span>
+  </div>
+  <div class="rope-hint-tag" id="rope-hint">▲ PULL ROPE ▲</div>
+
+  <!-- 3D Canvas -->
+  <div id="webgl-container"></div>
+
+  <!-- Celebration Popup -->
+  <div class="celebration-overlay" id="celeb-modal">
+    <div class="celebration-title" id="celeb-title">FIESTA WIN!</div>
+    <div class="celebration-sub" id="celeb-sub">+500 COINS</div>
+  </div>
+
+  <!-- Bottom Carnival Deck -->
+  <div class="carnival-controls-deck">
+    <div class="deck-top-row">
+      <div class="stakes-summary" id="chips-summary-row">
+        <span>Active Bets:</span>
+        <span class="color-chip-tag" style="border-color:#ef4444; color:#ef4444">RED: <b id="val-red">0</b></span>
+        <span class="color-chip-tag" style="border-color:#facc15; color:#facc15">YEL: <b id="val-yellow">0</b></span>
+        <span class="color-chip-tag" style="border-color:#3b82f6; color:#3b82f6">BLU: <b id="val-blue">0</b></span>
+        <span class="color-chip-tag" style="border-color:#10b981; color:#10b981">GRN: <b id="val-green">0</b></span>
+        <span class="color-chip-tag" style="border-color:#f8fafc; color:#f8fafc">WHT: <b id="val-white">0</b></span>
+        <span class="color-chip-tag" style="border-color:#ec4899; color:#ec4899">PNK: <b id="val-pink">0</b></span>
+      </div>
+      <div style="font-family: var(--font-mono); color: #94a3b8;">
+        Total: <span id="total-staked-val" style="color:#fff; font-weight:800;">0</span>
+      </div>
+    </div>
+
+    <div class="deck-bottom-row">
+      <!-- Chips -->
+      <div class="chip-selector-group">
+        <button class="chip-btn chip-10" data-val="10">10</button>
+        <button class="chip-btn chip-50 active" data-val="50">50</button>
+        <button class="chip-btn chip-100" data-val="100">100</button>
+        <button class="chip-btn chip-500" data-val="500">500</button>
+        <button class="chip-btn chip-1000" data-val="1000">1K</button>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions-group">
+        <button class="btn-quick" id="btn-clear">✕ Clear</button>
+        <button class="btn-quick" id="btn-double">2x Double</button>
+      </div>
+
+      <!-- Main Action -->
+      <button class="btn-main-drop" id="btn-drop">
+        <span>🎪 HILAHIN ANG LUBID / DROP CUBES</span>
+      </button>
+    </div>
+  </div>
+
+  <audio id="bgm-player" src="audio/bgm_perya.mp3" loop preload="none"></audio>
+
+  <!-- =========================================================================
+       3D WEBGL ENGINE & PERYA CARNIVAL LOGIC
+       ========================================================================= -->
+  <script>
+    'use strict';
+
+    /* --- Sound Synthesizer & Audio Engine --- */
+    class PeryaAudio {
+      constructor() {
+        this.ctx = null;
+        this.sfxMuted = localStorage.getItem('perya_sfx_muted') === '1';
+        this.bgmMuted = localStorage.getItem('perya_bgm_muted') === '1';
+        this.bgmEl = document.getElementById('bgm-player');
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) this.ctx = new AC();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      toggleSFX() {
+        this.sfxMuted = !this.sfxMuted;
+        localStorage.setItem('perya_sfx_muted', this.sfxMuted ? '1' : '0');
+        return !this.sfxMuted;
+      }
+
+      toggleBGM() {
+        this.bgmMuted = !this.bgmMuted;
+        localStorage.setItem('perya_bgm_muted', this.bgmMuted ? '1' : '0');
+        if (this.bgmMuted) {
+          this.bgmEl.pause();
+        } else {
+          this.bgmEl.volume = 0.45;
+          this.bgmEl.play().catch(() => {});
+        }
+        return !this.bgmMuted;
+      }
+
+      woodClack(pitch = 1.0) {
+        if (this.sfxMuted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(140 * pitch, now);
+        osc.frequency.exponentialRampToValueAtTime(45 * pitch, now + 0.08);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.09);
+      }
+
+      chip() {
+        if (this.sfxMuted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1900 + Math.random() * 400, now);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+
+      ropePull() {
+        if (this.sfxMuted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        // Wood creak & rope strain
+        for (let i = 0; i < 3; i++) {
+          setTimeout(() => {
+            if (!this.ctx) return;
+            const t = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(280 + i * 40, t);
+            osc.frequency.exponentialRampToValueAtTime(110, t + 0.12);
+            gain.gain.setValueAtTime(0.2, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(t);
+            osc.stop(t + 0.12);
+          }, i * 45);
+        }
+      }
+
+      fanfare(level = 1) {
+        if (this.sfxMuted) return;
+        this.init();
+        if (!this.ctx) return;
+        const freqs = level >= 3 ? [523, 659, 783, 1046, 1318] : (level === 2 ? [523, 659, 783, 1046] : [523, 659, 783]);
+        const now = this.ctx.currentTime;
+        freqs.forEach((f, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(f, now + idx * 0.08);
+          gain.gain.setValueAtTime(0.25, now + idx * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.4);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.08);
+          osc.stop(now + idx * 0.08 + 0.4);
+        });
+      }
+    }
+
+    const sound = new PeryaAudio();
+
+    /* --- Wallet Management --- */
+    class WalletManager {
+      constructor() {
+        const saved = localStorage.getItem('borgor_slots_balance') || localStorage.getItem('jtrash_wallet_balance') || '25000';
+        this.balance = parseInt(saved, 10);
+        if (isNaN(this.balance) || this.balance <= 0) this.balance = 25000;
+        this.updateHUD();
+      }
+      get() { return this.balance; }
+      add(amt) {
+        this.balance += amt;
+        this.save();
+      }
+      deduct(amt) {
+        if (this.balance < amt) return false;
+        this.balance -= amt;
+        this.save();
+        return true;
+      }
+      save() {
+        localStorage.setItem('borgor_slots_balance', this.balance);
+        localStorage.setItem('jtrash_wallet_balance', this.balance);
+        this.updateHUD();
+      }
+      updateHUD() {
+        const el = document.getElementById('display-wallet');
+        if (el) el.textContent = this.balance.toLocaleString();
+      }
+    }
+
+    const wallet = new WalletManager();
+
+    /* --- Perya Color Configuration --- */
+    const PERYA_COLORS = [
+      { id: 'red',    name: 'PULA (RED)',       hex: '#ef4444', threeColor: 0xef4444, x: -2.3, z: -0.9 },
+      { id: 'yellow', name: 'DILAW (YELLOW)',   hex: '#facc15', threeColor: 0xfacc15, x: 0.0,  z: -0.9 },
+      { id: 'blue',   name: 'ASUL (BLUE)',      hex: '#2563eb', threeColor: 0x2563eb, x: 2.3,  z: -0.9 },
+      { id: 'green',  name: 'BERDE (GREEN)',    hex: '#16a34a', threeColor: 0x16a34a, x: -2.3, z: 1.1 },
+      { id: 'white',  name: 'PUTI (WHITE)',     hex: '#f8fafc', threeColor: 0xf8fafc, x: 0.0,  z: 1.1 },
+      { id: 'pink',   name: 'ROSA (PINK)',      hex: '#ec4899', threeColor: 0xec4899, x: 2.3,  z: 1.1 }
+    ];
+
+    let currentChip = 50;
+    let bets = { red: 0, yellow: 0, blue: 0, green: 0, white: 0, pink: 0 };
+    let isRolling = false;
+
+    /* --- Three.js 3D Scene Setup --- */
+    const container = document.getElementById('webgl-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x070a12);
+    scene.fog = new THREE.FogExp2(0x070a12, 0.035);
+
+    const camera = new THREE.PerspectiveCamera(46, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 5.4, 6.6);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = false; // Disabled to guarantee butter smooth 60 FPS on all devices
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.target.set(0, 0.9, 0);
+    controls.maxPolarAngle = Math.PI / 2.05;
+    controls.minDistance = 4;
+    controls.maxDistance = 14;
+
+    /* --- Lighting: Festive Perya Carnival Glow --- */
+    const ambientLight = new THREE.AmbientLight(0xfff1d6, 0.7);
+    scene.add(ambientLight);
+
+    const keyLight = new THREE.DirectionalLight(0xfff7e6, 1.6);
+    keyLight.position.set(5, 12, 6);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.width = 2048;
+    keyLight.shadow.mapSize.height = 2048;
+    keyLight.shadow.camera.near = 0.5;
+    keyLight.shadow.camera.far = 25;
+    keyLight.shadow.camera.left = -7;
+    keyLight.shadow.camera.right = 7;
+    keyLight.shadow.camera.top = 7;
+    keyLight.shadow.camera.bottom = -7;
+    keyLight.shadow.bias = -0.0005;
+    scene.add(keyLight);
+
+    const boothFill = new THREE.PointLight(0xf59e0b, 1.2, 16);
+    boothFill.position.set(0, 6.5, 1);
+    scene.add(boothFill);
+
+    /* --- 3D Texture Generators for Perya Cube Faces --- */
+    function createPeryaFaceTexture(colorHex, name) {
+      const cv = document.createElement('canvas');
+      cv.width = 256;
+      cv.height = 256;
+      const ctx = cv.getContext('2d');
+
+      // Base Solid Perya Color
+      ctx.fillStyle = colorHex;
+      ctx.fillRect(0, 0, 256, 256);
+
+      // Subtle wood grain / carnival finish
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+      for (let i = 0; i < 256; i += 8) {
+        ctx.fillRect(0, i, 256, 3);
+      }
+
+      // Border insets
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth = 10;
+      ctx.strokeRect(10, 10, 236, 236);
+
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(18, 18, 220, 220);
+
+      // Iconic Central White Circle Emblem
+      ctx.beginPath();
+      ctx.arc(128, 128, 54, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = 'rgba(0,0,0,0.3)';
+      ctx.shadowBlur = 8;
+      ctx.fill();
+
+      // Inner ring
+      ctx.beginPath();
+      ctx.arc(128, 128, 38, 0, Math.PI * 2);
+      ctx.strokeStyle = colorHex;
+      ctx.lineWidth = 8;
+      ctx.stroke();
+
+      const tex = new THREE.CanvasTexture(cv);
+      tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      return tex;
+    }
+
+    const cubeFaceMaterials = [
+      new THREE.MeshStandardMaterial({ map: createPeryaFaceTexture('#ec4899', 'PINK'), roughness: 0.35, metalness: 0.1 }),   // +X: Pink
+      new THREE.MeshStandardMaterial({ map: createPeryaFaceTexture('#2563eb', 'BLUE'), roughness: 0.35, metalness: 0.1 }),   // -X: Blue
+      new THREE.MeshStandardMaterial({ map: createPeryaFaceTexture('#dc2626', 'RED'), roughness: 0.35, metalness: 0.1 }),    // +Y: Red
+      new THREE.MeshStandardMaterial({ map: createPeryaFaceTexture('#16a34a', 'GREEN'), roughness: 0.35, metalness: 0.1 }),  // -Y: Green
+      new THREE.MeshStandardMaterial({ map: createPeryaFaceTexture('#facc15', 'YELLOW'), roughness: 0.35, metalness: 0.1 }), // +Z: Yellow
+      new THREE.MeshStandardMaterial({ map: createPeryaFaceTexture('#f8fafc', 'WHITE'), roughness: 0.35, metalness: 0.1 })   // -Z: White
+    ];
+
+    /* --- Build 3D Carnival Booth & Wooden Stage --- */
+    const carnivalGroup = new THREE.Group();
+    scene.add(carnivalGroup);
+
+    // Weathered Wood Material
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0x3d2314, roughness: 0.75, metalness: 0.05 });
+    const woodRimMat = new THREE.MeshStandardMaterial({ color: 0x5a341e, roughness: 0.6, metalness: 0.1 });
+    const brassMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.3, metalness: 0.85 });
+
+    // Table Base (Wood Deck)
+    const tableGeom = new THREE.BoxGeometry(8.2, 0.45, 5.2);
+    const tableMesh = new THREE.Mesh(tableGeom, woodMat);
+    tableMesh.position.set(0, -0.22, 0.1);
+    tableMesh.receiveShadow = true;
+    carnivalGroup.add(tableMesh);
+
+    // Table Border Rim (Raised wooden retaining rail)
+    const railMat = woodRimMat;
+    const rimFront = new THREE.Mesh(new THREE.BoxGeometry(8.4, 0.35, 0.25), railMat);
+    rimFront.position.set(0, 0.1, 2.7);
+    carnivalGroup.add(rimFront);
+
+    const rimBack = new THREE.Mesh(new THREE.BoxGeometry(8.4, 0.8, 0.25), railMat);
+    rimBack.position.set(0, 0.3, -2.5);
+    carnivalGroup.add(rimBack);
+
+    const rimLeft = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.5, 5.4), railMat);
+    rimLeft.position.set(-4.2, 0.2, 0.1);
+    carnivalGroup.add(rimLeft);
+
+    const rimRight = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.5, 5.4), railMat);
+    rimRight.position.set(4.2, 0.2, 0.1);
+    carnivalGroup.add(rimRight);
+
+    /* --- The 6 Interactive 3D Betting Pads (Table Mat) --- */
+    const padsGroup = new THREE.Group();
+    carnivalGroup.add(padsGroup);
+    const padMeshes = [];
+
+    PERYA_COLORS.forEach(c => {
+      const padGroup = new THREE.Group();
+      padGroup.position.set(c.x, 0.05, c.z);
+
+      // Pad Frame
+      const frameGeom = new THREE.BoxGeometry(2.1, 0.08, 1.8);
+      const frameMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 });
+      const frame = new THREE.Mesh(frameGeom, frameMat);
+      frame.receiveShadow = true;
+      padGroup.add(frame);
+
+      // Colored Top Surface
+      const surfGeom = new THREE.BoxGeometry(1.95, 0.04, 1.65);
+      const surfMat = new THREE.MeshStandardMaterial({
+        color: c.threeColor,
+        roughness: 0.3,
+        metalness: 0.15,
+        emissive: c.threeColor,
+        emissiveIntensity: 0.08
+      });
+      const surf = new THREE.Mesh(surfGeom, surfMat);
+      surf.position.y = 0.05;
+      surf.receiveShadow = true;
+      surf.userData = { isPad: true, colorId: c.id, colorData: c, baseMat: surfMat };
+      padGroup.add(surf);
+      padMeshes.push(surf);
+
+      // Center White Ring on Pad
+      const ringGeom = new THREE.CylinderGeometry(0.38, 0.38, 0.02, 32);
+      const ringMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 });
+      const ring = new THREE.Mesh(ringGeom, ringMat);
+      ring.position.y = 0.075;
+      padGroup.add(ring);
+
+      padsGroup.add(padGroup);
+    });
+
+    /* --- 3D Chute & Suspended Wooden Funnel --- */
+    const chuteGroup = new THREE.Group();
+    chuteGroup.position.set(0, 3.8, -0.6);
+    carnivalGroup.add(chuteGroup);
+
+    // Chute Box
+    const chuteBoxGeom = new THREE.BoxGeometry(4.2, 1.8, 1.6);
+    const chuteBox = new THREE.Mesh(chuteBoxGeom, woodMat);
+    chuteBox.castShadow = true;
+    chuteGroup.add(chuteBox);
+
+    // Brass Corners & Trim
+    const brassTrim = new THREE.Mesh(new THREE.BoxGeometry(4.3, 0.1, 1.7), brassMat);
+    brassTrim.position.y = 0.9;
+    chuteGroup.add(brassTrim);
+
+    const brassTrimBot = new THREE.Mesh(new THREE.BoxGeometry(4.3, 0.1, 1.7), brassMat);
+    brassTrimBot.position.y = -0.9;
+    chuteGroup.add(brassTrimBot);
+
+    // Striped Carnival Roof Awning at the Top
+    const awningGeom = new THREE.BoxGeometry(6.4, 0.35, 1.4);
+    const awningMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.6 });
+    const awning = new THREE.Mesh(awningGeom, awningMat);
+    awning.position.set(0, 1.05, 0.1);
+    chuteGroup.add(awning);
+
+    // Decorative festival pennants (banderitas) hanging across the chute
+    for (let i = 0; i < 9; i++) {
+      const flagGeom = new THREE.ConeGeometry(0.16, 0.38, 3);
+      const flagColors = [0xef4444, 0xfacc15, 0x3b82f6, 0x10b981, 0xec4899];
+      const flagMat = new THREE.MeshStandardMaterial({ color: flagColors[i % 5], roughness: 0.4 });
+      const flag = new THREE.Mesh(flagGeom, flagMat);
+      flag.rotation.x = Math.PI;
+      flag.position.set(-2.8 + i * 0.7, 0.75, 0.85);
+      chuteGroup.add(flag);
+    }
+
+    // Chute Trapdoor (Hinged Flap)
+    const doorGeom = new THREE.BoxGeometry(3.6, 0.12, 1.2);
+    doorGeom.translate(0, 0, 0.6);
+    const trapdoor = new THREE.Mesh(doorGeom, woodRimMat);
+    trapdoor.position.set(0, -0.95, -0.6);
+    chuteGroup.add(trapdoor);
+
+    // Hanging 3D Rope & Pull Handle
+    const ropeGroup = new THREE.Group();
+    ropeGroup.position.set(2.4, 0.2, 0.2);
+    chuteGroup.add(ropeGroup);
+
+    const ropeCordGeom = new THREE.CylinderGeometry(0.04, 0.04, 2.2, 12);
+    const ropeMat = new THREE.MeshStandardMaterial({ color: 0xd4b996, roughness: 0.9 });
+    const ropeCord = new THREE.Mesh(ropeCordGeom, ropeMat);
+    ropeCord.position.y = -1.1;
+    ropeGroup.add(ropeCord);
+
+    // Red Wooden Tassel Handle
+    const tasselGeom = new THREE.CylinderGeometry(0.12, 0.18, 0.45, 16);
+    const tasselMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.4 });
+    const tassel = new THREE.Mesh(tasselGeom, tasselMat);
+    tassel.position.y = -2.3;
+    tassel.castShadow = true;
+    tassel.userData = { isRope: true };
+    ropeGroup.add(tassel);
+
+    /* --- The 3 Large 3D Wooden Perya Blocks (Cubes) --- */
+    const cubesGroup = new THREE.Group();
+    scene.add(cubesGroup);
+
+    const S = 0.92;
+    const cubeGeom = new THREE.BoxGeometry(S, S, S);
+
+    const diceMeshes = [];
+    const initialFloorY = 0.52;
+
+    const diceState = [
+      {
+        mesh: null,
+        spawnX: -1.4,
+        y: initialFloorY,
+        vy: 0,
+        rot: new THREE.Euler(0, 0, 0),
+        vRot: new THREE.Vector3(),
+        settled: true,
+        bounces: 0,
+        targetColor: 'yellow'
+      },
+      {
+        mesh: null,
+        spawnX: 0,
+        y: initialFloorY,
+        vy: 0,
+        rot: new THREE.Euler(0, 0, 0),
+        vRot: new THREE.Vector3(),
+        settled: true,
+        bounces: 0,
+        targetColor: 'red'
+      },
+      {
+        mesh: null,
+        spawnX: 1.4,
+        y: initialFloorY,
+        vy: 0,
+        rot: new THREE.Euler(0, 0, 0),
+        vRot: new THREE.Vector3(),
+        settled: true,
+        bounces: 0,
+        targetColor: 'blue'
+      }
+    ];
+
+    diceState.forEach((d, idx) => {
+      const mesh = new THREE.Mesh(cubeGeom, cubeFaceMaterials);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      mesh.position.set(d.spawnX, d.y, 0.1);
+      cubesGroup.add(mesh);
+      d.mesh = mesh;
+    });
+
+    // Face rotation map: brings the requested color directly facing the camera with slight top pitch
+    const TARGET_EULERS = {
+      yellow: new THREE.Euler(-0.4, 0, 0),
+      white:  new THREE.Euler(-0.4, Math.PI, 0),
+      pink:   new THREE.Euler(-0.4, -Math.PI / 2, 0),
+      blue:   new THREE.Euler(-0.4, Math.PI / 2, 0),
+      red:    new THREE.Euler(Math.PI / 2 - 0.4, 0, 0),
+      green:  new THREE.Euler(-Math.PI / 2 - 0.4, 0, 0)
+    };
+
+    // Set initial settled orientation
+    diceState[0].mesh.rotation.copy(TARGET_EULERS['yellow']);
+    diceState[1].mesh.rotation.copy(TARGET_EULERS['red']);
+    diceState[2].mesh.rotation.copy(TARGET_EULERS['blue']);
+
+    /* --- 3D Stacked Casino Chips on Pads --- */
+    const chipStacks = { red: [], yellow: [], blue: [], green: [], white: [], pink: [] };
+    const chipGeom = new THREE.CylinderGeometry(0.24, 0.24, 0.065, 24);
+
+    function addChipTo3DTable(colorId, chipVal) {
+      const padConfig = PERYA_COLORS.find(c => c.id === colorId);
+      if (!padConfig) return;
+
+      const stack = chipStacks[colorId];
+      const chipMat = new THREE.MeshStandardMaterial({
+        color: padConfig.threeColor,
+        roughness: 0.25,
+        metalness: 0.2
+      });
+      const chipMesh = new THREE.Mesh(chipGeom, chipMat);
+      chipMesh.castShadow = true;
+      chipMesh.receiveShadow = true;
+
+      // Jitter & stack altitude
+      const stackHeight = stack.length * 0.07;
+      const jitterX = (Math.random() - 0.5) * 0.22;
+      const jitterZ = (Math.random() - 0.5) * 0.22;
+
+      chipMesh.position.set(padConfig.x + jitterX, 0.12 + stackHeight, padConfig.z + jitterZ);
+      padsGroup.add(chipMesh);
+      stack.push(chipMesh);
+    }
+
+    function clear3DChips() {
+      Object.keys(chipStacks).forEach(k => {
+        chipStacks[k].forEach(c => padsGroup.remove(c));
+        chipStacks[k] = [];
+      });
+    }
+
+    /* --- Raycasting for 3D Table & Rope Interaction --- */
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    function onPointerDown(e) {
+      if (isRolling) return;
+      // Exclude clicks on UI elements
+      if (e.target.closest('.carnival-controls-deck') || e.target.closest('header')) return;
+
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects([...padMeshes, tassel], true);
+
+      if (intersects.length > 0) {
+        const hit = intersects[0].object;
+        if (hit.userData && hit.userData.isPad) {
+          const colId = hit.userData.colorId;
+          placeBet(colId);
+        } else if (hit.userData && hit.userData.isRope) {
+          triggerDropCubes();
+        }
+      }
+    }
+
+    window.addEventListener('pointerdown', onPointerDown);
+
+    /* --- Betting Logic --- */
+    function placeBet(colorId) {
+      if (isRolling) return;
+      if (wallet.deduct(currentChip)) {
+        bets[colorId] += currentChip;
+        sound.chip();
+        addChipTo3DTable(colorId, currentChip);
+        updateStakesUI();
+
+        // Flash pad emissive
+        const padMesh = padMeshes.find(p => p.userData.colorId === colorId);
+        if (padMesh) {
+          padMesh.material.emissiveIntensity = 0.6;
+          setTimeout(() => padMesh.material.emissiveIntensity = 0.08, 180);
+        }
+      } else {
+        showBanner('❌ Not enough coins! Claim ₱2,000 Ayuda refill at the top.');
+        sound.woodClack(0.6);
+      }
+    }
+
+    function updateStakesUI() {
+      let total = 0;
+      PERYA_COLORS.forEach(c => {
+        const v = bets[c.id];
+        total += v;
+        const el = document.getElementById(`val-${c.id}`);
+        if (el) el.textContent = v.toLocaleString();
+      });
+      document.getElementById('total-staked-val').textContent = total.toLocaleString();
+    }
+
+    function clearBets() {
+      if (isRolling) return;
+      let totalRefund = 0;
+      Object.keys(bets).forEach(k => {
+        totalRefund += bets[k];
+        bets[k] = 0;
+      });
+      wallet.add(totalRefund);
+      clear3DChips();
+      updateStakesUI();
+      sound.chip();
+    }
+
+    function doubleBets() {
+      if (isRolling) return;
+      const total = Object.values(bets).reduce((a,b) => a+b, 0);
+      if (total <= 0) return;
+      if (wallet.deduct(total)) {
+        Object.keys(bets).forEach(k => {
+          if (bets[k] > 0) {
+            bets[k] *= 2;
+            addChipTo3DTable(k, currentChip);
+          }
+        });
+        sound.chip();
+        updateStakesUI();
+      } else {
+        showBanner('❌ Not enough coins to double current bets!');
+      }
+    }
+
+    /* --- Drop 3D Cubes (Hilahin ang Lubid) --- */
+    function triggerDropCubes() {
+      if (isRolling) return;
+      const totalStaked = Object.values(bets).reduce((a,b) => a+b, 0);
+      if (totalStaked <= 0) {
+        showBanner('⚠️ Place chips on at least one color before pulling the rope!');
+        sound.woodClack(0.6);
+        return;
+      }
+
+      isRolling = true;
+      document.getElementById('btn-drop').disabled = true;
+      sound.ropePull();
+
+      // Animate Rope Pull & Trapdoor Flap
+      let ropePullAnim = 0;
+      const pullInterval = setInterval(() => {
+        ropePullAnim += 0.15;
+        ropeGroup.position.y = 0.2 - Math.sin(ropePullAnim) * 0.45;
+        trapdoor.rotation.x = Math.sin(ropePullAnim) * 1.2;
+        if (ropePullAnim >= Math.PI) {
+          clearInterval(pullInterval);
+          ropeGroup.position.y = 0.2;
+          trapdoor.rotation.x = 0;
+        }
+      }, 25);
+
+      showBanner('🎪 Cubes tumbling out of the chute...');
+
+      // Roll 3 random winning colors
+      const roll1 = PERYA_COLORS[Math.floor(Math.random() * 6)].id;
+      const roll2 = PERYA_COLORS[Math.floor(Math.random() * 6)].id;
+      const roll3 = PERYA_COLORS[Math.floor(Math.random() * 6)].id;
+      const winningColors = [roll1, roll2, roll3];
+
+      // Launch Cubes with realistic drop & spin physics
+      diceState.forEach((d, i) => {
+        d.y = 3.6 + i * 0.4;
+        d.mesh.position.y = d.y;
+        d.mesh.position.x = d.spawnX + (Math.random() - 0.5) * 0.3;
+        d.mesh.position.z = -0.5 + (Math.random() - 0.5) * 0.4;
+
+        d.vy = -0.05 - Math.random() * 0.04;
+        d.vRot.set(
+          (Math.random() - 0.5) * 0.5,
+          (Math.random() - 0.5) * 0.5,
+          (Math.random() - 0.5) * 0.5
+        );
+        d.targetColor = winningColors[i];
+        d.settled = false;
+        d.bounces = 0;
+      });
+
+      // Settle and evaluate after 2.1s
+      setTimeout(() => {
+        evaluateRoll(winningColors);
+      }, 2100);
+    }
+
+    function evaluateRoll(winningColors) {
+      // Force cubes cleanly to their exact target angles & resting floor altitude
+      diceState.forEach(d => {
+        d.settled = true;
+        d.y = initialFloorY;
+        d.mesh.position.y = initialFloorY;
+        const targetRot = TARGET_EULERS[d.targetColor];
+        if (targetRot) d.mesh.rotation.copy(targetRot);
+      });
+
+      const counts = {};
+      winningColors.forEach(c => counts[c] = (counts[c] || 0) + 1);
+
+      let totalWon = 0;
+      let winningPads = [];
+
+      Object.keys(bets).forEach(id => {
+        if (counts[id] && bets[id] > 0) {
+          // 1 match = stake returned + 1x. 2 matches = stake + 2x. 3 matches = stake + 3x!
+          const winMultiplier = 1 + counts[id];
+          totalWon += bets[id] * winMultiplier;
+          winningPads.push({ id, count: counts[id] });
+        }
+      });
+
+      const colorNames = winningColors.map(id => PERYA_COLORS.find(c => c.id === id).name.split(' ')[0]).join(' • ');
+
+      if (totalWon > 0) {
+        wallet.add(totalWon);
+        const maxMatch = Math.max(...Object.values(counts));
+        sound.fanfare(maxMatch);
+        showCelebration(maxMatch >= 3 ? '🎉 TRIPLE FIESTA JACKPOT!' : (maxMatch === 2 ? '🔥 DOUBLE COLOR WIN!' : '✨ WINNER!'), `+₱${totalWon.toLocaleString()}`);
+        showBanner(`🏆 WON ₱${totalWon.toLocaleString()}! (${colorNames})`);
+
+        // Glow winning 3D table pads
+        winningPads.forEach(wp => {
+          const pad = padMeshes.find(p => p.userData.colorId === wp.id);
+          if (pad) {
+            pad.material.emissiveIntensity = 0.9;
+            setTimeout(() => pad.material.emissiveIntensity = 0.08, 1600);
+          }
+        });
+      } else {
+        sound.woodClack(0.7);
+        showBanner(`Outcome: ${colorNames} — No match. Better luck next roll!`);
+      }
+
+      // Reset active bets
+      Object.keys(bets).forEach(k => bets[k] = 0);
+      clear3DChips();
+      updateStakesUI();
+
+      isRolling = false;
+      document.getElementById('btn-drop').disabled = false;
+    }
+
+    function showBanner(msg) {
+      document.getElementById('banner-text').textContent = msg;
+    }
+
+    function showCelebration(title, sub) {
+      const modal = document.getElementById('celeb-modal');
+      document.getElementById('celeb-title').textContent = title;
+      document.getElementById('celeb-sub').textContent = sub;
+      modal.classList.add('active');
+      setTimeout(() => modal.classList.remove('active'), 2400);
+    }
+
+    /* --- Event Listeners --- */
+    document.querySelectorAll('.chip-btn').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentChip = parseInt(btn.dataset.val, 10);
+        sound.chip();
+      };
+    });
+
+    document.getElementById('btn-clear').onclick = clearBets;
+    document.getElementById('btn-double').onclick = doubleBets;
+    document.getElementById('btn-drop').onclick = triggerDropCubes;
+
+    document.getElementById('btn-ayuda').onclick = () => {
+      wallet.add(2000);
+      sound.fanfare(1);
+      showBanner('🎁 ₱2,000 Free Ayuda Coins claimed!');
+    };
+
+    document.getElementById('btn-sfx').onclick = (e) => {
+      const on = sound.toggleSFX();
+      e.target.textContent = on ? '🔊' : '🔇';
+    };
+
+    document.getElementById('btn-bgm').onclick = (e) => {
+      const on = sound.toggleBGM();
+      e.target.style.color = on ? '#facc15' : '#94a3b8';
+    };
+
+    let camMode = 0;
+    document.getElementById('btn-cam').onclick = () => {
+      camMode = (camMode + 1) % 2;
+      if (camMode === 1) {
+        camera.position.set(0, 9.8, 1.2);
+        controls.target.set(0, 0, 0);
+      } else {
+        camera.position.set(0, 7.2, 7.8);
+        controls.target.set(0, 1.2, 0);
+      }
+    };
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    /* --- Animation / Physics Loop --- */
+    let clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = Math.min(clock.getDelta(), 0.05);
+
+      controls.update();
+
+      // Dice Physics
+      diceState.forEach((d, idx) => {
+        if (!d.settled) {
+          d.vy -= 18.0 * delta; // Gravity
+          d.y += d.vy * delta;
+          d.mesh.position.y = d.y;
+
+          d.mesh.rotation.x += d.vRot.x * delta * 20;
+          d.mesh.rotation.y += d.vRot.y * delta * 20;
+          d.mesh.rotation.z += d.vRot.z * delta * 20;
+
+          if (d.y <= initialFloorY) {
+            d.y = initialFloorY;
+            d.mesh.position.y = initialFloorY;
+            d.bounces++;
+            if (d.bounces < 3) {
+              d.vy = -d.vy * 0.45; // Bounce damping
+              d.vRot.multiplyScalar(0.65);
+              sound.woodClack(0.9 + Math.random() * 0.3);
+            } else {
+              d.vy = 0;
+              d.vRot.set(0, 0, 0);
+            }
+          }
+        } else if (!isRolling) {
+          // Idle gentle hover/breathing
+          d.mesh.position.y = initialFloorY + Math.sin(clock.getElapsedTime() * 2 + idx) * 0.02;
+        }
+      });
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
