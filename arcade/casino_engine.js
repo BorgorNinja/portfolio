@@ -660,28 +660,45 @@
         </div>
       `;
     }
+    const isRed = (card.suit === '♥' || card.suit === '♦');
+    const suitColor = isRed ? '#dc2626' : '#0f172a';
     const isRoyal = ['J', 'Q', 'K'].includes(card.rank);
     const isAce = card.rank === 'A';
     return `
-      <div class="casino-card ${isRoyal ? 'card-royal' : ''} ${isAce ? 'card-ace' : ''}" style="color: ${card.color};">
-        <div class="card-corner top-left">
-          <span>${card.rank}</span>
-          <span class="suit-icon">${card.suit}</span>
+      <div class="casino-card ${isRed ? 'suit-red' : 'suit-black'} ${isRoyal ? 'card-royal' : ''} ${isAce ? 'card-ace' : ''}" data-suit="${card.suit}" data-rank="${card.rank}" style="color: ${suitColor};">
+        <div class="card-corner top-left" style="color: ${suitColor};">
+          <span class="card-rank" style="color: ${suitColor};">${card.rank}</span>
+          <span class="suit-icon" style="color: ${suitColor};">${card.suit}</span>
         </div>
-        <div class="card-center">
-          ${isAce ? `<span style="font-size: 2.2rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">${card.suit}</span>` : `<span style="font-size: 1.5rem;">${card.suit}</span>`}
+        <div class="card-center" style="color: ${suitColor};">
+          ${isAce ? `<span class="suit-symbol" style="font-size: 2.2rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25)); color: ${suitColor};">${card.suit}</span>` : `<span class="suit-symbol" style="font-size: 1.5rem; color: ${suitColor};">${card.suit}</span>`}
         </div>
-        <div class="card-corner bottom-right">
-          <span>${card.rank}</span>
-          <span class="suit-icon">${card.suit}</span>
+        <div class="card-corner bottom-right" style="color: ${suitColor};">
+          <span class="card-rank" style="color: ${suitColor};">${card.rank}</span>
+          <span class="suit-icon" style="color: ${suitColor};">${card.suit}</span>
         </div>
       </div>
     `;
   }
 
   function buildBlackjack(gameDef, container) {
-    let deck = createDeck(gameDef.id === 'single_deck_bj' ? 1 : 6);
+    const isPontoon = (gameDef.id === 'pontoon');
+    const isSpanish21 = (gameDef.id === 'spanish21');
+    const isSingleDeck = (gameDef.id === 'single_deck_bj');
+    const feltClass = isPontoon ? 'felt-pontoon' : (isSpanish21 ? 'felt-spanish21' : (isSingleDeck ? 'felt-single-deck' : 'felt-blackjack'));
+
+    function getFreshDeck() {
+      if (isSingleDeck) return createDeck(1);
+      if (isSpanish21) {
+        // Spanish 21: 6 decks, all 10s removed (keeps J, Q, K with value 10)
+        return createDeck(6).filter(c => c.rank !== '10');
+      }
+      return createDeck(6);
+    }
+
+    let deck = getFreshDeck();
     let bet = 100;
+    let baseBet = 100;
     let playerHand = [];
     let dealerHand = [];
     let inRound = false;
@@ -702,7 +719,7 @@
 
     container.innerHTML = `
       <div class="theater-game-shell">
-        <div class="table-felt">
+        <div class="table-felt ${feltClass}">
           <div class="table-badge">${gameDef.title.toUpperCase()} • ${gameDef.badge}</div>
           <div class="dealer-area">
             <div class="hand-label">DEALER <span id="dealer-total" class="hand-badge">--</span></div>
@@ -767,13 +784,14 @@
 
     function startDeal() {
       updateBet(elBet.value);
+      baseBet = bet;
       if (!wallet.deduct(bet)) {
         sound.lose();
         elStatus.innerHTML = '<span style="color:#ef4444">Insufficient coins! Claim Free Ayuda below.</span>';
         return;
       }
       sound.chip();
-      deck = createDeck(gameDef.id === 'single_deck_bj' ? 1 : 6);
+      deck = getFreshDeck();
       playerHand = [deck.pop(), deck.pop()];
       dealerHand = [deck.pop(), deck.pop()];
       inRound = true;
@@ -809,7 +827,11 @@
       if (!inRound) return;
       playerHand.push(deck.pop());
       sound.card();
-      btnDouble.disabled = true;
+      if (!isSpanish21) {
+        btnDouble.disabled = true;
+      } else {
+        btnDouble.disabled = wallet.get() < bet;
+      }
       renderTable(true);
       const pTot = calcHand(playerHand);
       if (pTot > 21) {
@@ -864,9 +886,49 @@
 
       if (pTot > 21) {
         endRound('bust');
-      } else if (dTot > 21) {
+        return;
+      }
+      if (dTot > 21) {
         endRound('dealer_bust');
-      } else if (pTot === 21 && playerHand.length === 2 && (dTot !== 21 || dealerHand.length > 2)) {
+        return;
+      }
+
+      // Spanish 21 rules: Player 21 ALWAYS wins!
+      if (isSpanish21 && pTot === 21) {
+        if (playerHand.length === 2 && (dTot !== 21 || dealerHand.length > 2)) {
+          endRound('blackjack');
+        } else {
+          endRound('player_win');
+        }
+        return;
+      }
+
+      // Pontoon rules:
+      if (isPontoon) {
+        const playerIsPontoon = (pTot === 21 && playerHand.length === 2);
+        const dealerIsPontoon = (dTot === 21 && dealerHand.length === 2);
+        const playerIs5Card = (playerHand.length >= 5 && pTot <= 21);
+        const dealerIs5Card = (dealerHand.length >= 5 && dTot <= 21);
+
+        if (playerIsPontoon && !dealerIsPontoon) {
+          endRound('pontoon');
+        } else if (dealerIsPontoon) {
+          endRound('dealer_win');
+        } else if (playerIs5Card && !dealerIs5Card) {
+          endRound('5card_trick');
+        } else if (dealerIs5Card) {
+          endRound('dealer_win');
+        } else if (pTot > dTot) {
+          endRound('player_win');
+        } else {
+          // Dealer wins ties in Pontoon
+          endRound('dealer_win');
+        }
+        return;
+      }
+
+      // Standard Blackjack & Single Deck
+      if (pTot === 21 && playerHand.length === 2 && (dTot !== 21 || dealerHand.length > 2)) {
         endRound('blackjack');
       } else if (pTot > dTot) {
         endRound('player_win');
@@ -893,6 +955,20 @@
         celebration.burst('win', 90);
         window.CasinoEngine.showBanner('NATURAL BLACKJACK!', `+${winAmt.toLocaleString()} COINS`);
         elStatus.innerHTML = `<span style="color:#fde047; font-weight:800;">💥 NATURAL BLACKJACK! +${winAmt.toLocaleString()} COINS</span>`;
+      } else if (outcome === 'pontoon') {
+        winAmt = bet * 3;
+        wallet.add(winAmt);
+        sound.bigWin();
+        celebration.burst('win', 90);
+        window.CasinoEngine.showBanner('🎩 PONTOON 2:1!', `+${winAmt.toLocaleString()} COINS`);
+        elStatus.innerHTML = `<span style="color:#fde047; font-weight:800;">🎩 PONTOON 2:1! +${winAmt.toLocaleString()} COINS</span>`;
+      } else if (outcome === '5card_trick') {
+        winAmt = bet * 3;
+        wallet.add(winAmt);
+        sound.bigWin();
+        celebration.burst('win', 90);
+        window.CasinoEngine.showBanner('5-CARD TRICK 2:1!', `+${winAmt.toLocaleString()} COINS`);
+        elStatus.innerHTML = `<span style="color:#fde047; font-weight:800;">🎉 5-CARD TRICK 2:1! +${winAmt.toLocaleString()} COINS</span>`;
       } else if (outcome === 'player_win' || outcome === 'dealer_bust') {
         winAmt = bet * 2;
         wallet.add(winAmt);
@@ -909,6 +985,10 @@
         sound.lose();
         elStatus.innerHTML = `<span style="color:#ef4444">💀 DEALER WINS. Staked ${bet.toLocaleString()} lost.</span>`;
       }
+
+      // Reset bet to base bet if doubled
+      bet = baseBet;
+      elBet.value = baseBet;
     }
 
     btnDeal.onclick = startDeal;
@@ -922,6 +1002,7 @@
     let bet = 100;
     let betTarget = 'player'; // 'player', 'banker', 'tie', 'dragon7'
     let deck = createDeck(8);
+    const feltClass = (gameDef.id === 'dragon_baccarat') ? 'felt-dragon-baccarat' : 'felt-baccarat';
 
     function calcBaccarat(hand) {
       let sum = 0;
@@ -933,7 +1014,7 @@
 
     container.innerHTML = `
       <div class="theater-game-shell">
-        <div class="table-felt">
+        <div class="table-felt ${feltClass}">
           <div class="table-badge">${gameDef.title.toUpperCase()} • ${gameDef.badge}</div>
           <div class="baccarat-grid">
             <div class="bacc-side">
@@ -945,7 +1026,7 @@
               <div class="cards-tray" id="bacc-b-cards"></div>
             </div>
           </div>
-          <div class="felt-center-banner" id="bacc-status-msg">Choose your bet spot and click Deal</div>
+          <div class="felt-center-banner" id="bacc-status-msg">Choose your bet spot and click Deal to play</div>
           <div class="baccarat-bet-spots">
             <button class="bacc-spot active" data-target="player">PLAYER (1:1)</button>
             <button class="bacc-spot" data-target="banker">BANKER (${gameDef.id === 'dragon_baccarat' ? '1:1' : '0.95:1'})</button>
@@ -975,6 +1056,7 @@
     const elBScore = container.querySelector('#bacc-b-score');
     const elStatus = container.querySelector('#bacc-status-msg');
     const elBet = container.querySelector('#input-bacc-bet');
+    const btnDeal = container.querySelector('#btn-bacc-deal');
     const spots = container.querySelectorAll('.bacc-spot');
 
     spots.forEach(sp => {
@@ -991,13 +1073,14 @@
     container.querySelector('#btn-bacc-max').onclick = () => { bet = wallet.get(); elBet.value = bet; };
     elBet.onchange = (e) => { bet = Math.max(10, Math.min(wallet.get(), parseInt(e.target.value, 10) || 10)); };
 
-    container.querySelector('#btn-bacc-deal').onclick = () => {
+    btnDeal.onclick = () => {
       bet = Math.max(10, Math.min(wallet.get(), parseInt(elBet.value, 10) || 10));
       if (!wallet.deduct(bet)) {
         sound.lose();
-        elStatus.innerHTML = '<span style="color:#ef4444">Insufficient coins!</span>';
+        elStatus.innerHTML = '<span style="color:#ef4444">Insufficient coins! Claim Free Ayuda below.</span>';
         return;
       }
+      btnDeal.disabled = true;
       sound.chip();
       deck = createDeck(8);
       const pHand = [deck.pop(), deck.pop()];
@@ -1068,15 +1151,14 @@
 
       if (betTarget === 'dragon7') {
         if (isDragon7) { win = true; payout = bet * 41; }
+      } else if (isDragon7 && betTarget === 'banker') {
+        // In EZ Baccarat / Dragon 7, winning 3-card Banker 7 pushes regular Banker bets
+        payout = bet;
       } else if (betTarget === outcome) {
         win = true;
         if (outcome === 'player') payout = bet * 2;
         else if (outcome === 'banker') {
-          if (gameDef.id === 'dragon_baccarat') {
-            payout = (bScore === 6) ? Math.floor(bet * 1.5) : bet * 2;
-          } else {
-            payout = Math.floor(bet * 1.95);
-          }
+          payout = (gameDef.id === 'dragon_baccarat') ? (bet * 2) : Math.floor(bet * 1.95);
         } else if (outcome === 'tie') {
           payout = bet * 9;
         }
@@ -1094,11 +1176,14 @@
       } else if (payout === bet) {
         wallet.add(payout);
         sound.click();
-        elStatus.innerHTML = `<span style="color:#38bdf8">🤝 TIE PUSH! Staked ${bet.toLocaleString()} returned.</span>`;
+        const pushMsg = isDragon7 ? '🐉 DRAGON 7 PUSH! Banker stake returned.' : '🤝 TIE PUSH! Staked returned.';
+        elStatus.innerHTML = `<span style="color:#38bdf8">${pushMsg}</span>`;
       } else {
         sound.lose();
         elStatus.innerHTML = `<span style="color:#ef4444">💀 ${outcome.toUpperCase()} WINS. Stake lost.</span>`;
       }
+
+      btnDeal.disabled = false;
     }
   }
 
@@ -1339,7 +1424,7 @@
       bet = Math.max(10, Math.min(wallet.get(), parseInt(elBet.value, 10) || 10));
       if (!wallet.deduct(bet)) {
         sound.lose();
-        alert('Insufficient coins!');
+        elPot.textContent = 'INSUFFICIENT COINS!';
         return;
       }
       sound.chip();
@@ -1487,7 +1572,8 @@
       bet = Math.max(10, Math.min(wallet.get(), parseInt(elBet.value, 10) || 10));
       if (!wallet.deduct(bet)) {
         sound.lose();
-        alert('Insufficient coins!');
+        btnDrop.textContent = 'INSUFFICIENT COINS!';
+        setTimeout(() => { btnDrop.textContent = 'DROP ORB 🟢'; }, 1500);
         return;
       }
       sound.chip();
@@ -1632,8 +1718,10 @@
 
     container.querySelector('#btn-drop-cubes').onclick = () => {
       const totalStaked = Object.values(bets).reduce((a, b) => a + b, 0);
+      const status = container.querySelector('#color-status');
       if (totalStaked <= 0) {
-        alert('Place at least one chip on a color first!');
+        sound.lose();
+        if (status) status.innerHTML = '<span style="color:#ef4444">Place chips on at least one color first!</span>';
         return;
       }
       sound.dice();
@@ -1756,7 +1844,7 @@
       bet = Math.max(10, Math.min(wallet.get(), parseInt(elBet.value, 10) || 10));
       if (!wallet.deduct(bet)) {
         sound.lose();
-        alert('Insufficient coins!');
+        elBanner.innerHTML = `<span style="color:#ef4444">Insufficient coins! Claim Free Ayuda below.</span>`;
         return;
       }
 

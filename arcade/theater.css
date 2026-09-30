@@ -989,6 +989,71 @@
   pointer-events: none;
 }
 
+/* =========================================================================
+   CARD SUIT CONTRAST & VISIBILITY (SOLID CHARCOAL & SOLID RED)
+   ========================================================================= */
+.casino-card {
+  color: #0f172a !important;
+  background-color: #ffffff !important;
+}
+
+.casino-card.suit-black,
+.casino-card[data-suit="♠"],
+.casino-card[data-suit="♣"] {
+  color: #0f172a !important;
+}
+
+.casino-card.suit-red,
+.casino-card[data-suit="♥"],
+.casino-card[data-suit="♦"] {
+  color: #dc2626 !important;
+}
+
+.casino-card .card-corner,
+.casino-card .card-rank,
+.casino-card .suit-icon,
+.casino-card .card-center,
+.casino-card .suit-symbol {
+  color: inherit;
+}
+
+.casino-card.suit-black .card-corner,
+.casino-card.suit-black .card-rank,
+.casino-card.suit-black .suit-icon,
+.casino-card.suit-black .card-center,
+.casino-card.suit-black .suit-symbol {
+  color: #0f172a !important;
+}
+
+.casino-card.suit-red .card-corner,
+.casino-card.suit-red .card-rank,
+.casino-card.suit-red .suit-icon,
+.casino-card.suit-red .card-center,
+.casino-card.suit-red .suit-symbol {
+  color: #dc2626 !important;
+}
+
+/* Custom Table Felt Banners for Card Game Variants */
+.table-felt.felt-pontoon::before {
+  content: 'PONTOON PAYS 2 TO 1  •  5-CARD TRICK PAYS 2 TO 1  •  DEALER WINS TIES' !important;
+}
+
+.table-felt.felt-spanish21::before {
+  content: 'PLAYER 21 ALWAYS WINS  •  NO 10s IN DECK  •  DOUBLE ANY TIME' !important;
+}
+
+.table-felt.felt-single-deck::before {
+  content: 'SINGLE 52-CARD SHOE  •  BLACKJACK PAYS 3 TO 2  •  DEALER STANDS ON 17' !important;
+}
+
+.table-felt.felt-baccarat::before {
+  content: 'PUNTO BANCO  •  BANKER 0.95:1  •  PLAYER 1:1  •  TIE PAYS 8:1' !important;
+}
+
+.table-felt.felt-dragon-baccarat::before {
+  content: 'NO COMMISSION BACCARAT  •  DRAGON 7 PAYS 40 TO 1  •  BANKER 1:1' !important;
+}
+
 .card-back {
   background: radial-gradient(circle, #1e1b4b 0%, #0f172a 100%) !important;
   border: 2px solid #f5b041 !important;
