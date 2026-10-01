@@ -97,15 +97,72 @@ if ($action === 'episodes') {
     exit;
 }
 
-if ($action === 'stream') {
+function parseEpisodeServers($html) {
+    $servers = [];
+    $parts = explode('<div class="server-group">', $html);
+    for ($i = 1; $i < count($parts); $i++) {
+        $part = $parts[$i];
+        $groupLabel = 'SUB';
+        if (preg_match('/<label[^>]*>(.*?)<\/label>/si', $part, $lm)) {
+            $rawLabel = strtoupper(trim(strip_tags($lm[1])));
+            if (strpos($rawLabel, 'DUB') !== false) {
+                $groupLabel = 'DUB';
+            } elseif (strpos($rawLabel, 'SUB') !== false) {
+                $groupLabel = 'SUB';
+            }
+        }
+        if (preg_match_all('/<button[^>]*class="server-button[^"]*"[^>]*onclick="loadMi\(\{\s*value:\s*[\x27\x22]([^\x27\x22]+)[\x27\x22]\s*\}\);?\"[^>]*>(.*?)<\/button>/si', $part, $bm, PREG_SET_ORDER)) {
+            foreach ($bm as $btn) {
+                $b64 = $btn[1];
+                $name = trim(strip_tags($btn[2]));
+                if (stripos($name, 'Recheck') !== false) continue;
+                $decoded = base64_decode($b64);
+                if (preg_match('/src=[\x27\x22]([^\x27\x22]+)[\x27\x22]/i', $decoded, $sm)) {
+                    $playerUrl = html_entity_decode($sm[1], ENT_QUOTES | ENT_HTML5);
+                    $type = (strpos($playerUrl, 'source=blogger') !== false || strpos($playerUrl, 'google') !== false) ? 'blogger' : 'embed';
+                    $servers[] = [
+                        'name' => $name . ' (' . $groupLabel . ')',
+                        'raw_name' => $name,
+                        'group' => $groupLabel,
+                        'player_url' => $playerUrl,
+                        'type' => $type
+                    ];
+                }
+            }
+        }
+    }
+
+    if (empty($servers)) {
+        $embedSrc = '';
+        if (preg_match('/<div class="player-embed"[^>]*id="pembed"[^>]*>\s*<iframe[^>]+src="([^"]+)"/si', $html, $m)) {
+            $embedSrc = html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5);
+        } elseif (preg_match('/<iframe[^>]+src="([^"]+)"/si', $html, $m)) {
+            $embedSrc = html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5);
+        }
+        if (!empty($embedSrc)) {
+            $type = (strpos($embedSrc, 'source=blogger') !== false || strpos($embedSrc, 'google') !== false) ? 'blogger' : 'embed';
+            $servers[] = [
+                'name' => 'Default (SUB)',
+                'raw_name' => 'Default',
+                'group' => 'SUB',
+                'player_url' => $embedSrc,
+                'type' => $type
+            ];
+        }
+    }
+
+    return $servers;
+}
+
+if ($action === 'servers') {
     $epUrl = $_GET['ep_url'] ?? '';
     if (empty($epUrl) || !filter_var($epUrl, FILTER_VALIDATE_URL)) {
         echo json_encode(['error' => 'Invalid or missing ep_url']);
         exit;
     }
 
-    $cacheFile = $cacheDir . '/stream_' . md5($epUrl) . '.json';
-    if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < 18000)) { // 5 hour cache
+    $cacheFile = $cacheDir . '/servers_' . md5($epUrl) . '.json';
+    if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < 18000)) {
         echo file_get_contents($cacheFile);
         exit;
     }
@@ -116,11 +173,54 @@ if ($action === 'stream') {
         exit;
     }
 
-    $embedSrc = '';
-    if (preg_match('/<div class="player-embed"[^>]*id="pembed"[^>]*>\s*<iframe[^>]+src="([^"]+)"/si', $html, $m)) {
-        $embedSrc = html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5);
-    } elseif (preg_match('/<iframe[^>]+src="([^"]+)"/si', $html, $m)) {
-        $embedSrc = html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5);
+    $servers = parseEpisodeServers($html);
+    $result = [
+        'ep_url' => $epUrl,
+        'servers' => $servers
+    ];
+    file_put_contents($cacheFile, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    echo json_encode($result);
+    exit;
+}
+
+if ($action === 'stream') {
+    $epUrl = $_GET['ep_url'] ?? '';
+    if (empty($epUrl) || !filter_var($epUrl, FILTER_VALIDATE_URL)) {
+        echo json_encode(['error' => 'Invalid or missing ep_url']);
+        exit;
+    }
+
+    $cacheFile = $cacheDir . '/stream_' . md5($epUrl) . '.json';
+    if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < 18000)) {
+        echo file_get_contents($cacheFile);
+        exit;
+    }
+
+    $html = fetchUrl($epUrl);
+    if (!$html) {
+        echo json_encode(['error' => 'Failed to fetch episode page']);
+        exit;
+    }
+
+    $servers = parseEpisodeServers($html);
+    $selectedServer = null;
+    foreach ($servers as $s) {
+        if ($s['type'] === 'embed') {
+            $selectedServer = $s;
+            break;
+        }
+    }
+    if (!$selectedServer && !empty($servers)) {
+        $selectedServer = $servers[0];
+    }
+
+    $embedSrc = $selectedServer ? $selectedServer['player_url'] : '';
+    if (empty($embedSrc)) {
+        if (preg_match('/<div class="player-embed"[^>]*id="pembed"[^>]*>\s*<iframe[^>]+src="([^"]+)"/si', $html, $m)) {
+            $embedSrc = html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5);
+        } elseif (preg_match('/<iframe[^>]+src="([^"]+)"/si', $html, $m)) {
+            $embedSrc = html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5);
+        }
     }
 
     if (empty($embedSrc)) {
@@ -140,7 +240,8 @@ if ($action === 'stream') {
     $result = [
         'ep_url' => $epUrl,
         'embed_url' => $embedSrc,
-        'source_type' => $sourceType
+        'source_type' => $sourceType,
+        'servers' => $servers
     ];
 
     file_put_contents($cacheFile, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
@@ -150,34 +251,52 @@ if ($action === 'stream') {
 
 if ($action === 'player') {
     $epUrl = $_GET['ep_url'] ?? '';
+    $serverUrl = $_GET['server_url'] ?? '';
+
     if (empty($epUrl) || !filter_var($epUrl, FILTER_VALIDATE_URL)) {
         header('HTTP/1.1 400 Bad Request');
         echo 'Invalid ep_url';
         exit;
     }
 
-    $html = fetchUrl($epUrl);
-    if (!$html) {
-        header('HTTP/1.1 502 Bad Gateway');
-        echo 'Failed to fetch episode page';
-        exit;
+    $targetPlayerUrl = '';
+    if (!empty($serverUrl) && filter_var($serverUrl, FILTER_VALIDATE_URL)) {
+        $targetPlayerUrl = $serverUrl;
+    } else {
+        $html = fetchUrl($epUrl);
+        if (!$html) {
+            header('HTTP/1.1 502 Bad Gateway');
+            echo 'Failed to fetch episode page';
+            exit;
+        }
+
+        $servers = parseEpisodeServers($html);
+        foreach ($servers as $s) {
+            if ($s['type'] === 'embed') {
+                $targetPlayerUrl = $s['player_url'];
+                break;
+            }
+        }
+        if (empty($targetPlayerUrl) && !empty($servers)) {
+            $targetPlayerUrl = $servers[0]['player_url'];
+        }
+        if (empty($targetPlayerUrl)) {
+            if (preg_match('/<div class="player-embed"[^>]*id="pembed"[^>]*>\s*<iframe[^>]+src="([^"]+)"/si', $html, $m)) {
+                $targetPlayerUrl = html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5);
+            } elseif (preg_match('/<iframe[^>]+src="([^"]+)"/si', $html, $m)) {
+                $targetPlayerUrl = html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5);
+            }
+        }
     }
 
-    $playerUrl = '';
-    if (preg_match('/<div class="player-embed"[^>]*id="pembed"[^>]*>\s*<iframe[^>]+src="([^"]+)"/si', $html, $m)) {
-        $playerUrl = html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5);
-    } elseif (preg_match('/<iframe[^>]+src="([^"]+)"/si', $html, $m)) {
-        $playerUrl = html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5);
-    }
-
-    if (empty($playerUrl)) {
+    if (empty($targetPlayerUrl)) {
         header('HTTP/1.1 404 Not Found');
         echo 'Player iframe not found';
         exit;
     }
 
     // Fetch the actual player embed HTML with upstream referer
-    $ch = curl_init($playerUrl);
+    $ch = curl_init($targetPlayerUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
@@ -188,6 +307,18 @@ if ($action === 'player') {
     curl_close($ch);
 
     if ($httpCode >= 200 && $httpCode < 400 && !empty($playerHtml)) {
+        // If playerHtml contains an inner iframe (e.g. megaplay/megavid), unwrap cleanly
+        if (preg_match('/<iframe[^>]+src=[\x27\x22]([^\x27\x22]+)[\x27\x22]/si', $playerHtml, $im)) {
+            $innerSrc = html_entity_decode($im[1], ENT_QUOTES | ENT_HTML5);
+            if (strpos($innerSrc, '//') === 0) {
+                $innerSrc = 'https:' . $innerSrc;
+            }
+            header('Content-Type: text/html; charset=utf-8');
+            header('X-Frame-Options: ALLOWALL');
+            echo '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"><style>html,body{width:100%;height:100%;margin:0;padding:0;background:#000;overflow:hidden;}iframe{width:100%;height:100%;border:0;display:block;}</style></head><body><iframe src="' . htmlspecialchars($innerSrc, ENT_QUOTES) . '" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen sandbox="allow-scripts allow-same-origin allow-popups allow-forms" loading="eager"></iframe></body></html>';
+            exit;
+        }
+
         header('Content-Type: text/html; charset=utf-8');
         header('X-Frame-Options: ALLOWALL');
         echo $playerHtml;

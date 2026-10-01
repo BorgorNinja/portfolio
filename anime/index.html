@@ -707,6 +707,65 @@
       cursor: not-allowed;
     }
 
+    /* Server selector bar */
+    .server-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+    }
+
+    .server-bar-label {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.74rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .server-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .server-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-dim);
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: var(--font-mono);
+      user-select: none;
+    }
+
+    .server-pill:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .server-pill.active {
+      background: var(--aurora-purple);
+      color: #fff;
+      border-color: var(--aurora-purple);
+      box-shadow: 0 0 10px rgba(124, 58, 237, 0.4);
+    }
+
     /* Playlist sidebar */
     .playlist-sidebar {
       background: var(--bg-card);
@@ -1061,6 +1120,14 @@
               </button>
             </div>
           </div>
+
+          <!-- Server Selector Bar -->
+          <div class="server-bar" id="server-bar">
+            <span class="server-bar-label">⚡ Server:</span>
+            <div class="server-pills" id="server-pills">
+              <span style="color: var(--text-dim); font-size: 0.78rem;">Loading servers...</span>
+            </div>
+          </div>
         </div>
 
         <!-- Episodes Playlist Sidebar -->
@@ -1328,6 +1395,65 @@
       updateControls();
     }
 
+    let currentEpisodeServers = [];
+
+    async function loadServersForEpisode(epUrl) {
+      const pillsContainer = document.getElementById('server-pills');
+      if (!pillsContainer) return;
+      pillsContainer.innerHTML = '<span style="color: var(--text-dim); font-size: 0.78rem;">Detecting streams...</span>';
+
+      try {
+        const res = await fetch(`/anime/api.php?action=servers&ep_url=${encodeURIComponent(epUrl)}`);
+        const data = await res.json();
+        currentEpisodeServers = (data && data.servers) ? data.servers : [];
+
+        if (currentEpisodeServers.length === 0) {
+          pillsContainer.innerHTML = '<span style="color: var(--text-dim); font-size: 0.78rem;">Default (Auto)</span>';
+          return;
+        }
+
+        pillsContainer.innerHTML = '';
+        let defaultIdx = currentEpisodeServers.findIndex(s => s.type === 'embed');
+        if (defaultIdx === -1) defaultIdx = 0;
+
+        currentEpisodeServers.forEach((srv, sIdx) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `server-pill ${sIdx === defaultIdx ? 'active' : ''}`;
+          btn.textContent = srv.name;
+          btn.onclick = () => {
+            selectServer(srv, btn, epUrl);
+          };
+          pillsContainer.appendChild(btn);
+        });
+
+        const activeSrv = currentEpisodeServers[defaultIdx];
+        if (activeSrv) {
+          const displaySource = document.getElementById('display-source-badge');
+          if (displaySource) displaySource.textContent = `Source: ${activeSrv.name} • Stream Proxy`;
+        }
+      } catch (err) {
+        console.error("Failed to load servers:", err);
+        pillsContainer.innerHTML = '<span style="color: var(--text-dim); font-size: 0.78rem;">Default (Auto)</span>';
+      }
+    }
+
+    function selectServer(server, btnEl, epUrl) {
+      document.querySelectorAll('.server-pill').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+
+      const displaySource = document.getElementById('display-source-badge');
+      if (displaySource) displaySource.textContent = `Source: ${server.name} • Stream Proxy`;
+
+      showLoader(`Switching to ${server.name}...`);
+      const player = document.getElementById('video-player');
+      player.src = `/anime/api.php?action=player&ep_url=${encodeURIComponent(epUrl)}&server_url=${encodeURIComponent(server.player_url)}`;
+      player.onload = () => {
+        hideLoader();
+      };
+      setTimeout(hideLoader, 2500);
+    }
+
     function selectEpisode(idx) {
       if (idx < 0 || idx >= currentEpisodes.length) return;
       currentIndex = idx;
@@ -1338,12 +1464,14 @@
       const player = document.getElementById('video-player');
 
       displayTitle.textContent = ep.title;
-      displaySource.textContent = "Source: Streaming via Same-Origin Proxy";
+      displaySource.textContent = "Source: Connecting Stream Proxy...";
       showLoader(`Loading ${ep.title}...`);
 
       const cards = document.querySelectorAll('.ep-card');
       cards.forEach((c, i) => c.classList.toggle('active', i === currentIndex));
       updateControls();
+
+      loadServersForEpisode(ep.url);
 
       player.src = `/anime/api.php?action=player&ep_url=${encodeURIComponent(ep.url)}`;
       player.onload = () => {
