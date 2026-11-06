@@ -296,13 +296,14 @@ const ARCADE_GAMES = [
     category: 'betting',
     genre: 'Live Fast-Candle Market',
     icon: '📈',
-    badge: '100x LEVERAGE',
+    badge: '200x LEVERAGE',
     accent: '#10b981',
     rtp: '98.5%',
-    maxWin: '100x',
-    blurb: 'Fast-paced candlestick trading simulator with real-time ticks, multi-asset pairs (EUR/USD, BTC/USD, USD/JPY, BORGOR/USDT), leverage controls, and long/short execution.',
-    tags: ['Live Candles', 'Long / Short', '10x-100x Leverage', 'Realtime PnL'],
-    type: 'forex_trading'
+    maxWin: '200x',
+    blurb: 'Full-fledged high-frequency candlestick trading terminal with real-time ticks, multi-asset pairs (Forex, Crypto, Meme), live order books, and up to 200x degen leverage.',
+    tags: ['Live Candlesticks', 'Order Book & Depth', 'Multi-Asset Pairs', '200x Degen Mode'],
+    type: 'forex_trading',
+    directUrl: '/forex/'
   },
   {
     id: 'crash',
