@@ -1927,3 +1927,132 @@
   border-color: #38bdf8;
   transform: scale(1.1);
 }
+
+/* Cyber Forex & Crypto Trading Terminal */
+.felt-forex {
+  background: radial-gradient(circle at 50% 25%, #051a24 0%, #020b12 70%, #010408 100%) !important;
+  border-color: #10b981 !important;
+}
+.felt-forex::before {
+  content: 'CYBER FOREX & CRYPTO EXCHANGE  •  HIGH-FREQUENCY CANDLE TRADING' !important;
+}
+.forex-top-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+.forex-pairs-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.forex-pair-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.forex-pair-btn.active, .forex-pair-btn:hover {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  color: #34d399;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+.forex-ticker-stat {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: #f8fafc;
+}
+.forex-canvas-wrapper {
+  position: relative;
+  background: #02070c;
+  border-radius: 12px;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  overflow: hidden;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
+  width: 100%;
+}
+.forex-live-pnl-badge {
+  position: absolute;
+  top: 10px;
+  left: 14px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.88rem;
+  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  z-index: 5;
+}
+.forex-news-ticker {
+  font-size: 0.74rem;
+  font-family: var(--font-mono, monospace);
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+}
+.forex-leverage-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.forex-leverage-btn.active {
+  background: rgba(250, 204, 21, 0.2) !important;
+  border-color: #facc15 !important;
+  color: #fde047 !important;
+  box-shadow: 0 0 8px rgba(250, 204, 21, 0.3);
+}
+.forex-btn-long {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  border-color: #34d399 !important;
+  color: #ffffff !important;
+  font-weight: 800;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+}
+.forex-btn-short {
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+  border-color: #f87171 !important;
+  color: #ffffff !important;
+  font-weight: 800;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+}
+.forex-btn-close {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  border-color: #fbbf24 !important;
+  color: #000000 !important;
+  font-weight: 900 !important;
+  animation: pulse-border 1.5s infinite;
+}
+@keyframes pulse-border {
+  0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+

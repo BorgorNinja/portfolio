@@ -4547,6 +4547,464 @@
   }
 
   /* =========================================================================
+     4X. CYBER FOREX & CRYPTO TRADING TERMINAL
+     ========================================================================= */
+  function buildForexTrading(gameDef, container) {
+    const pairs = {
+      'EUR/USD': { base: 1.08450, digits: 5, vol: 0.00030, name: 'EUR/USD (Euro / US Dollar)' },
+      'BTC/USD': { base: 67420.00, digits: 2, vol: 35.00, name: 'BTC/USD (Bitcoin Spot)' },
+      'USD/JPY': { base: 153.250, digits: 3, vol: 0.090, name: 'USD/JPY (US Dollar / Yen)' },
+      'BORGOR/USDT': { base: 4.2069, digits: 4, vol: 0.0450, name: 'BORGOR/USDT (Borgor Meme Index)' }
+    };
+
+    const newsHeadlines = [
+      '⚡ ECB LEAVES INTEREST RATES UNCHANGED AT 3.75%',
+      '🚀 BORGOR CAPITAL ADDS 1,500 BTC TO TREASURY',
+      '📈 US CORE CPI COOLS TO 2.8% Y/Y, DOLLAR SOFTENS',
+      '🍔 BORGOR ECOSYSTEM BURNS 10,000,000 $BORGOR TOKENS',
+      '⚠️ ASIAN TRADING SESSION SEES RECORD SHORT SQUEEZE',
+      '💎 TECH RALLY PUSHES CRYPTO MARKETS TO SESSION HIGHS',
+      '🏦 CENTRAL BANK LIQUIDITY INJECTION BOOSTS FOREX VOLUME'
+    ];
+
+    let currentPairKey = 'EUR/USD';
+    let currentPair = pairs[currentPairKey];
+    let leverage = 50;
+    let bet = 100;
+
+    let inTrade = false;
+    let tradeType = 'long';
+    let entryPrice = 0;
+    let currentPrice = currentPair.base;
+    let positionMargin = 0;
+    let positionLeverage = 50;
+    let liquidationPrice = 0;
+
+    let candles = [];
+    let tickCount = 0;
+    let currentCandle = null;
+    let animTimer = null;
+    let newsTimer = null;
+
+    function initCandles() {
+      candles = [];
+      let p = currentPair.base;
+      for (let i = 0; i < 28; i++) {
+        const change = (Math.random() - 0.49) * currentPair.vol * 3;
+        const o = p;
+        const c = o + change;
+        const h = Math.max(o, c) + Math.random() * currentPair.vol * 1.5;
+        const l = Math.min(o, c) - Math.random() * currentPair.vol * 1.5;
+        candles.push({ open: o, high: h, low: l, close: c });
+        p = c;
+      }
+      currentPrice = p;
+      currentCandle = { open: p, high: p, low: p, close: p };
+    }
+
+    initCandles();
+
+    container.innerHTML = `
+      <div class="theater-game-shell">
+        <div class="table-felt felt-forex">
+          <div class="forex-top-bar">
+            <div class="forex-pairs-group">
+              ${Object.keys(pairs).map(k => `
+                <button class="forex-pair-btn ${k === currentPairKey ? 'active' : ''}" data-pair="${k}">
+                  ${k}
+                </button>
+              `).join('')}
+            </div>
+
+            <div class="forex-news-ticker" id="forex-news-bar">
+              ${newsHeadlines[0]}
+            </div>
+
+            <div class="forex-ticker-stat" id="forex-price-hud">
+              <span id="forex-price-val" style="color: #34d399;">${currentPrice.toFixed(currentPair.digits)}</span>
+              <span id="forex-price-arrow">▲</span>
+            </div>
+          </div>
+
+          <div class="forex-canvas-wrapper">
+            <canvas id="forex-canvas" width="620" height="310" style="display:block; width:100%; height:auto;"></canvas>
+            <div class="forex-live-pnl-badge" id="forex-pnl-badge">
+              <span id="forex-pnl-text">PnL: +$0.00 (+0.0%)</span>
+            </div>
+          </div>
+
+          <div class="felt-center-banner" id="forex-status-msg" style="padding: 4px 10px; font-size: 0.8rem;">
+            Select asset, leverage, and enter a LONG or SHORT trade!
+          </div>
+        </div>
+
+        <div class="theater-controls-bar" style="flex-wrap: wrap; gap: 10px;">
+          <div class="bet-adjust-group">
+            <span class="bet-label">MARGIN</span>
+            <button class="btn-ctrl-sub" id="btn-fx-half">1/2</button>
+            <input type="number" id="input-fx-bet" class="bet-number-input" value="${bet}" min="10" max="50000" step="50">
+            <button class="btn-ctrl-sub" id="btn-fx-double">2x</button>
+            <button class="btn-ctrl-sub" id="btn-fx-max">MAX</button>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span class="bet-label">LEVERAGE:</span>
+            <button class="forex-leverage-btn" data-lev="10">10x</button>
+            <button class="forex-leverage-btn" data-lev="25">25x</button>
+            <button class="forex-leverage-btn active" data-lev="50">50x</button>
+            <button class="forex-leverage-btn" data-lev="100">100x</button>
+          </div>
+
+          <div class="action-buttons-group" id="forex-actions-idle" style="display: flex; gap: 10px;">
+            <button class="btn-action forex-btn-long" id="btn-fx-long">
+              LONG (BUY) 🟢
+            </button>
+            <button class="btn-action forex-btn-short" id="btn-fx-short">
+              SHORT (SELL) 🔴
+            </button>
+          </div>
+
+          <div class="action-buttons-group" id="forex-actions-trade" style="display: none;">
+            <button class="btn-action forex-btn-close" id="btn-fx-close">
+              CLOSE POSITION (CASH OUT)
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const canvas = container.querySelector('#forex-canvas');
+    const ctx = canvas.getContext('2d');
+    const elPriceVal = container.querySelector('#forex-price-val');
+    const elPriceArrow = container.querySelector('#forex-price-arrow');
+    const elStatus = container.querySelector('#forex-status-msg');
+    const elBet = container.querySelector('#input-fx-bet');
+    const elPnlBadge = container.querySelector('#forex-pnl-badge');
+    const elPnlText = container.querySelector('#forex-pnl-text');
+    const elNews = container.querySelector('#forex-news-bar');
+
+    const actionsIdle = container.querySelector('#forex-actions-idle');
+    const actionsTrade = container.querySelector('#forex-actions-trade');
+    const btnClose = container.querySelector('#btn-fx-close');
+
+    let newsIdx = 0;
+    newsTimer = setInterval(() => {
+      newsIdx = (newsIdx + 1) % newsHeadlines.length;
+      if (elNews) elNews.textContent = newsHeadlines[newsIdx];
+    }, 6000);
+
+    container.querySelectorAll('.forex-pair-btn').forEach(b => {
+      b.onclick = () => {
+        if (inTrade) {
+          sound.lose();
+          elStatus.innerHTML = '<span style="color:#ef4444">Cannot change asset while position is open!</span>';
+          return;
+        }
+        sound.click();
+        container.querySelectorAll('.forex-pair-btn').forEach(btn => btn.classList.remove('active'));
+        b.classList.add('active');
+        currentPairKey = b.dataset.pair;
+        currentPair = pairs[currentPairKey];
+        initCandles();
+        drawChart();
+      };
+    });
+
+    container.querySelectorAll('.forex-leverage-btn').forEach(b => {
+      b.onclick = () => {
+        if (inTrade) return;
+        sound.click();
+        container.querySelectorAll('.forex-leverage-btn').forEach(btn => btn.classList.remove('active'));
+        b.classList.add('active');
+        leverage = parseInt(b.dataset.lev, 10);
+      };
+    });
+
+    container.querySelector('#btn-fx-half').onclick = () => {
+      if (inTrade) return;
+      bet = Math.max(10, Math.floor(bet / 2));
+      elBet.value = bet;
+    };
+    container.querySelector('#btn-fx-double').onclick = () => {
+      if (inTrade) return;
+      bet = Math.min(wallet.get(), bet * 2);
+      elBet.value = bet;
+    };
+    container.querySelector('#btn-fx-max').onclick = () => {
+      if (inTrade) return;
+      bet = Math.max(10, wallet.get());
+      elBet.value = bet;
+    };
+
+    function calculatePnL() {
+      if (!inTrade) return { pnl: 0, pnlPct: 0 };
+      const priceDiff = (currentPrice - entryPrice) / entryPrice;
+      const effectiveDiff = tradeType === 'long' ? priceDiff : -priceDiff;
+      const pnlPct = effectiveDiff * positionLeverage;
+      const pnl = positionMargin * pnlPct;
+      return { pnl, pnlPct };
+    }
+
+    function drawChart() {
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+      ctx.lineWidth = 1;
+      for (let x = 40; x < w - 60; x += 40) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      for (let y = 30; y < h; y += 30) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      const allCandles = [...candles, currentCandle];
+      let minP = Infinity;
+      let maxP = -Infinity;
+      allCandles.forEach(c => {
+        if (c.low < minP) minP = c.low;
+        if (c.high > maxP) maxP = c.high;
+      });
+      if (inTrade) {
+        if (entryPrice < minP) minP = entryPrice;
+        if (entryPrice > maxP) maxP = entryPrice;
+        if (liquidationPrice < minP) minP = liquidationPrice;
+        if (liquidationPrice > maxP) maxP = liquidationPrice;
+      }
+
+      const pad = (maxP - minP) * 0.1 || currentPair.vol;
+      minP -= pad;
+      maxP += pad;
+      const pRange = maxP - minP;
+
+      const chartW = w - 80;
+      const candleW = Math.max(4, Math.floor(chartW / allCandles.length) - 3);
+
+      function getY(val) {
+        return h - 20 - ((val - minP) / pRange) * (h - 40);
+      }
+
+      allCandles.forEach((c, idx) => {
+        const x = 20 + idx * (candleW + 3);
+        const yOpen = getY(c.open);
+        const yClose = getY(c.close);
+        const yHigh = getY(c.high);
+        const yLow = getY(c.low);
+
+        const isGreen = c.close >= c.open;
+        const color = isGreen ? '#10b981' : '#ef4444';
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(x + candleW / 2, yHigh);
+        ctx.lineTo(x + candleW / 2, yLow);
+        ctx.stroke();
+
+        ctx.fillStyle = color;
+        const bodyTop = Math.min(yOpen, yClose);
+        const bodyH = Math.max(2, Math.abs(yClose - yOpen));
+        ctx.fillRect(x, bodyTop, candleW, bodyH);
+      });
+
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+      ctx.fillRect(w - 75, 0, 75, h);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.beginPath();
+      ctx.moveTo(w - 75, 0);
+      ctx.lineTo(w - 75, h);
+      ctx.stroke();
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = '10px monospace';
+      ctx.textAlign = 'left';
+      for (let s = 1; s <= 4; s++) {
+        const pLevel = minP + (pRange * s) / 5;
+        const yLevel = getY(pLevel);
+        ctx.fillText(pLevel.toFixed(currentPair.digits), w - 70, yLevel + 3);
+      }
+
+      const curY = getY(currentPrice);
+      ctx.save();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(0, curY);
+      ctx.lineTo(w - 75, curY);
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(w - 75, curY - 9, 75, 18);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 10px monospace';
+      ctx.fillText(currentPrice.toFixed(currentPair.digits), w - 70, curY + 4);
+
+      if (inTrade) {
+        const entryY = getY(entryPrice);
+        const entryColor = tradeType === 'long' ? '#10b981' : '#ef4444';
+
+        ctx.save();
+        ctx.strokeStyle = entryColor;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 3]);
+        ctx.beginPath();
+        ctx.moveTo(0, entryY);
+        ctx.lineTo(w - 75, entryY);
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.fillStyle = entryColor;
+        ctx.font = 'bold 10px monospace';
+        ctx.fillText(`${tradeType.toUpperCase()} @ ${entryPrice.toFixed(currentPair.digits)} (${positionLeverage}x)`, 10, entryY - 5);
+
+        const liqY = getY(liquidationPrice);
+        if (liqY >= 0 && liqY <= h) {
+          ctx.save();
+          ctx.strokeStyle = '#dc2626';
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([2, 4]);
+          ctx.beginPath();
+          ctx.moveTo(0, liqY);
+          ctx.lineTo(w - 75, liqY);
+          ctx.stroke();
+          ctx.restore();
+
+          ctx.fillStyle = '#f87171';
+          ctx.font = '9px monospace';
+          ctx.fillText(`💀 LIQ: ${liquidationPrice.toFixed(currentPair.digits)}`, 10, liqY - 4);
+        }
+      }
+    }
+
+    function tick() {
+      const delta = (Math.random() - 0.495) * currentPair.vol + (Math.random() - 0.5) * (currentPair.vol * 0.4);
+      currentPrice = Math.max(0.0001, currentPrice + delta);
+
+      currentCandle.high = Math.max(currentCandle.high, currentPrice);
+      currentCandle.low = Math.min(currentCandle.low, currentPrice);
+      currentCandle.close = currentPrice;
+
+      tickCount++;
+      if (tickCount >= 10) {
+        candles.push({ ...currentCandle });
+        if (candles.length > 32) candles.shift();
+        currentCandle = { open: currentPrice, high: currentPrice, low: currentPrice, close: currentPrice };
+        tickCount = 0;
+      }
+
+      elPriceVal.textContent = currentPrice.toFixed(currentPair.digits);
+      const isUp = delta >= 0;
+      elPriceVal.style.color = isUp ? '#34d399' : '#f87171';
+      elPriceArrow.textContent = isUp ? '▲' : '▼';
+      elPriceArrow.style.color = isUp ? '#34d399' : '#f87171';
+
+      if (inTrade) {
+        const { pnl, pnlPct } = calculatePnL();
+        const pnlFormatted = pnl >= 0 ? `+$${pnl.toFixed(2)}` : `-$${Math.abs(pnl).toFixed(2)}`;
+        const pctFormatted = pnlPct >= 0 ? `+${(pnlPct * 100).toFixed(1)}%` : `${(pnlPct * 100).toFixed(1)}%`;
+
+        elPnlBadge.style.display = 'block';
+        elPnlText.textContent = `PnL: ${pnlFormatted} (${pctFormatted})`;
+        elPnlText.style.color = pnl >= 0 ? '#34d399' : '#f87171';
+        elPnlBadge.style.borderColor = pnl >= 0 ? '#10b981' : '#ef4444';
+
+        const cashoutVal = Math.max(0, Math.floor(positionMargin + pnl));
+        btnClose.textContent = `CLOSE POSITION • CASH OUT $${cashoutVal.toLocaleString()} 💰`;
+
+        if (pnlPct <= -0.90) {
+          inTrade = false;
+          sound.lose();
+          sound.boom();
+          elStatus.innerHTML = `<span style="color:#ef4444">💥 POSITION LIQUIDATED! 90% loss reached at ${currentPrice.toFixed(currentPair.digits)}.</span>`;
+          elPnlBadge.style.display = 'none';
+          actionsIdle.style.display = 'flex';
+          actionsTrade.style.display = 'none';
+        }
+      }
+
+      drawChart();
+    }
+
+    animTimer = setInterval(tick, 220);
+
+    if (window.CasinoEngine && window.CasinoEngine.theater) {
+      window.CasinoEngine.theater.activeCleanup = () => {
+        clearInterval(animTimer);
+        clearInterval(newsTimer);
+      };
+    }
+
+    function openTrade(type) {
+      if (inTrade) return;
+      bet = Math.max(10, Math.min(wallet.get(), parseInt(elBet.value, 10) || 10));
+      if (!wallet.deduct(bet)) {
+        sound.lose();
+        elStatus.innerHTML = '<span style="color:#ef4444">Insufficient coins to open position!</span>';
+        return;
+      }
+
+      sound.chip();
+      inTrade = true;
+      tradeType = type;
+      entryPrice = currentPrice;
+      positionMargin = bet;
+      positionLeverage = leverage;
+
+      const maxMove = 0.90 / positionLeverage;
+      liquidationPrice = tradeType === 'long'
+        ? entryPrice * (1 - maxMove)
+        : entryPrice * (1 + maxMove);
+
+      actionsIdle.style.display = 'none';
+      actionsTrade.style.display = 'flex';
+
+      const typeLabel = tradeType === 'long' ? '🟢 LONG (BUY)' : '🔴 SHORT (SELL)';
+      elStatus.innerHTML = `Opened ${typeLabel} on ${currentPairKey} @ ${entryPrice.toFixed(currentPair.digits)} with ${positionLeverage}x leverage!`;
+    }
+
+    container.querySelector('#btn-fx-long').onclick = () => openTrade('long');
+    container.querySelector('#btn-fx-short').onclick = () => openTrade('short');
+
+    btnClose.onclick = () => {
+      if (!inTrade) return;
+      const { pnl, pnlPct } = calculatePnL();
+      const payout = Math.max(0, Math.floor(positionMargin + pnl));
+
+      if (payout > 0) {
+        wallet.add(payout);
+      }
+
+      if (pnl > 0) {
+        sound.win();
+        celebration.burst('win', 40);
+        if (pnlPct >= 1.0) {
+          celebration.burst('jackpot', 60);
+          sound.bigWin();
+        }
+        elStatus.innerHTML = `<span style="color:#34d399">🏆 CLOSED PROFITABLE TRADE! Cashed out $${payout.toLocaleString()} (+${(pnlPct * 100).toFixed(1)}%)!</span>`;
+      } else {
+        sound.lose();
+        elStatus.innerHTML = `<span style="color:#f87171">Trade closed. Realized PnL: -$${Math.abs(pnl).toFixed(2)} (${(pnlPct * 100).toFixed(1)}%).</span>`;
+      }
+
+      inTrade = false;
+      elPnlBadge.style.display = 'none';
+      actionsIdle.style.display = 'flex';
+      actionsTrade.style.display = 'none';
+      drawChart();
+    };
+  }
+
+  /* =========================================================================
      5. UNIVERSAL THEATER MODAL CONTROLLER
      ========================================================================= */
   class UniversalTheater {
@@ -4673,6 +5131,10 @@
       document.getElementById('th-balance-val').textContent = wallet.get().toLocaleString();
 
       const viewport = document.getElementById('theater-viewport');
+      if (this.activeCleanup) {
+        try { this.activeCleanup(); } catch (e) {}
+        this.activeCleanup = null;
+      }
       viewport.innerHTML = '';
 
       if (['blackjack', 'single_deck_bj', 'pontoon', 'spanish21'].includes(gameDef.id)) {
@@ -4703,6 +5165,8 @@
         buildLimbo(gameDef, viewport);
       } else if (gameDef.id === 'tower_climb') {
         buildTowerClimb(gameDef, viewport);
+      } else if (gameDef.id === 'forex_trading') {
+        buildForexTrading(gameDef, viewport);
       } else if (gameDef.id === 'crash') {
         buildCrash(gameDef, viewport);
       } else if (gameDef.id === 'mines') {
@@ -4722,6 +5186,10 @@
     }
 
     close() {
+      if (this.activeCleanup) {
+        try { this.activeCleanup(); } catch (e) {}
+        this.activeCleanup = null;
+      }
       if (this.modal) this.modal.style.display = 'none';
       const viewport = document.getElementById('theater-viewport');
       if (viewport) viewport.innerHTML = '';

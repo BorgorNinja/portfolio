@@ -288,8 +288,22 @@ const ARCADE_GAMES = [
   },
 
   /* =========================================================================
-     🎲 BETTING & TABLE GAMES (16 Games)
+     🎲 BETTING & TABLE GAMES (17 Games)
      ========================================================================= */
+  {
+    id: 'forex_trading',
+    title: 'Cyber Forex & Crypto Exchange',
+    category: 'betting',
+    genre: 'Live Fast-Candle Market',
+    icon: '📈',
+    badge: '100x LEVERAGE',
+    accent: '#10b981',
+    rtp: '98.5%',
+    maxWin: '100x',
+    blurb: 'Fast-paced candlestick trading simulator with real-time ticks, multi-asset pairs (EUR/USD, BTC/USD, USD/JPY, BORGOR/USDT), leverage controls, and long/short execution.',
+    tags: ['Live Candles', 'Long / Short', '10x-100x Leverage', 'Realtime PnL'],
+    type: 'forex_trading'
+  },
   {
     id: 'crash',
     title: 'Aviator Crash Rocket',

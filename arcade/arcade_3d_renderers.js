@@ -1288,6 +1288,121 @@
   }
 
   /* =========================================================================
+     6B. 3D CYBER FOREX / CANDLESTICK CHART RENDERER (Forex Trading)
+     ========================================================================= */
+
+  function renderForexChart3D(ctx, cv, g, t, st) {
+    const cx = cv.width / 2;
+    const cy = cv.height / 2;
+    const time = t * 0.002;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+
+    // 3D Perspective grid backdrop
+    ctx.save();
+    ctx.strokeStyle = 'rgba(16, 185, 129, 0.12)';
+    ctx.lineWidth = 1;
+    for (let x = 20; x < cv.width; x += 30) {
+      ctx.beginPath();
+      ctx.moveTo(x, 15);
+      ctx.lineTo(x, cv.height - 25);
+      ctx.stroke();
+    }
+    for (let y = 25; y < cv.height - 20; y += 25) {
+      ctx.beginPath();
+      ctx.moveTo(15, y);
+      ctx.lineTo(cv.width - 15, y);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // Procedural candles sequence
+    const candleWidth = 8;
+    const candleGap = 15;
+    const startX = 35;
+    const baseY = cy + 10;
+
+    const emaPoints = [];
+    const numCandles = 16;
+    for (let i = 0; i < numCandles; i++) {
+      const cX = startX + i * candleGap;
+      const wave = Math.sin(time + i * 0.45) * 22 + Math.cos(time * 0.7 + i * 0.2) * 15;
+      const isGreen = Math.sin(time * 0.5 + i * 0.8) > -0.1;
+
+      const bodyHeight = 8 + Math.abs(Math.sin(i * 1.3 + time)) * 24;
+      const topY = baseY - wave - bodyHeight / 2;
+      const bottomY = topY + bodyHeight;
+      const wickTop = topY - (4 + Math.abs(Math.cos(i + time)) * 8);
+      const wickBottom = bottomY + (4 + Math.abs(Math.sin(i + time)) * 8);
+
+      const color = isGreen ? '#10b981' : '#ef4444';
+      const glow = isGreen ? 'rgba(16, 185, 129, 0.6)' : 'rgba(239, 68, 68, 0.6)';
+
+      // Wick
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(cX, wickTop);
+      ctx.lineTo(cX, wickBottom);
+      ctx.stroke();
+
+      // Body with glow
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.shadowColor = glow;
+      ctx.shadowBlur = i === numCandles - 1 ? 12 : 4;
+      ctx.fillRect(cX - candleWidth / 2, topY, candleWidth, Math.max(3, bodyHeight));
+      ctx.restore();
+
+      emaPoints.push({ x: cX, y: (topY + bottomY) / 2 });
+    }
+
+    // Glowing Trend line across candle centers
+    if (emaPoints.length > 1) {
+      ctx.save();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.shadowColor = 'rgba(56, 189, 248, 0.8)';
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.moveTo(emaPoints[0].x, emaPoints[0].y);
+      for (let i = 1; i < emaPoints.length; i++) {
+        ctx.lineTo(emaPoints[i].x, emaPoints[i].y);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Last candle price tag HUD
+    if (emaPoints.length > 0) {
+      const lastP = emaPoints[emaPoints.length - 1];
+      ctx.save();
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath();
+      ctx.arc(lastP.x, lastP.y, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Floating pulsing PnL badge
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.2)';
+      ctx.strokeStyle = '#34d399';
+      ctx.lineWidth = 1;
+      if (ctx.roundRect) {
+        ctx.beginPath();
+        ctx.roundRect(cv.width - 95, 20, 82, 22, 6);
+        ctx.fill();
+        ctx.stroke();
+      } else {
+        ctx.fillRect(cv.width - 95, 20, 82, 22);
+      }
+
+      ctx.font = '700 10px monospace';
+      ctx.fillStyle = '#34d399';
+      ctx.textAlign = 'center';
+      ctx.fillText('+48.5% 100x', cv.width - 54, 35);
+      ctx.restore();
+    }
+  }
+
+  /* =========================================================================
      MASTER THEME DISPATCHER
      ========================================================================= */
 
@@ -1299,7 +1414,9 @@
     const cat = g.category;
     const id = g.id;
 
-    if (cat === 'cards') {
+    if (id === 'forex_trading') {
+      renderForexChart3D(ctx, cv, g, t, st);
+    } else if (cat === 'cards') {
       renderCardGame3D(ctx, cv, g, t, st);
     } else if (id === 'roulette_euro' || id === 'roulette_us' || id === 'wheel') {
       renderRouletteWheel3D(ctx, cv, g, t, st);
