@@ -39,6 +39,13 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    html, body {
+      max-width: 100vw;
+      overflow-x: hidden;
+      width: 100%;
+      position: relative;
+    }
+
     body {
       background-color: var(--bg);
       color: var(--text-main);
@@ -46,7 +53,6 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      overflow-x: hidden;
       padding-bottom: env(safe-area-inset-bottom, 0px);
     }
 
@@ -281,7 +287,7 @@
     /* Main Terminal Layout */
     .terminal-container {
       display: grid;
-      grid-template-columns: 1fr 310px;
+      grid-template-columns: minmax(0, 1fr) 310px;
       gap: 12px;
       padding: 12px;
       max-width: 1540px;
@@ -290,6 +296,18 @@
       flex: 1;
       position: relative;
       z-index: 10;
+      box-sizing: border-box;
+    }
+
+    .terminal-left-column,
+    .terminal-right-column,
+    .chart-panel-card,
+    .positions-panel-card,
+    .trade-deck-card,
+    .order-book-card {
+      min-width: 0 !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
     }
 
     /* Center Stage (Chart + Positions) */
@@ -314,8 +332,10 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
+      flex-wrap: wrap !important;
+      gap: 8px !important;
+      width: 100%;
+      min-width: 0;
     }
 
     .active-pair-summary {
@@ -390,8 +410,10 @@
     }
 
     #main-chart-canvas {
-      width: 100%;
-      height: 100%;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      height: 100% !important;
       display: block;
     }
 
@@ -777,30 +799,58 @@
        RESPONSIVE BREAKPOINTS (TABLET & MOBILE)
        ========================================================================= */
     @media (max-width: 1080px) {
-      .terminal-container { grid-template-columns: 1fr; }
+      .terminal-container {
+        grid-template-columns: minmax(0, 1fr) !important;
+      }
     }
 
     @media (max-width: 768px) {
-      header {
-        padding: 8px 12px;
-        flex-wrap: wrap;
-        gap: 6px;
+      html, body {
+        max-width: 100vw;
+        overflow-x: hidden;
       }
-      .brand-logo { font-size: 1.1rem; }
-      .brand-badge { font-size: 0.58rem; }
+      header {
+        padding: 8px 10px;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: space-between;
+        max-width: 100vw;
+        box-sizing: border-box;
+      }
+      .brand-group {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+      }
+      .brand-logo {
+        font-size: 1.05rem;
+        white-space: nowrap;
+      }
+      .brand-badge {
+        font-size: 0.58rem;
+        padding: 2px 5px;
+      }
       .header-nav {
         width: 100%;
+        display: flex;
+        align-items: center;
         justify-content: space-between;
         border-top: 1px solid var(--border-subtle);
         padding-top: 6px;
+        gap: 6px;
+        flex-wrap: wrap;
         order: 3;
+        box-sizing: border-box;
       }
       .nav-links-cluster {
-        gap: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
       }
       .nav-link {
-        font-size: 0.74rem;
-        padding: 3px 5px;
+        font-size: 0.72rem;
+        padding: 3px 6px;
       }
       .wallet-chip-badge {
         font-size: 0.74rem;
@@ -809,45 +859,94 @@
 
       .mobile-view-tabs {
         display: flex;
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        width: 100%;
+        max-width: 100vw;
+        box-sizing: border-box;
+        background: rgba(9, 13, 20, 0.95);
+        backdrop-filter: blur(12px);
       }
 
       .terminal-container {
         padding: 8px;
         gap: 10px;
+        grid-template-columns: minmax(0, 1fr) !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+        box-sizing: border-box !important;
+      }
+
+      #card-chart, #card-deck, #card-positions, #card-book {
+        scroll-margin-top: 55px;
       }
 
       .chart-panel-card {
         padding: 10px;
       }
       .candlestick-wrapper {
-        height: 310px;
+        height: 290px;
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      .chart-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .active-pair-summary {
+        width: 100%;
+        justify-content: space-between;
+        align-items: baseline;
       }
       .summary-pair-title { font-size: 1.05rem; }
       .summary-pair-price { font-size: 1.15rem; }
 
+      .chart-controls-group {
+        width: 100%;
+        justify-content: flex-start;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+      }
+
       .side-tab-btn {
-        padding: 12px;
-        font-size: 0.95rem;
+        padding: 10px;
+        font-size: 0.92rem;
+      }
+      .leverage-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 4px;
+        width: 100%;
       }
       .lev-pill {
-        padding: 8px 2px;
-        font-size: 0.78rem;
+        padding: 8px 1px;
+        font-size: 0.72rem;
+        min-width: 0;
+      }
+      .preset-chips-row {
+        display: flex;
+        gap: 4px;
+        width: 100%;
       }
       .preset-chip {
-        padding: 8px 0;
-        font-size: 0.74rem;
+        flex: 1;
+        min-width: 0;
+        padding: 7px 0;
+        font-size: 0.72rem;
       }
       .btn-submit-order {
-        padding: 14px;
-        font-size: 1rem;
+        padding: 13px;
+        font-size: 0.95rem;
       }
 
       .mobile-quick-order-bar {
         display: grid;
         grid-template-columns: 1fr 1fr;
+        padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px)) 14px;
       }
       body {
-        padding-bottom: 74px; /* Clearance for sticky bottom bar */
+        padding-bottom: calc(75px + env(safe-area-inset-bottom, 0px));
       }
     }
 
@@ -897,6 +996,14 @@
       }
       .positions-table td[data-label="ACTION"]::before {
         display: none;
+      }
+      .positions-table td[colspan] {
+        display: block !important;
+        text-align: center !important;
+        justify-content: center !important;
+      }
+      .positions-table td[colspan]::before {
+        display: none !important;
       }
     }
   </style>
@@ -1285,16 +1392,22 @@
     const ctx = canvas.getContext('2d');
 
     function resizeCanvas() {
+      if (!canvas || !canvas.parentElement) return;
       const rect = canvas.parentElement.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
+      const w = Math.max(100, Math.floor(rect.width));
+      const h = Math.max(100, Math.floor(rect.height));
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(dpr, dpr);
       drawChart();
     }
     window.addEventListener('resize', resizeCanvas);
-    window.addEventListener('orientationchange', resizeCanvas);
+    window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 100));
+    if (window.ResizeObserver && canvas.parentElement) {
+      new ResizeObserver(() => resizeCanvas()).observe(canvas.parentElement);
+    }
     resizeCanvas();
 
     function drawChart() {
@@ -1930,6 +2043,24 @@
         }
       };
     });
+
+    if ('IntersectionObserver' in window) {
+      const tabObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            document.querySelectorAll('.m-view-tab').forEach(t => {
+              t.classList.toggle('active', t.dataset.target === id);
+            });
+          }
+        });
+      }, { rootMargin: '-20% 0px -60% 0px' });
+
+      ['card-chart', 'card-deck', 'card-positions', 'card-book'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) tabObserver.observe(el);
+      });
+    }
 
     // Ayuda & Sound
     document.getElementById('btn-ayuda-refill').onclick = () => {

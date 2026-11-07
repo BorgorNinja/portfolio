@@ -2056,3 +2056,59 @@
   100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
 }
 
+
+/* Mobile Responsiveness for Cyber Forex in Arcade Theater */
+@media (max-width: 640px) {
+  .felt-forex {
+    padding: 8px !important;
+  }
+  .forex-top-bar {
+    padding: 6px 8px;
+    gap: 6px;
+  }
+  .forex-pairs-group {
+    width: 100%;
+    justify-content: center;
+  }
+  .forex-pair-btn {
+    padding: 3px 6px;
+    font-size: 0.7rem;
+  }
+  .forex-news-ticker {
+    max-width: 100%;
+    width: 100%;
+    text-align: center;
+    font-size: 0.68rem;
+    box-sizing: border-box;
+  }
+  .forex-ticker-stat {
+    width: 100%;
+    text-align: center;
+    font-size: 0.9rem;
+  }
+  .forex-canvas-wrapper {
+    height: 220px;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .forex-canvas-wrapper canvas {
+    height: 100% !important;
+    width: 100% !important;
+    object-fit: contain;
+  }
+  .bet-adjust-group {
+    width: 100%;
+    justify-content: center;
+  }
+  .action-buttons-group {
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .forex-btn-long, .forex-btn-short, .forex-btn-close {
+    width: 100%;
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+}
